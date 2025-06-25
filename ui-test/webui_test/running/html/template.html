@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>{{ title }}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	{{ stylesheet }}
+</head>
+<body>
+	{{ heading }}
+	{{ report }}
+	{{ chart_script }}
+</div>
+	<footer class="footer">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-6">2021 JITS</div>
+				<div class="col-md-6">WEBUI Test</div>
+			</div>
+		</div>
+	</footer>
+	<script language="javascript" type="text/javascript">
+		function show_img(obj) {
+			var obj1 = obj.nextElementSibling;
+			obj1.style.display = 'block';
+			var index = 0; 
+			var len = obj1.getElementsByTagName('img').length; 
+			var imgyuan = obj1.getElementsByClassName('imgyuan')[0];
+
+			obj1.onmouseover = function() { 
+				clearInterval(start);
+			}
+			obj1.onmouseout = function() {
+				start = startInterval(autoPlay, 1000);
+			}
+			for (var i = 0; i < len; i++) { 
+				var font = document.createElement('font');
+				imgyuan.appendChild(font) 
+			}
+			var lis = obj1.getElementsByTagName('font'); 
+			changeImg(0);
+			var funny = function(i) { 
+				lis[i].onmouseover = function() { 
+					index = i; 
+					changeImg(i); 
+				}
+			}
+			for (var i = 0; i < lis.length; i++) { 
+				funny(i);
+			}
+
+			function autoPlay() { 
+				if (index > len - 1) { 
+					index = 0; 
+					clearInterval(start);
+				}
+				changeImg(index++);
+			}
+			imgyuan.style.width = 25 * len + "px"; 
+			function changeImg(index) { 
+				var list = obj1.getElementsByTagName('img'); 
+				var list1 = obj1.getElementsByTagName('font'); 
+				for (i = 0; i < list.length; i++) { 
+					list[i].style.display = 'none'; 
+					list1[i].style.backgroundColor = 'white'; 
+				}
+				list[index].style.display = 'block'; 
+				list1[index].style.backgroundColor = 'red'; 
+			}
+		}
+
+		function hide_img(obj) { 
+			obj.parentElement.style.display = 'none'; 
+			obj.parentElement.getElementsByClassName('imgyuan')[0].innerHTML = ''; 
+		}
+
+		output_list = Array();
+
+		function showCase(level, channel) { 
+			trs = document.getElementsByTagName("tr");
+            for (var i = 0; i < trs.length; i++) {
+                tr = trs[i];
+                id = tr.id;
+                if (["ft", "pt", "et", "st"].indexOf(id.substr(0, 2)) != -1) {
+                    if (level == 0 && id.substr(2, 1) == channel) {
+                        tr.className = 'hiddenRow';
+                    }
+                }
+                if (id.substr(0, 3) == 'pt' + channel) {
+                    if (level == 1) {
+                        tr.className = '';
+                    }
+                    else if (level > 4 && id.substr(2, 1) == channel) {
+                        tr.className = '';
+                    }
+                    else {
+                        tr.className = 'hiddenRow';
+                    }
+                }
+                if (id.substr(0, 3) == 'ft' + channel) {
+                    if (level == 2) {
+                        tr.className = '';
+                    }
+                    else if (level > 4 && id.substr(2, 1) == channel) {
+                        tr.className = '';
+                    }
+                    else {
+                        tr.className = 'hiddenRow';
+                    }
+                }
+                if (id.substr(0, 3) == 'et' + channel) {
+                    if (level == 3) {
+                        tr.className = '';
+                    }
+                    else if (level > 4 && id.substr(2, 1) == channel) {
+                        tr.className = '';
+                    }
+                    else {
+                        tr.className = 'hiddenRow';
+                    }
+                }
+                if (id.substr(0, 3) == 'st' + channel) {
+                    if (level == 4) {
+                        tr.className = '';
+                    }
+                    else if (level > 4 && id.substr(2, 1) == channel) {
+                        tr.className = '';
+                    }
+                    else {
+                        tr.className = 'hiddenRow';
+                    }
+                }
+            }
+		}
+
+		function showClassDetail(cid, count) { 
+			var id_list = Array(count);
+            var toHide = 1;
+            for (var i = 0; i < count; i++) {
+                tid0 = 't' + cid.substr(1) + '.' + (i + 1);
+                tid = 'f' + tid0;
+                tr = document.getElementById(tid);
+                if (!tr) {
+                    tid = 'p' + tid0;
+                    tr = document.getElementById(tid);
+                }
+                if (!tr) {
+                    tid = 'e' + tid0;
+                    tr = document.getElementById(tid);
+                }
+                if (!tr) {
+                    tid = 's' + tid0;
+                    tr = document.getElementById(tid);
+                }
+                id_list[i] = tid;
+                if (tr.className) {
+                    toHide = 0;
+                }
+            }
+            for (var i = 0; i < count; i++) {
+                tid = id_list[i];
+                if (toHide) {
+                    document.getElementById(tid).className = 'hiddenRow';
+                }
+                else {
+                    document.getElementById(tid).className = '';
+                }
+            }
+		}
+
+		function showTestDetail(div_id) { 
+			var details_div = document.getElementById(div_id)
+            var displayState = details_div.style.display
+
+            if (displayState != 'block') {
+                displayState = 'block'
+                details_div.style.display = 'block'
+            }
+            else {
+                details_div.style.display = 'none'
+            }
+		}
+
+		function html_escape(s) { 
+			s = s.replace(/&/g, '&amp;');
+			s = s.replace(/</g, '&lt;');
+			s = s.replace(/>/g, '&gt;');
+			return s; 
+		}
+	</script>
+</body>
+</html>

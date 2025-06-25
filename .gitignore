@@ -1,0 +1,14 @@
+ui-test/webui_test/__pycache__/
+ui-test/webui_test/logging/__pycache__/
+ui-test/webui_test/running/__pycache__/
+ui-test/webui_test/testdata/__pycache__/
+ui-test/tests/logs/
+ui-test/webui_test.egg-info
+ui-test/dist/
+ui-test/build/
+ui-test/.pytest_cache/
+ui-test/tests/run/logs/
+ui-test/tests/run/reports/
+ui-test/tests/data_excel/~$data_transaction_rules.xlsx
+ui-test/tests/test_dir/regression/__pycache__/
+ui-test/tests/__pycache__/
