@@ -31,9 +31,11 @@ def tearDownModule():
 
 class TestCase(unittest.TestCase):
     def start_class(self):
+        self.driver = get_driver()
         pass
 
     def end_class(self):
+        self.driver = get_driver()
         pass
 
     @classmethod
@@ -70,10 +72,12 @@ class TestCase(unittest.TestCase):
             kill_browser()
 
     def start(self):
-        log.debug("2. Go to 'start' method")
+        self.driver = get_driver()
+        # log.debug("2. Go to 'start' method")
         pass
 
     def end(self):
+        self.driver = get_driver()
         # log.debug("4. Go to 'end' method")
         pass
 
@@ -84,19 +88,21 @@ class TestCase(unittest.TestCase):
         # log.debug("Go to 'stop' method")
 
     def setUp(self):
-        log.debug("1. Go to 'setUp' method")
+        self.driver = get_driver()
+        # log.debug("1. Go to 'setUp' method")
         if test_suite_stopped:
             # log.debug(f"Go to 'skipTest'")
             self.skipTest('Skipping because the data used for testing is incorrect.')
         self.start()
 
     def tearDown(self):
+        self.driver = get_driver()
         # log.debug("3. Go to 'tearDown' method")
         self.end()
 
     def get_url(self):
-        log.debug("Go to 'get_url' method")
-        return 
+        # log.debug("Go to 'get_url' method")
+        return
 
     def go_to(self, url):
         BrowserConfig.url_env = url
@@ -107,8 +113,13 @@ class TestCase(unittest.TestCase):
     def wait(self, seconds=1):
         sleep(seconds)
 
-    # def restart_browser(selt):
-    #     selt.started_browser()
+    def restart_browser(self):
+        global _TEST_BROWSER
+        type(self).driver = restart_driver()
+        _TEST_BROWSER = type(self).driver
+        self.driver = get_driver()
+        self.go_to(BrowserConfig.url_env)
+        self.wait_page_login()
 
     def screen_size(self):
         width = self.driver.get_window_size()['width']
@@ -191,6 +202,40 @@ class TestCase(unittest.TestCase):
             self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            is_obscured = self.driver.execute_script("""
+                var element = arguments[0];
+                var rect = element.getBoundingClientRect();
+                var x = rect.left + (rect.width / 2);
+                var y = rect.top + (rect.height / 2);
+                return document.elementFromPoint(x, y) !== element;
+            """, element)
+            if is_obscured:
+                log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                log.info(f"Element with xpath '{xpath}' is no longer obscured.")
+                break
+        if not is_obscured:
+            log.info("Element is unobstructed.")
+            return element
+        else:
+            log.warn(f"Element with xpath '{xpath}' is still obscured.")
+            return None
+
+    def wait_for_element_by_xpath(self, xpath):
+        # Get the element you want to interact with
+        element = self.driver.find_element(By.XPATH, xpath)
+        if element is None:
+            return None
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
         # While loop to wait until the element is no longer obscured
         is_obscured = True
         max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
@@ -305,6 +350,40 @@ class TestCase(unittest.TestCase):
             log.warn(f"Element with CSS selector '{css_selector}' is still obscured.")
             return None # return False
 
+    def wait_for_element_by_css(self, css_selector):
+        # Get the element you want to interact with
+        element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
+        if element is None:
+            return None
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            is_obscured = self.driver.execute_script("""
+                var element = arguments[0];
+                var rect = element.getBoundingClientRect();
+                var x = rect.left + (rect.width / 2);
+                var y = rect.top + (rect.height / 2);
+                return document.elementFromPoint(x, y) !== element;
+            """, element)
+            if is_obscured:
+                log.warn(f"Element with css_selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                log.info(f"Element with css_selector '{css_selector}' is no longer obscured.")
+                break
+        if not is_obscured:
+            log.info("Element is unobstructed.")
+            return element
+        else:
+            log.warn(f"Element with css_selector '{css_selector}' is still obscured.")
+            return None
+
     def is_displayed_by_css(self, css_selector):
         try:
             is_displayed = self.driver.find_element(By.CSS_SELECTOR, css_selector).is_displayed()
@@ -401,6 +480,8 @@ class TestCase(unittest.TestCase):
                     return self.wait_for_element_visibility_by_xpath(xpath, timeout)
                 if method == 'enabled':
                     return self.wait_for_element_enabled_by_xpath(xpath, timeout)
+                if method == 'find':
+                    return self.wait_for_element_by_xpath(xpath)
             elif css:
                 if method == 'unobscured':
                     return self.wait_for_element_unobscured_by_css(css, timeout)
@@ -408,6 +489,8 @@ class TestCase(unittest.TestCase):
                     return self.wait_for_element_visibility_by_css(css, timeout)
                 if method == 'enabled':
                     return self.wait_for_element_enabled_by_css(css, timeout)
+                if method == 'find':
+                    return self.wait_for_element_by_css(css)
             return None
         element = get_element()
         if element is not None:
@@ -428,12 +511,10 @@ class TestCase(unittest.TestCase):
             elif action == 'get_text':
                 if info:
                     log.info(info)
-                    # log.debug(f"get_text: {element.text}")
                 return element.text
             elif action == 'get_value':
                 if info:
                     log.info(info)
-                    # log.debug(f"get_value: {element.get_attribute('value')}")
                 return element.get_attribute('value')
         else:
             if error:
@@ -445,6 +526,7 @@ class TestCase(unittest.TestCase):
 # ================= handle button =================
     def wait_for_button_available(self, button_name):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
         try:
             button_element = self.wait_for_element_unobscured_by_xpath(button_name_xpath)
             if button_element is None:
@@ -456,6 +538,7 @@ class TestCase(unittest.TestCase):
 
     def click_button(self, button_name):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info=f"Clicked on '{button_name}' button.", error=f"Click on '{button_name_xpath}' button failed.")
 
     def click_button_in_popup(self, button_name):
@@ -463,7 +546,8 @@ class TestCase(unittest.TestCase):
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info=f"Clicked on '{button_name}' button.", error=f"Click on '{button_name_xpath}' button failed.")
 
     def click_button_in_tab(self, button_name):
-        button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uFormTab-content') and @style='opacity: 1;']//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        # button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uFormTab-content') and @style='opacity: 1;']//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uFormTab-content') and @style='opacity: 1;']//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info=f"Clicked on '{button_name}' button.", error=f"Click on '{button_name_xpath}' button failed.")
 
     def click_radio_button(self, radio_button_name):
@@ -472,6 +556,7 @@ class TestCase(unittest.TestCase):
 
     def assert_button_disable(self, button_name):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']/parent::div/parent::div[contains(@class,'disable')]"
+        # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']/parent::div/parent::div[contains(@class,'disable')]"
         try:
             button = self.wait_for_element_visibility_by_xpath(button_name_xpath)
             self.assertTrue(self.check_disable(button), f"The '{button_name}' button not disable.")
@@ -692,7 +777,7 @@ class TestCase(unittest.TestCase):
 
     def fo_approve_in_popup(self, username, password, reason=None):
         try:
-            if self.get_text_form_title_popup() is not None:
+            if self.get_text_form_title_popup(timeout=30) is not None:
                 self.assert_form_title_popup('Approval Require')
                 self.wait_for_button_available('Accept')
                 self.write_text_textarea_non_tab('User Name', username, clear_text='Y')
@@ -725,9 +810,9 @@ class TestCase(unittest.TestCase):
         actual_title = self.get_text_form_title_header_popup()
         self.assertEqual(expected_title, actual_title)
 
-    def get_text_form_title_popup(self):
+    def get_text_form_title_popup(self, timeout=5):
         title_xpath = "//div[@class='malibu-desktop-uModal-content-content']/div/div[contains(@class,'malibu-desktop-uForm')]/div[@class='malibu-desktop-uForm-title']"
-        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title popup failed.", timeout=5)
+        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title popup failed.", timeout=timeout)
 
     def assert_form_title_popup(self, expected_title=None):
         if expected_title is None: 
@@ -737,7 +822,15 @@ class TestCase(unittest.TestCase):
 
     def close_popup(self):
         xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header']/div[@class='malibu-desktop-form-uModalHeader-header-close']/i"
-        self.common(xpath=xpath, method='visibility', action='click', info=f"Clicked close popup.", error=f"Click close popup failed.")
+        # self.common(xpath=xpath, method='visibility', action='click', info=f"Clicked close popup.", error=f"Click close popup failed.")
+        try:
+            close_popup_element = self.driver.find_element(By.XPATH, xpath)
+            if close_popup_element:
+                self.common(xpath=xpath, method='visibility', action='click', info=f"Clicked close popup.", error=f"Click close popup failed.")
+            else:
+                log.warn("Close popup icon not found.")
+        except NoSuchElementException:
+            log.warn("Close popup icon does not exist.")
 
     def close_bank(self, username, password):
         try:
@@ -1190,11 +1283,13 @@ class TestCase(unittest.TestCase):
 # ================= handle other methods =================
     def click_checkbox_in_tab(self, title):
         """Click 'check-box' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen have tab.", error=f"Click check-box '{title}' in screen have tab failed.")
 
     def assert_checked_in_tab(self, title):
-        title_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
+        # title_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
+        title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
         try:
             title_element = self.wait_for_element_unobscured_by_xpath(title_xpath)
             css_class = title_element.get_attribute('class')
@@ -1209,11 +1304,13 @@ class TestCase(unittest.TestCase):
 
     def click_checkbox_non_tab(self, title):
         """Click 'check-box' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen NON tab.", error=f"Click check-box '{title}' in screen NON tab failed.")
 
     def assert_checked_non_tab(self, title):
-        title_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
+        # title_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
+        title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
         is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
         if is_checked == 'check_box':
             log.info(f"Checkbox of element '{title}' have checked. Text is '{is_checked}'.")
@@ -1222,12 +1319,23 @@ class TestCase(unittest.TestCase):
             log.warn(f"Checkbox of element '{title}' is un-check. Text is '{is_checked}'.")
             return False
 
+    def assert_checked_multi(self, collap_name, title):
+        title_xpath=f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/preceding-sibling::i"
+        is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
+        if is_checked == 'check_box':
+            log.info(f"Checkbox of element '{title}' and '{collap_name}' have checked. Text is '{is_checked}'.")
+            return True
+        else:
+            log.warn(f"Checkbox of element '{title}' '{collap_name}' is un-check. Text is '{is_checked}'.")
+            return False
+
     def assert_checkbox(self, title, expected, collap_name=None):
         i_xpath = ""
         if collap_name:
-            i_xpath = f"//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/preceding-sibling::i"
+            i_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/preceding-sibling::i"
         else:
-            i_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
+            # i_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
+            i_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
         is_checked = self.common(xpath=i_xpath, method='unobscured', action='get_text')
         if is_checked == 'check_box':
             self.assertTrue(expected)
@@ -1236,23 +1344,28 @@ class TestCase(unittest.TestCase):
 
     def click_checkbox_in_multi(self, collap_name, title):
         """Click 'check-box' in multi"""
-        xpath = f"//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
+        # xpath = f"//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen have tab.", error=f"Click check-box '{title}' in screen have tab failed.")
 
-    def click_checkbox(self, title, in_tab="Y"):
+    def click_checkbox(self, title, in_tab="Y", in_multi="N", collap_name=None):
         """Click 'check-box' from title, flexible parameters for in_tab"""
         # Validate 'in_tab' to be 'Y': screen have tab or 'N': screen have no tab (default is 'Y')
         if in_tab not in ['Y', 'N']:
             raise ValueError(f"Invalid in_tab: Expected 'Y' or 'N', got '{in_tab}'")
+        if in_multi not in ['Y', 'N']:
+            raise ValueError(f"Invalid in_multi: Expected 'Y' or 'N', got '{in_multi}'")
         # Create a dictionary of conditions to corresponding methods
         method_map = {
-            ('Y'): self.click_checkbox_in_tab,
-            ('N'): self.click_checkbox_non_tab
+            ('Y', 'N'): self.click_checkbox_in_tab,
+            ('N', 'N'): self.click_checkbox_non_tab,
+            ('Y', 'Y'): lambda title: self.click_checkbox_in_multi(collap_name, title),
+            ('N', 'Y'): lambda title: self.click_checkbox_in_multi(collap_name, title)
         }
         # Get the correct method from the map
-        key = (in_tab)
+        key = (in_tab, in_multi)
         if key not in method_map:
-            raise ValueError(f"Invalid combination of in_tab")
+            raise ValueError(f"Invalid combination of in_tab and in_multi")
         # Call the corresponding method with title as the argument
         return method_map[key](title)
 
@@ -1263,7 +1376,7 @@ class TestCase(unittest.TestCase):
             - bo: form type is bo
         """
         sign_icon_xpath = f"//div[contains(@class,'malibu-desktop-uButton-square-content')]/img"
-        if form_type is "bo":
+        if form_type == "bo":
             sign_icon_xpath = f"//div[contains(@class,'malibu-desktop-uButton-content')]/*[name()='svg']"
         self.common(xpath=sign_icon_xpath, method='unobscured', action='click', info='Clicked signature icon.', error='Click signature icon failed.')
 
@@ -1312,7 +1425,8 @@ class TestCase(unittest.TestCase):
 
     # Functions used for testcase - BO screen
     def bo_click_tab(self, tab_name):
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"", error=f"Click tab '{tab_name}' in BO view screen failed.")
 
     def bo_click_checkbox(self, title):
@@ -1328,6 +1442,13 @@ class TestCase(unittest.TestCase):
             return ''
         else:
             return self.click_checkbox(title, in_tab="N")
+
+    def bo_click_checkbox_multi(self, collap_name, title):
+        if self.assert_checked_multi(collap_name, title):
+            log.warn(f"Checkbox '{title}' in bo_click_checkbox_multi checked")
+            return ''
+        else:
+            return self.click_checkbox(title=title, in_tab="Y", in_multi="Y", collap_name=collap_name)
 
     def bo_click_signature(self):
         self.click_signature(form_type="bo")
@@ -1349,7 +1470,7 @@ class TestCase(unittest.TestCase):
         button_name_xpath="//div[contains(@class,'malibu-desktop-uMultiValue')]//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='Search']"
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info="Clicked on 'Search' button in advanced search screen.", error=f"Click on '{button_name_xpath}' button failed.")
 
-    def advanced_search(self, title, value, click_collap="N", field_type="I", in_group="N"):
+    def advanced_search(self, title, value, click_collap="Y", field_type="I", in_group="N"):
         """
         Write value to title in advanced search screen, flexible parameters for click_collap, field_type, in_group. field_type: str, default is 'I'. Valid options are:
             - I: tagname is 'input'. Enter text, date or number to input field (default).
@@ -1380,6 +1501,27 @@ class TestCase(unittest.TestCase):
             raise ValueError(f"Invalid combination of field_type, in_group")
         # Call the corresponding method with title and value as the argument
         return method_map[key](title, value)
+
+    def adv_search(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='I', in_group='N')
+
+    def adv_search_group(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='I', in_group='Y')
+
+    def adv_search_text(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='A', in_group='N')
+
+    def adv_search_text_group(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='A', in_group='Y')
+
+    def adv_search_select(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='S', in_group='N')
+
+    def adv_search_select_group(self, title, value):
+        return self.advanced_search(title=title, value=value, field_type='S', in_group='Y')
+
+    def adv_click_checkbox(self, collap_name, title):
+        return self.click_checkbox(title=title, in_multi="Y", collap_name=collap_name)
 
     def advanced_search_input(self, title, value):
         """Write text or number or date to 'input' in advanced search screen"""
@@ -1435,22 +1577,26 @@ class TestCase(unittest.TestCase):
 
     def get_text_input_in_tab(self, title):
         """Get text from 'input' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from input '{title}' in screen have tab.", error=f"Get text from input '{title}' in screen have tab failed.")
 
     def get_text_input_non_tab(self, title):
         """Get text from 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from input '{title}' in screen NON tab.", error=f"Get text from input '{title}' in screen NON tab failed.")
 
     def get_text_input_in_tab_group(self, title):
         """Get text from 'input' in screen have tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from input '{title}' in screen have tab.", error=f"Get text from input '{title}' in screen have tab failed.")
 
     def get_text_input_non_tab_group(self, title):
         """Get text from 'input' in screen non tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from input '{title}' in screen NON tab.", error=f"Get text from input '{title}' in screen NON tab failed.")
 
     def get_text_input_below_border(self, border_name, title):
@@ -1465,27 +1611,43 @@ class TestCase(unittest.TestCase):
 
     def get_date_input_in_tab(self, title):
         """Get date from 'input' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get date from input '{title}' in screen have tab.", error=f"Get date from input '{title}' in screen have tab failed.")
 
     def get_date_input_non_tab(self, title):
         """Get date from 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get date from input '{title}' in screen NON tab.", error=f"Get date from input '{title}' in screen NON tab failed.")
+
+    def get_date_input_in_tab_group(self, title):
+        """Get date from 'input' in screen have tab and group"""
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get date from input '{title}' in screen have tab and group.", error=f"Get date from input '{title}' in screen have tab failed.")
+
+    def get_date_input_non_tab_group(self, title):
+        """Get date from 'input' in screen non tab and group"""
+        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        return ''
 
     def get_text_select_in_tab(self, title):
         """Get text from field 'select' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title}' in screen have tab.", error=f"Get text from field select '{title}' in screen have tab failed.")
 
     def get_text_select_non_tab(self, title):
         """Get text from field 'select' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title}' in screen NON tab.", error=f"Get text from field select '{title}' in screen NON tab failed.")
 
     def get_text_select_in_tab_group(self, title_front_select, title_select):
         """Get text from field 'select' in screen have tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]//legend[@title='{title_front_select}']/parent::fieldset/parent::div/parent::div/parent::div/parent::div/following-sibling::div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title_select}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]//legend[@title='{title_front_select}']/parent::fieldset/parent::div/parent::div/parent::div/parent::div/following-sibling::div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title_select}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]//legend[@title='{title_front_select}']/parent::fieldset/parent::div/parent::div/parent::div/parent::div/following-sibling::div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title_select}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title_select}' group with '{title_front_select}' in screen have tab.", error=f"Get text from field select '{title_select}' group with '{title_front_select}' in screen have tab failed.")
 
     def get_text_select_non_tab_group(self, title_front_select, title_select):
@@ -1495,7 +1657,8 @@ class TestCase(unittest.TestCase):
 
     def get_text_select_multi(self, title):
         """Get text from field 'select_multi' in any screen"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uSelectMulti')]//legend[text()='{title}']/parent::fieldset/preceding-sibling::div/div/div[@class='malibu-desktop-uSelectMulti-item-choose-title']"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uSelectMulti')]//legend[text()='{title}']/parent::fieldset/preceding-sibling::div/div/div[@class='malibu-desktop-uSelectMulti-item-choose-title']"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uSelectMulti')]//legend[text()='{title}']/parent::fieldset/preceding-sibling::div/div/div[@class='malibu-desktop-uSelectMulti-item-choose-title']"
         actual_text = []
         try:
             elements = self.driver.find_elements(By.XPATH, xpath)
@@ -1508,22 +1671,26 @@ class TestCase(unittest.TestCase):
 
     def get_text_textarea_in_tab(self, title):
         """Get text from 'textarea' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.common(xpath=xpath, method='unobscured', action='get_text', info=f"Get text from title '{title}' in screen have tab.", error=f"Get text from title '{title}' in screen have tab failed.")
 
     def get_text_textarea_non_tab(self, title):
         """Get text from 'textarea' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.common(xpath=xpath, method='unobscured', action='get_text', info=f"Get text from title '{title}' in screen NON tab.", error=f"Get text from title '{title}' in screen NON tab failed.")
 
     def get_text_textarea_in_tab_group(self, title):
         """Get text from 'textarea' in screen have tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.common(xpath=xpath, method='unobscured', action='get_text', info=f"Get text from title '{title}' in screen have tab.", error=f"Get text from title '{title}' in screen have tab failed.")
 
     def get_text_textarea_non_tab_group(self, title):
         """Get text from 'textarea' in screen non tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.common(xpath=xpath, method='unobscured', action='get_text', info=f"Get text from title '{title}' in screen NON tab.", error=f"Get text from title '{title}' in screen NON tab failed.")
 
     def get_text(self, title, field_type="I", in_tab="Y", in_group="N", in_multi="N", title_front_select=None):
@@ -1559,6 +1726,8 @@ class TestCase(unittest.TestCase):
             ('I', 'N', 'Y', 'N'): self.get_text_input_non_tab_group,
             ('D', 'Y', 'N', 'N'): self.get_date_input_in_tab,
             ('D', 'N', 'N', 'N'): self.get_date_input_non_tab,
+            ('D', 'Y', 'Y', 'N'): self.get_date_input_in_tab_group,
+            ('D', 'N', 'Y', 'N'): self.get_date_input_non_tab_group,
             ('S', 'Y', 'N', 'N'): self.get_text_select_in_tab,
             ('S', 'N', 'N', 'N'): self.get_text_select_non_tab,
             ('S', 'Y', 'Y', 'N'): lambda title: self.get_text_select_in_tab_group(title_front_select, title),
@@ -1587,12 +1756,14 @@ class TestCase(unittest.TestCase):
 
     def get_value_multi(self, collap_name, title):
         """Get value from 'input' in 'multi' any screen"""
-        xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.get_text_by_xpath_input(xpath)
 
     def get_text_multi(self, collap_name, title):
         """Get text from 'textarea' in 'multi' any screen"""
-        xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.get_text_by_xpath_textarea(xpath)
 
     def get_text_table(self, colunm_01, value_colunm_01, colunm_expected, colunm_02=None, value_colunm_02=None, xpath_type='following'):
@@ -1673,6 +1844,9 @@ class TestCase(unittest.TestCase):
     def bo_get_date_single(self, title):
         return self.get_text(title, field_type="D", in_tab="N", in_group="N", in_multi="N")
 
+    def bo_get_date_group(self, title):
+        return self.get_text(title, field_type="D", in_tab="Y", in_group="Y", in_multi="N")
+
     def bo_get_select(self, title):
         return self.get_text(title, field_type="S", in_tab="Y", in_group="N", in_multi="N")
 
@@ -1744,6 +1918,9 @@ class TestCase(unittest.TestCase):
 
     def bo_assert_date_single(self, title, expected):
         self.assertEqual(self.bo_get_date_single(title), expected)
+
+    def bo_assert_date_group(self, title, expected):
+        self.assertEqual(self.bo_get_date_group(title), expected)
 
     def bo_assert_select(self, title, expected):
         self.assertEqual(self.bo_get_select(title), expected)
@@ -1842,7 +2019,10 @@ class TestCase(unittest.TestCase):
     def bo_assert_text_border(self, border_name, title, expected):
         self.assertEqual(self.bo_get_text_border(border_name, title), expected, title)
 
-    def bo_assert_checkbox(self, title, expected, collap_name=None):
+    def bo_assert_checkbox(self, title, expected):
+        self.assert_checkbox(title=title, expected=expected)
+
+    def bo_assert_checkbox_multi(self, collap_name, title, expected):
         self.assert_checkbox(title=title, expected=expected, collap_name=collap_name)
 
     # Functions used for testcase - FO screen
@@ -1921,6 +2101,12 @@ class TestCase(unittest.TestCase):
     def fo_assert_text_group(self, title, expected):
         self.assertEqual(self.fo_get_text_group(title), expected)
 
+    def fo_assert_value_data(self, title, expected):
+        self.assertEqual(self.fo_get_value_data(title), expected)
+
+    def fo_assert_text_data(self, title, expected):
+        self.assertEqual(self.fo_get_text_data(title), expected)
+
     def fo_assert_value_multi(self, collap_name, title, expected):
         self.assertEqual(self.fo_get_value_multi(collap_name, title), expected)
 
@@ -1979,7 +2165,10 @@ class TestCase(unittest.TestCase):
     def fo_assert_text_border(self, border_name, title, expected):
         self.assertEqual(self.fo_get_text_border(border_name, title), expected, title)
 
-    def fo_assert_checkbox(self, title, expected, collap_name=None):
+    def fo_assert_checkbox(self, title, expected):
+        self.assert_checkbox(title=title, expected=expected)
+
+    def fo_assert_checkbox_multi(self, collap_name, title, expected):
         self.assert_checkbox(title=title, expected=expected, collap_name=collap_name)
 
 # ================= handle click field =================
@@ -1995,7 +2184,9 @@ class TestCase(unittest.TestCase):
 
     def click_collap_multi_non_tab(self, collap_name):
         """Click collap multi in screen non tab"""
-        xpath_collap_name = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div/span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']"
+        # xpath_collap_name = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div/span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']"
+        xpath_collap_name = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div/span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']"
+        xpath_collap_icon = f"{xpath_collap_name}/preceding-sibling::span/span"
         xpath_collap_icon = f"{xpath_collap_name}/preceding-sibling::span/span"
         text_collap_icon = self.common(xpath=xpath_collap_icon, method='unobscured', action='get_text')
         if text_collap_icon == '+':
@@ -2017,105 +2208,124 @@ class TestCase(unittest.TestCase):
 # ================= handle write_text field =================
     def write_text_input(self, title, value, clear_text=None):
         """Write text to 'input' any screen"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
 
     def write_text_input_in_tab(self, title, value, clear_text=None):
         """Write text to 'input' screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen have tab.", error=f"Write '{value}' at '{title}' in screen have tab failed.")
 
     def write_text_input_non_tab(self, title, value, clear_text=None):
         """Write text to 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_text_input_in_tab_group(self, title, value, clear_text=None):
         """Write text to 'input' screen have tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen have tab.", error=f"Write '{value}' at '{title}' in screen have tab failed.")
 
     def write_text_input_non_tab_group(self, title, value, clear_text=None):
         """Write text to 'input' in screen non tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_text_input_multi_in_tab(self, collap_name, title, value, clear_text=None):
         """Write text to 'input' in multi in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' at '{collap_name}' in screen have tab.", error=f"Write '{value}' at '{title}' at '{collap_name}' in screen have tab failed.")
 
     def write_text_input_multi_non_tab(self, collap_name, title, value, clear_text=None):
         """Write text to 'input' in multi in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' at '{collap_name}' in screen NON tab.", error=f"Write '{value}' at '{title}' at '{collap_name}' in screen NON tab failed.")
 
     def write_text_input_below_border(self, border_name, title, value, clear_text=None):
         """Write text to 'input' below border in screen"""
         # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' below border in screen.", error=f"Write '{value}' at '{title}' below border in screen failed.")
 
     def write_text_textarea(self, title, value, clear_text=None):
         """Write text to 'textarea' any screen"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
 
     def write_text_textarea_in_tab(self, title, value, clear_text=None):
         """Write text to 'textarea' in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen have tab.", error=f"Write '{value}' at '{title}' in screen have tab failed.")
 
     def write_text_textarea_non_tab(self, title, value, clear_text=None):
         """Write text to 'textarea' in screen non tab"""
         xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_text_textarea_in_tab_group(self, title, value, clear_text=None):
         """Write text to 'textarea' in screen have tab and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
-        return ''
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen have tab and group.", error=f"Write '{value}' at '{title}' in screen have tab and group failed.")
 
     def write_text_textarea_non_tab_group(self, title, value, clear_text=None):
         """Write text to 'textarea' in screen non tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_text_textarea_multi_in_tab(self, collap_name, title, value, clear_text=None):
         """Write text to 'textarea' in multi in screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' at '{collap_name}' in screen have tab.", error=f"Write '{value}' at '{title}' at '{collap_name}' in screen have tab failed.")
 
     def write_text_textarea_multi_non_tab(self, collap_name, title, value, clear_text=None):
         """Write text to 'textarea' in multi in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' at '{collap_name}' in screen NON tab.", error=f"Write '{value}' at '{title}' at '{collap_name}' in screen NON tab failed.")
 
     def write_text_textarea_below_border(self, border_name, title, value, clear_text=None):
         """Write text to 'textarea' below border in screen"""
         # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
-        xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' below border in screen.", error=f"Write '{value}' at '{title}' below border in screen failed.")
 
     def write_text_textarea_multi_line(self, title, value, clear_text=None):
         """Write text to textarea multi line"""
-        xpath = f"//span[text()='{title}']/parent::div/following-sibling::textarea"
+        # xpath = f"//span[text()='{title}']/parent::div/following-sibling::textarea"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{title}']/parent::div/following-sibling::textarea"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' below textarea multi line in screen.", error=f"Write '{value}' at '{title}' below textarea multi line in screen failed.")
 
     def write_date_input_in_tab(self, title, value):
         """Write date to 'input' screen have tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text='Y', info=f"Wrote '{value}' at '{title}' in screen have tab.", error=f"Write '{value}' at '{title}' in screen have tab failed.")
 
     def write_date_input_non_tab(self, title, value):
         """Write date to 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_date_below_border(self, border_name, title, value):
         """Write date to 'input' below border in screen"""
         # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uDate')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text='Y', info=f"Wrote '{value}' at '{title}' below border in screen.", error=f"Write '{value}' at '{title}' below border in screen failed.")
 
     def write_decimal_input_in_tab(self, title, amount):
@@ -2129,7 +2339,8 @@ class TestCase(unittest.TestCase):
 
     def write_decimal_input_in_tab_group(self, title, amount):
         """Write decimal to 'input' in screen have tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         value_amount=str(amount).replace(',', '')
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{amount}' at '{title}' in screen have tab and group first time.", error=f"Write '{amount}' at '{title}' in screen have tab and group failed.")
         actual_amount = self.common(xpath=xpath, method='unobscured', action='get_value')
@@ -2138,7 +2349,8 @@ class TestCase(unittest.TestCase):
 
     def write_decimal_input_non_tab(self, title, amount):
         """Write decimal to 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         value_amount=str(amount).replace(',', '')
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{amount}' at '{title}' in screen NON tab first time.", error=f"Write '{amount}' at '{title}' in screen NON tab failed.")
         actual_amount = self.common(xpath=xpath, method='unobscured', action='get_value')
@@ -2147,7 +2359,8 @@ class TestCase(unittest.TestCase):
 
     def write_decimal_input_non_tab_group(self, title, amount):
         """Write decimal to 'input' in screen non tab and group"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         value_amount=str(amount).replace(',', '')
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{amount}' at '{title}' in screen NON tab and group first time.", error=f"Write '{amount}' at '{title}' in screen NON tab and group failed.")
         actual_amount = self.common(xpath=xpath, method='unobscured', action='get_value')
@@ -2157,12 +2370,26 @@ class TestCase(unittest.TestCase):
     def write_decimal_below_border(self, border_name, title, value):
         """Write decimal to 'input' below border in screen"""
         # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        # xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         value_amount=str(value).replace(',', '')
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{value}' at '{title}' below border in screen first time.", error=f"Write '{value}' at '{title}' below border in screen failed.")
         actual_amount = self.common(xpath=xpath, method='unobscured', action='get_value')
         if actual_amount != value:
             self.common(xpath=xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{value}' at '{title}' below border in screen second time.", error=f"Write '{value}' at '{title}' below border in screen failed.")
+
+    def write_table(self, column_01, value_column_01, column_expected, value_expected, column_02=None, value_column_02=None):
+        xpath = ""
+        if column_02:
+            xpath = f"//tr/td[contains(@class,'malibu-desktop-uTable-td') and @data-title='{column_01}']/div[text()='{value_column_01}']/parent::td/parent::tr/td[contains(@class,'malibu-desktop-uTable-td') and @data-title='{column_02}']/div[text()='{value_column_02}']/parent::td/parent::tr/td[contains(@class,'malibu-desktop-uTable-td') and @data-title='{column_expected}']/div/div//"
+        else:
+            xpath = f"//tr/td[contains(@class,'malibu-desktop-uTable-td') and @data-title='{column_01}']/div[text()='{value_column_01}']/parent::td/parent::tr/td[contains(@class,'malibu-desktop-uTable-td') and @data-title='{column_expected}']/div/div//"
+        # click icon
+        icon_xpath = f"{xpath}i"
+        self.common(xpath=icon_xpath, method='find', action='click', info=f"Clicked 'icon' in table.")
+        # enter value
+        value_xpath = f"{xpath}input"
+        self.common(xpath=value_xpath, method='find', action='send_keys', value=value_expected, clear_text='Y', need_tab='Y', info=f"Wrote '{value_expected}' at '{column_expected}' in table.", error=f"Write '{value_expected}' at '{column_expected}' in table failed.")
 
     def select(self, title, value):
         """Select field in any screen"""
@@ -2226,6 +2453,13 @@ class TestCase(unittest.TestCase):
         value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
         self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' below border in screen.", error=f"Select value '{value}' at '{title}' below border in screen failed.")
 
+    def select_below_collap(self, collap_name, title, value):
+        fieldset_xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/"
+        title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+        self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' below collap in screen.")
+        value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+        self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' below collap in screen.", error=f"Select value '{value}' at '{title}' below collap in screen failed.")
+
     def choose_file_by_xpath(self, file_path, xpath):
         """
         Upload the file based on bsolute file path
@@ -2244,6 +2478,14 @@ class TestCase(unittest.TestCase):
     def choose_file(self, file_path):
         xpath = f"//div[@class='malibu-desktop-uView-content']/div/div/input[@type='file']"
         return self.choose_file_by_xpath(file_path, xpath)
+
+    def get_file_name(self):
+        xpath = f"//div[contains(@class,'malibu-desktop-uInputFile-div')]/following-sibling::div[contains(@class,'malibu-desktop-uLabel')]/label"
+        return self.get_text_by_xpath_div(xpath)
+
+    def get_info_signature(self, title):
+        xpath = f"//div[contains(@class,'malibu-desktop-form-003005-key') and text()='{title}']/following-sibling::div[contains(@class,'malibu-desktop-form-003005-value')]"
+        return self.get_text_by_xpath_div(xpath)
 
     def write_all_type(self, title, value, clear_text=None, field_type=None):
         """
@@ -2329,6 +2571,8 @@ class TestCase(unittest.TestCase):
             ('S', 'N', 'Y', 'N', 'N'): self.select_non_tab_group,
             ('S', 'N', 'N', 'N', 'Y'): lambda title, value: self.select_below_border(border_name, title, value),
             ('S', 'Y', 'N', 'N', 'Y'): lambda title, value: self.select_below_border(border_name, title, value),
+            ('S', 'N', 'N', 'Y', 'N'): lambda title, value: self.select_below_collap(collap_name, title, value),
+            ('S', 'Y', 'N', 'Y', 'N'): lambda title, value: self.select_below_collap(collap_name, title, value),
         }
         # Get the correct method from the map
         key = (field_type, in_tab, in_group, in_multi, below_border)
@@ -2405,6 +2649,9 @@ class TestCase(unittest.TestCase):
     def bo_select_border(self, border_name, title, value):
         return self.write_text(title, value, field_type="S", in_tab="Y", in_group="N", in_multi="N", below_border="Y", border_name=border_name)
 
+    def bo_select_collap(self, collap_name, title, value):
+        return self.write_text(title, value, field_type="S", in_tab="Y", in_group="N", in_multi="Y", below_border="N", collap_name=collap_name)
+
     def bo_select_multi(self, title, values):
         return self.select_multi(title, values)
 
@@ -2425,6 +2672,18 @@ class TestCase(unittest.TestCase):
 
     def bo_choose_file(self, file_path):
         return self.choose_file(file_path)
+
+    def bo_get_file_name(self):
+        return self.get_file_name()
+
+    def bo_assert_file_name(self, expected):
+        self.assertEqual(self.bo_get_file_name(), expected)
+
+    def bo_get_info_signature(self, title):
+        return self.get_info_signature(title)
+
+    def bo_assert_info_signature(self, title, expected):
+        self.assertEqual(self.bo_get_info_signature(title), expected)
 
     def bo_set_value(self, title, value, clear_text="Y"):
         return self.write_input(title, value, clear_text=clear_text)
@@ -2472,8 +2731,14 @@ class TestCase(unittest.TestCase):
     def fo_select_border(self, border_name, title, value):
         return self.write_text(title, value, field_type="S", in_tab="N", in_group="N", in_multi="N", below_border="Y", border_name=border_name)
 
+    def fo_select_collap(self, collap_name, title, value):
+        return self.write_text(title, value, field_type="S", in_tab="N", in_group="N", in_multi="Y", below_border="N", collap_name=collap_name)
+
+    def fo_select_data(self, title, value):
+        return self.select(title=title, value=value)
+
     def fo_select_multi(self, title, values):
-        return self.select_multi(title, values)
+        return self.select_multi(title=title, values=values)
 
     def fo_write_multi(self, collap_name, title, value, clear_text="Y"):
         return self.write_text(title, value, field_type="T", in_tab="N", in_group="N", in_multi="Y", below_border="N", collap_name=collap_name, clear_text=clear_text)
