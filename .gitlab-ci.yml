@@ -1,0 +1,41 @@
+stages:
+  - build
+  - cleanup
+
+variables:
+  IMAGE_REGISTRY: 27.3.1.180
+  IMAGE_NAME: autotestui
+
+build_app_image:
+  stage: build
+  script:
+  - docker login $IMAGE_REGISTRY -u admin -p admin
+  - docker build -f ./ui-test/Dockerfile --no-cache -t $IMAGE_NAME:latest ./ui-test/
+  - docker tag $IMAGE_NAME:latest $IMAGE_REGISTRY/$IMAGE_NAME:latest
+  - docker push $IMAGE_REGISTRY/$IMAGE_NAME:latest
+  - docker info
+  - echo "Start Deploying"
+  - cd ansible
+  # - sh play.sh
+
+  tags:
+    - linux-97
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ />>build_test/'
+
+
+# Job dọn dẹp (CẨN THẬN KHI SỬ DỤNG)
+cleanup_docker_resources:
+  stage: cleanup
+  script:
+    - echo "Cleanup Docker resources..."
+    # - docker system prune -a -f # Lệnh này sẽ xóa mọi thứ không sử dụng.
+    - docker image prune -f # chỉ xóa hình ảnh dangling
+    - docker volume prune -f # chỉ xóa volume không sử dụng
+    - docker builder prune -f #chỉ xóa build cache
+
+  tags:
+    - linux-97
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ />>cleanup_docker/'
+      allow_failure: true

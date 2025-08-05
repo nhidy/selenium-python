@@ -19,15 +19,19 @@ _TEST_BROWSER=None
 test_suite_stopped=False
 
 def setUpModule():
-    global _TEST_BROWSER
-    if _TEST_BROWSER is None:
-        _TEST_BROWSER = start_browser()
+    # global _TEST_BROWSER
+    # if _TEST_BROWSER is None:
+    #     _TEST_BROWSER = start_browser()
+    log.info("--- Setting up Module ---")
+    pass
 
 def tearDownModule():
-    global _TEST_BROWSER
-    if _TEST_BROWSER is not None:
-        kill_browser()
-        _TEST_BROWSER = None
+    # global _TEST_BROWSER
+    # if _TEST_BROWSER is not None:
+    #     kill_browser()
+    #     _TEST_BROWSER = None
+    log.info("--- Tearing down Module ---")
+    pass
 
 class TestCase(unittest.TestCase):
     def start_class(self):
@@ -41,35 +45,47 @@ class TestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         global _TEST_BROWSER
-        if BrowserConfig.run_file:
-            log.warn('Run file')
-            if _TEST_BROWSER is None: 
-                cls.driver = start_browser()
-                _TEST_BROWSER = cls.driver
-                cls.started_browser = True
-            else: 
-                cls.driver = _TEST_BROWSER
-                cls.started_browser = False
-            cls().go_to(cls().get_url())
-            cls().wait_page_login()
-            cls().start_class()
-        else:
-            log.warn('Run somthing else')
-            cls.driver = _TEST_BROWSER 
-            cls.started_browser = False
-            cls().start_class()
+        # if BrowserConfig.run_file:
+        #     log.warn('Run file')
+        #     if _TEST_BROWSER is None: 
+        #         cls.driver = start_browser()
+        #         _TEST_BROWSER = cls.driver
+        #         cls.started_browser = True
+        #     else: 
+        #         cls.driver = _TEST_BROWSER
+        #         cls.started_browser = False
+        #     cls().go_to(cls().get_url())
+        #     cls().wait_page_login()
+        #     cls().start_class()
+        # else:
+        #     log.warn('Run somthing else')
+        #     cls.driver = _TEST_BROWSER 
+        #     cls.started_browser = False
+        #     cls().start_class()
+        log.warn('Run any type')
+        if _TEST_BROWSER is None: 
+            cls.driver = start_browser()
+            _TEST_BROWSER = cls.driver
+        else: 
+            cls.driver = _TEST_BROWSER
+        cls().go_to(cls().get_url())
+        cls().wait_page_login()
+        cls().start_class()
 
     @classmethod
     def tearDownClass(cls):
         global _TEST_BROWSER
-        if BrowserConfig.run_file:
-            cls().end_class()
-            if cls.started_browser:
-                if _TEST_BROWSER is not None:
-                    kill_browser()
-        else:
-            cls().end_class()
-            kill_browser()
+        # if BrowserConfig.run_file:
+        #     cls().end_class()
+        #     if cls.started_browser:
+        #         if _TEST_BROWSER is not None:
+        #             kill_browser()
+        # else:
+        #     cls().end_class()
+        #     kill_browser()
+        cls().end_class()
+        # if _TEST_BROWSER is not None:
+        #     kill_browser()
 
     def start(self):
         self.driver = get_driver()
@@ -397,7 +413,7 @@ class TestCase(unittest.TestCase):
 # ================= other =================
     def wait_loading(self, max_wait_time=60):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uFormLoading')]"
-        log.warn(f"Start wait_loading.")
+        # log.warn(f"Start wait_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
             log.warn("Loading icon element has disappeared.")
         else:
@@ -405,7 +421,7 @@ class TestCase(unittest.TestCase):
 
     def wait_process_bar_loading(self, max_wait_time=60):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uLoading')]"
-        log.warn(f"Start wait_process_bar_loading.")
+        # log.warn(f"Start wait_process_bar_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
             log.warn("Loading bar element has disappeared.")
         else:
@@ -413,7 +429,7 @@ class TestCase(unittest.TestCase):
 
     def wait_app_loading(self, max_wait_time=60):
         loading_xpath = "//div[contains(text(),'Login successfully')]"
-        log.warn(f"Start wait_app_loading.")
+        # log.warn(f"Start wait_app_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
             log.warn(f"Loading app element has disappeared.")
         else:
@@ -543,7 +559,8 @@ class TestCase(unittest.TestCase):
 
     def choose_item(self, title, value, fieldset_xpath):
         title_xpath = f"{fieldset_xpath}preceding-sibling::input"
-        value_xpath = f"{fieldset_xpath}following-sibling::div//label[@title='{value}']"
+        # value_xpath = f"{fieldset_xpath}following-sibling::div//label[@title='{value}']"
+        value_xpath = f"{fieldset_xpath}following-sibling::div//label[contains(@title,'{value}')]"
         search_xpath = f"{fieldset_xpath}following-sibling::div//input[@class='malibu-desktop-uSelectItem-menu-search-input']"
         scroll_xpath = f"{fieldset_xpath}following-sibling::div/div[@class='virtual-sublist ']/div"
         self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}'.")
@@ -684,8 +701,8 @@ class TestCase(unittest.TestCase):
             return True
         else:
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            # location = element.location_once_scrolled_into_view
-            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            location = element.location_once_scrolled_into_view
+            self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
             log.info(f"Can scroll to element '{element}' in other browser.")
@@ -800,7 +817,7 @@ class TestCase(unittest.TestCase):
         app_name_xpath = f"//div[@class='malibu-desktop-uChooseApp-item-title' and text()='{app_name}']"
         self.common(xpath=app_name_xpath, method='unobscured', action='click', info=f"Clicked on {app_name} button.", error=f"Click action in choose app {app_name_xpath} failed.")
 
-    def login(self, username, password, one_app='N'):
+    def login(self, username, password, one_app='N', app_name="Shwebank"):
         try:
             email_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your account name']")
             password_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your System password']")
@@ -810,7 +827,7 @@ class TestCase(unittest.TestCase):
             available_app_xpath = "//div[@class='malibu-desktop-uChooseApp-title']/div[text()='Available Applications']"
             self.wait_for_element_visibility_by_xpath(available_app_xpath)
             if one_app=='N':
-                self.open_app("Shwebank")
+                self.open_app(app_name)
             self.wait_app_loading()
             self.wait_process_bar_loading()
             search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
@@ -1482,7 +1499,12 @@ class TestCase(unittest.TestCase):
     # Functions used for testcase - BO screen
     def bo_click_tab(self, tab_name):
         # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
-        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        # xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        self.common(xpath=xpath, method='unobscured', action='click', info=f"", error=f"Click tab '{tab_name}' in BO view screen failed.")
+
+    def bo_click_tab_child(self, tab_name):
+        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"", error=f"Click tab '{tab_name}' in BO view screen failed.")
 
     def bo_click_checkbox(self, title):
@@ -2449,6 +2471,11 @@ class TestCase(unittest.TestCase):
         fieldset_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
         self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
 
+    def select_in_tab_child(self, title, value):
+        """Select field in screen have tab under tab"""
+        fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]/div[@class='malibu-role_profile-div']//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]//div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
+        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+
     def select_multi(self, title, values):
         """Select multi in any screen"""
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uSelectMulti')]//legend[text()='{title}']/parent::fieldset/"
@@ -2805,7 +2832,7 @@ class TestCase(unittest.TestCase):
         try:
             actions = ActionChains(self.driver)
             actions.click(element_input).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
-            log.warn(f"Cleared value.")
+            # log.warn(f"Cleared value.")
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Clear value failed. Exception: {e}")
 
@@ -2818,7 +2845,7 @@ class TestCase(unittest.TestCase):
                 # log.info(f"Attribute 'disable' in class '{css_class}'.")
                 return True
             else:
-                log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
+                # log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
                 return False
         except:
             log.error(f"Check attribute 'disable' for element '{element}' failed.")
@@ -2828,39 +2855,39 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked at '{title}' in screen NON tab.", error=f"Click at '{title}' in screen NON tab failed.")
 
-class FirstTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        global _TEST_BROWSER
-        if _TEST_BROWSER is None:
-            cls.driver = start_browser()
-            _TEST_BROWSER = cls.driver
-            cls.started_browser = True
-        else: 
-            cls.driver = _TEST_BROWSER 
-            cls.started_browser = False
-        cls().go_to(cls().get_url())
-        cls().wait_page_login()
-        cls().start_class()
+# class FirstTestCase(TestCase):
+#     @classmethod
+#     def setUpClass(cls):
+#         global _TEST_BROWSER
+#         if _TEST_BROWSER is None:
+#             cls.driver = start_browser()
+#             _TEST_BROWSER = cls.driver
+#             cls.started_browser = True
+#         else: 
+#             cls.driver = _TEST_BROWSER 
+#             cls.started_browser = False
+#         cls().go_to(cls().get_url())
+#         cls().wait_page_login()
+#         cls().start_class()
     
-    @classmethod
-    def tearDownClass(cls):
-        global _TEST_BROWSER
-        cls().end_class()
-        # pass
+#     @classmethod
+#     def tearDownClass(cls):
+#         global _TEST_BROWSER
+#         cls().end_class()
+#         # pass
+
+# class LastTestCase(TestCase):
+#     @classmethod
+#     def setUpClass(cls):
+#         global _TEST_BROWSER
+#         # cls.driver = _TEST_BROWSER
+#         # cls.started_browser = False
+#         # cls().start_class()
+#         cls.driver = get_driver()
     
-class LastTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        global _TEST_BROWSER
-        # cls.driver = _TEST_BROWSER
-        # cls.started_browser = False
-        # cls().start_class()
-        cls.driver = get_driver()
-    
-    @classmethod
-    def tearDownClass(cls):
-        global _TEST_BROWSER
-        cls().end_class()
-        kill_browser()
-        # pass
+#     @classmethod
+#     def tearDownClass(cls):
+#         global _TEST_BROWSER
+#         cls().end_class()
+#         kill_browser()
+#         # pass

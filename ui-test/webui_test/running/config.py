@@ -13,7 +13,7 @@ class BrowserConfig:
 
 # S: view mode is "Status", N: view mode is "Normal"
 class F8Config:
-	view_mode = 'N'
+	view_mode = 'S'
 
 class WaitConfig: 
 	timeout_implicitly = 1

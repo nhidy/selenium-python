@@ -1346,10 +1346,6 @@ class CreditCompoundTest(FormAction):
         values = None
         total_fee = None
         expected_posting = None
-        approve_on_form = 'Y'
-        username = username_approve
-        password = password_approve
-        reason = None
 
         mtg_cls_result = self.mtg_cls(
             account_number=account_number,
@@ -1364,10 +1360,6 @@ class CreditCompoundTest(FormAction):
             values=values,
             total_fee=total_fee,
             expected_posting=expected_posting,
-            approve_on_form=approve_on_form,
-            username=username,
-            password=password,
-            reason=reason
         )
         transaction_references=mtg_cls_result[0]
 

@@ -113,7 +113,7 @@ number_of_leaves_cq = '25'
 number_of_book_cq = '1'
 expected_values = ['Unpaid'] * 3 + ['Paid'] + ['Unpaid'] * 21
 
-class RegressionTradeTest(FormAction):
+class TradeTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
 

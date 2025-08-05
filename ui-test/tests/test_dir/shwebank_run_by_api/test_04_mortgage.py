@@ -37,7 +37,7 @@ division_city_test = 'division_city test'
 home_test = 'home test'
 office_test = 'office test'
 
-class RegressionMortgageTest(FormAction):
+class MortgageTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
 

@@ -1,19 +1,33 @@
 import os
+import sys
 import time
 import unittest
 from xmlrunner import XMLTestRunner
 import inspect
 from webui_test.logging import log
 from webui_test.running.HTMLTestRunner import HTMLTestRunner
-from webui_test.running.config import BrowserConfig
+from webui_test.running.config import BrowserConfig, F8Config
 
 webui_test_str = "WebUI Test"
 
-def main(path=None, browser=None, report=None, title="WebUI Test Report", description="WEBUI Test Case Execution", debug=False, rerun=0, save_last_run=False, timeout=10, xmlrunner=False, headless=False, suite_to_run=None):
+DEFAULT_REPORTS_DIR = os.path.join(os.getcwd(), "reports")
+REPORTS_DIR = os.environ.get("REPORTS_PATH", DEFAULT_REPORTS_DIR)
+
+if not os.path.exists(REPORTS_DIR):
+    try:
+        os.makedirs(REPORTS_DIR)
+        print(f"Created reports directory: {REPORTS_DIR}")
+    except OSError as e:
+        print(f"Error create reports directory {REPORTS_DIR}: {e}", file=sys.stderr)
+
+def main(path=None, browser=None, report=None, title="WebUI Test Report", description="WEBUI Test Case Execution", debug=False, rerun=0, save_last_run=False, timeout=10, xmlrunner=False, headless=False, suite_to_run=None, f8_config=None):
         #   window_size="1920,1080"):
+    if f8_config is not None:
+        F8Config.view_mode = f8_config
+    else:
+        F8Config.view_mode = "S"
     suits = None
     if suite_to_run:
-        # Nếu suite_to_run được cung cấp, sử dụng nó trực tiếp
         suits = suite_to_run
         log.info("Running provided TestSuite.")
     elif path is None: 
@@ -58,55 +72,16 @@ def main(path=None, browser=None, report=None, title="WebUI Test Report", descri
     BrowserConfig.headless = headless
     # BrowserConfig.window_size = window_size
 
-    # if debug is False: 
-    #     for filename in os.listdir(os.getcwd()): 
-    #         if filename == "reports": 
-    #             break
-    #     else: 
-    #         os.mkdir(os.path.join(os.getcwd(), "reports"))
-
-    #     if report is None:
-    #         now = time.strftime("%Y_%m_%d_%H_%M_%S")
-    #         if xmlrunner is False:
-    #             report = os.path.join(os.getcwd(), "reports", now + "_result.html")
-    #             BrowserConfig.report_path = report 
-    #         else: 
-    #             report = os.path.join(os.getcwd(), "reports", now + ".xml")
-    #             BrowserConfig.report_path = report 
-    #     else: 
-    #         report = os.path.join(os.getcwd(), "reports", report)
-    
-    #     with(open(report, 'wb')) as fp:
-    #         log.info(webui_test_str)
-    #         if xmlrunner is False: 
-    #             runner = HTMLTestRunner(stream=fp, title=title, description=description, browser=BrowserConfig.name)
-    #             runner.run(suits, rerun=rerun, save_last_run=save_last_run)
-    #         else: 
-    #             runner = XMLTestRunner(output=fp)
-    #             runner.run(suits) 
-    #     log.info("generated html file: file:///{}".format(report))
-    
-    # else: 
-    #     runner = unittest.TextTestRunner(verbosity=2) 
-    #     log.info("A run the test in debug mode without generating HTML report!")
-    #     log.info(webui_test_str)
-    #     runner.run(suits)
-
-
     if not debug:
-        reports_dir = os.path.join(os.getcwd(), "reports")
-        if not os.path.exists(reports_dir):
-            os.makedirs(reports_dir)
-
         final_report_path = None
         if report is None:
             now = time.strftime("%Y_%m_%d_%H_%M_%S")
             if not xmlrunner:
-                final_report_path = os.path.join(reports_dir, now + "_result.html")
+                final_report_path = os.path.join(REPORTS_DIR, now + "_result.html")
             else:
-                final_report_path = os.path.join(reports_dir, now + ".xml")
+                final_report_path = os.path.join(REPORTS_DIR, now + ".xml")
         else:
-            final_report_path = os.path.join(reports_dir, report)
+            final_report_path = os.path.join(REPORTS_DIR, report)
 
         BrowserConfig.report_path = final_report_path
         log.info(f"Report will be generated at: {final_report_path}")
@@ -128,7 +103,6 @@ def main(path=None, browser=None, report=None, title="WebUI Test Report", descri
         log.info(webui_test_str)
         result = runner.run(suits)
 
-    # Trả về kết quả của lần chạy test
     return {
         "total_tests": result.testsRun,
         "failures": len(result.failures),

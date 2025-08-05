@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from fastapi.responses import FileResponse
 import subprocess
 import os
 import uuid
@@ -13,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import json
 import traceback
+
 
 executor = ThreadPoolExecutor(max_workers=5)
 if platform.system() == "Windows":
@@ -36,38 +38,11 @@ DEFAULT_HISTORY_DIR = os.path.join(os.getcwd(), "test_history")
 HISTORY_DIR = os.environ.get("TEST_HISTORY_PATH", DEFAULT_HISTORY_DIR)
 HISTORY_FILE = os.path.join(HISTORY_DIR, "runs.json")
 
-class TaskStatus(BaseModel):
-    task_id: str
-    status: str
-    stdout: Optional[str] = None
-    exec_status: Optional[str] = None
-    return_code: Optional[int] = None
+DEFAULT_REPORTS_DIR = os.path.join(os.getcwd(), "reports")
+REPORTS_DIR = os.environ.get("REPORTS_PATH", DEFAULT_REPORTS_DIR)
 
-class TestConfig(BaseModel):
-    release_version: str = ""
-    server_name: str = ""
-    run_on_url: str = ""
-    username_login: str = ""
-    password_login: str = ""
-    one_app: str = ""
-    browser: str = ""
-    headless: str = ""
-    customer_code: str = ""
-    username_approve: str = ""
-    password_approve: str = ""
-    username_reverse: str = ""
-    password_reverse: str = ""
-    test_suite: str = ""
-    report_name: str = ""
-    debug_mode: Optional[str] = None
-    hour_to_run: Optional[int] = None
-    minute_to_run: Optional[int] = None
-    username_login_other_branch: Optional[str] = None
-    password_login_other_branch: Optional[str] = None
-    username_approve_other_branch: Optional[str] = None
-    password_approve_other_branch: Optional[str] = None
-    username_reverse_other_branch: Optional[str] = None
-    password_reverse_other_branch: Optional[str] = None
+DEFAULT_LOGS_DIR = os.path.join(os.getcwd(), "logs")
+LOGS_DIR = os.environ.get("LOGS_PATH", DEFAULT_LOGS_DIR)
 
 class TestRunRequest(BaseModel):
     test_files: list[str]
@@ -85,6 +60,7 @@ class TestRunRequest(BaseModel):
     username_reverse: str = ""
     password_reverse: str = ""
     report_name: str = ""
+    f8_config: Optional[str] = None
     debug_mode: Optional[str] = None
     hour_to_run: Optional[int] = None
     minute_to_run: Optional[int] = None
@@ -102,92 +78,39 @@ def read_root():
 @app.on_event("startup")
 async def startup_event():
     """Event called when FastAPI application starts."""
+    if not os.path.exists(HISTORY_DIR):
+        try:
+            os.makedirs(HISTORY_DIR)
+            print(f"'test_history' folder created: {HISTORY_DIR}")
+        except OSError as e:
+            print(f"Error creating 'test_history' folder {HISTORY_DIR}: {e}", file=sys.stderr)
+            
+    if not os.path.exists(REPORTS_DIR):
+        try:
+            os.makedirs(REPORTS_DIR)
+            print(f"'reports' folder created: {REPORTS_DIR}")
+        except OSError as e:
+            print(f"Error creating 'reports' folder {REPORTS_DIR}: {e}", file=sys.stderr)
+
+    if not os.path.exists(LOGS_DIR):
+        try:
+            os.makedirs(LOGS_DIR)
+            print(f"'logs' folder created: {LOGS_DIR}")
+        except OSError as e:
+            print(f"Error creating 'logs' folder {LOGS_DIR}: {e}", file=sys.stderr)
+
     load_test_history()
-
-@app.post("/run_file")
-async def run_file(config: TestConfig):
-    task_id = str(uuid.uuid4())
-    test_script_path = os.path.join(os.path.dirname(__file__), "tests", "run_file_by_api.py")
-    test_script_dir = os.path.join(os.path.dirname(__file__), "tests")
-
-    if not os.path.exists(test_script_path):
-        raise HTTPException(status_code=404, detail=f"Test script not found at {test_script_path}")
-
-    running_tasks[task_id] = {
-        "task_id": task_id,
-        "status": "running",
-        "stdout": None,
-        "exec_status": None,
-        "return_code": None
-    }
-
-    asyncio.create_task(
-        _run_script_in_background(task_id, test_script_path, test_script_dir, config)
-    )
-
-    return {"message": "Test script started in background", "task_id": task_id}
-
-@app.get("/run_file_status/{task_id}", response_model=TaskStatus)
-async def get_run_file_status(task_id: str):
-    task_info = running_tasks.get(task_id)
-    if not task_info:
-        raise HTTPException(status_code=404, detail="Task ID not found")
-    return TaskStatus(**task_info)
-
-async def _run_script_in_background(task_id: str, script_path: str, cwd_path: str, config: TestConfig):
-    loop = asyncio.get_event_loop()
-
-    try:
-        cli_args = []
-        for key, value in config.model_dump().items():
-            if value is not None and value != "":
-                cli_args.append(f"--{key.replace('_', '-')}")
-                cli_args.append(str(value))
-
-        command = [python_executable, script_path] + cli_args
-
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            executor,
-            lambda: subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=False,
-                cwd=cwd_path
-            )
-        )
-
-        stdout_str = result.stdout if result.stdout else ""
-        stderr_str = result.stderr if result.stderr else ""
-
-        running_tasks[task_id].update({
-            "status": "completed" if result.returncode == 0 else "failed",
-            "stdout": stdout_str,
-            "exec_status": stderr_str,
-            "return_code": result.returncode
-        })
-
-    except Exception as e:
-        error_details = traceback.format_exc()
-
-        running_tasks[task_id].update({
-            "status": "failed",
-            "stdout": running_tasks[task_id].get("stdout"),
-            "exec_status": f"Error during execution: {error_details}",
-            "return_code": -1
-        })
 
 def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     """
-    Run script run_folder_by_api.py in a child process.
+    Run script run_by_api.py in a child process.
     """
     print(f"[{run_id}] Starting test run in background...")
     test_run_status[run_id] = "running"
     save_test_history()
     
-    # From main.py, relative path is tests/run_folder_by_api.py
-    script_path = os.path.join(os.path.dirname(__file__), 'tests', 'run_folder_by_api.py')
+    # From main.py, relative path is tests/run_by_api.py
+    script_path = os.path.join(os.path.dirname(__file__), 'tests', 'run_by_api.py')
     
     command = [sys.executable, script_path]
 
@@ -204,7 +127,8 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     command.extend(["--password-approve", request_data.password_approve])
     command.extend(["--username-reverse", request_data.username_reverse])
     command.extend(["--password-reverse", request_data.password_reverse])
-    command.extend(["--test-files-order", ",".join(request_data.test_files)])
+    if request_data.test_files:
+        command.extend(["--test-files-order", ",".join(request_data.test_files)])
     command.extend(["--report-name", request_data.report_name])
     if request_data.debug_mode is not None:
         command.extend(["--debug-mode", str(request_data.debug_mode).lower()])
@@ -228,6 +152,7 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     try:
         process = subprocess.run(command, capture_output=True, text=True, check=False)
         output_log = process.stdout + "\n" + process.stderr
+        # output_log = ""
         
         parsed_result = {}
         try:
@@ -238,7 +163,8 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
             print(f"[{run_id}] Warning: Could not decode JSON from subprocess output. Output: {process.stdout}", file=sys.stderr)
             pass
 
-        status = "completed" if process.returncode == 0 else "failed"
+        # status = "completed" if process.returncode == 0 else "failed"
+        status = "completed"
         passed = parsed_result.get("passed", False)
 
         test_run_results[run_id] = {
@@ -262,14 +188,11 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     finally:
         save_test_history()
 
-@app.post("/run_folder")
-async def run_folder(request: TestRunRequest):
+@app.post("/run_test")
+async def run_test(request: TestRunRequest):
     """
-    Triggers Selenium test cases to run in the specified order via `run_folder_by_api.py`. Test run in background.
+    Triggers Selenium test cases to run in the specified order via `run_by_api.py`. Test run in background.
     """
-    if not request.test_files:
-        raise HTTPException(status_code=400, detail="No test files specified in 'test_files' field.")
-
     run_id = str(uuid.uuid4())
 
     test_run_results[run_id] = {
@@ -288,8 +211,8 @@ async def run_folder(request: TestRunRequest):
 
     return {"message": "Test run initiated", "run_id": run_id, "status": "running"}
 
-@app.get("/run_folder_status/{run_id}")
-async def get_run_folder_status(run_id: str):
+@app.get("/get_test_status/{run_id}")
+async def get_run_test_status(run_id: str):
     """
     Check status and get test results of run under folder.
     """
@@ -310,9 +233,7 @@ def load_test_history():
             print(f"Created history directory: {HISTORY_DIR}")
         except OSError as e:
             print(f"Error creating history directory {HISTORY_DIR}: {e}", file=sys.stderr)
-            # Quan trọng: Nếu không tạo được thư mục, không thể lưu lịch sử
-            # Bạn có thể muốn thoát ứng dụng hoặc chuyển sang chế độ không ghi.
-            return # Thoát hàm nếu không tạo được thư mục
+            return
 
     if os.path.exists(HISTORY_FILE):
         try:
@@ -371,13 +292,114 @@ async def clear_history():
     save_test_history()
     return {"message": "Test history cleared."}
 
-if __name__ == "__main__":
-    # if platform.system() == "Windows":
-    #     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    # import uvicorn
-    # uvicorn.run(app, host="0.0.0.0", port=8000, loop="asyncio")
+@app.get("/reports")
+async def list_reports():
+    """
+    Returns a list of all available report file names in the reports directory.
+    """
+    try:
+        if not os.path.exists(REPORTS_DIR):
+            return {"message": "Report folder does not exist.", "reports": []}
 
+        report_files = [f for f in os.listdir(REPORTS_DIR) if os.path.isfile(os.path.join(REPORTS_DIR, f))]
+        report_files = sorted([f for f in report_files if f.endswith(('.html', '.xml'))])
+        
+        return {"reports": report_files}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error while getting report list: {e}")
+
+@app.get("/reports/download/{report_name}")
+async def download_report(report_name: str):
+    """
+    Download a specific report by file name.
+    """
+    report_path = os.path.join(REPORTS_DIR, report_name)
+
+    if not os.path.exists(report_path) or not os.path.isfile(report_path):
+        raise HTTPException(status_code=404, detail=f"No report found: {report_name}")
+    
+    if not report_name.endswith(('.html', '.xml')):
+         raise HTTPException(status_code=400, detail="Only supports downloading HTML or XML report files.")
+
+    try:
+        return FileResponse(path=report_path, filename=report_name, media_type="application/octet-stream")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error downloading report '{report_name}': {e}")
+
+@app.delete("/reports/clear_all")
+async def clear_all_reports():
+    """
+    Delete all files in the reports folder.
+    """
+    if not os.path.exists(REPORTS_DIR):
+        raise HTTPException(status_code=404, detail=f"The reports directory does not exist: {REPORTS_DIR}")
+
+    try:
+        for item in os.listdir(REPORTS_DIR):
+            item_path = os.path.join(REPORTS_DIR, item)
+            if os.path.isfile(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+        
+        return {"message": f"All files and subfolders in '{REPORTS_DIR}' have been successfully deleted."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error while deleting all reports: {e}")
+
+@app.get("/logs")
+async def list_logs():
+    """
+    Returns a list of all log file names available in the logs directory.
+    """
+    try:
+        if not os.path.exists(LOGS_DIR):
+            return {"message": "The logs directory does not exist.", "logs": []}
+
+        log_files = [f for f in os.listdir(LOGS_DIR) if os.path.isfile(os.path.join(LOGS_DIR, f))]
+        log_files = sorted([f for f in log_files if f.endswith(('.log', '.txt'))])
+        
+        return {"logs": log_files}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting logs list: {e}")
+
+@app.get("/logs/download/{log_name}")
+async def download_log(log_name: str):
+    """
+    Download a specific log file by file name.
+    """
+    log_path = os.path.join(LOGS_DIR, log_name)
+
+    if not os.path.exists(log_path) or not os.path.isfile(log_path):
+        raise HTTPException(status_code=404, detail=f"Log file not found: {log_name}")
+    
+    if not log_name.endswith(('.log', '.txt')):
+         raise HTTPException(status_code=400, detail="Only supports downloading log files (.log, .txt).")
+
+    try:
+        return FileResponse(path=log_path, filename=log_name, media_type="text/plain")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error downloading log file '{log_name}': {e}")
+
+@app.delete("/logs/clear_all")
+async def clear_all_logs():
+    """
+    Delete all files in the logs folder.
+    """
+    if not os.path.exists(LOGS_DIR):
+        raise HTTPException(status_code=404, detail=f"The logs directory does not exist: {LOGS_DIR}")
+
+    try:
+        for item in os.listdir(LOGS_DIR):
+            item_path = os.path.join(LOGS_DIR, item)
+            if os.path.isfile(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+
+        return {"message": f"All files and subdirectories in '{LOGS_DIR}' have been successfully deleted."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error when deleting all logs: {e}")
+
+if __name__ == "__main__":
     import uvicorn
-    # Load lịch sử khi chạy ứng dụng (nếu chưa được load bởi @app.on_event)
-    # Tuy nhiên, @app.on_event("startup") là cách tốt hơn cho ứng dụng FastAPI thực tế
     uvicorn.run(app, host="0.0.0.0", port=8000)

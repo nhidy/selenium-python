@@ -8,6 +8,9 @@ import unittest
 import importlib.util
 import json
 
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
 def str_to_bool(value):
     if isinstance(value, bool):
         return value
@@ -32,8 +35,9 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
     debug_mode = config_data.get("debug_mode", False)
     release_version = config_data.get("release_version", "")
     server_name = config_data.get("server_name", "")
+    f8_config = config_data.get("f8_config", "S")
 
-    # From run_folder_by_api.py, relative path is ../tests/test_dir/shwebank_run_by_api/
+    # From run_by_api.py, relative path is ../tests/test_dir/shwebank_run_by_api/
     test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', 'shwebank_run_by_api')
 
     combined_suite = unittest.TestSuite()
@@ -42,31 +46,46 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
     print(f"Loading tests from directory: {test_case_base_dir}")
     print(f"Test files order requested: {test_files_order_list}")
 
-    for test_file_name in test_files_order_list:
-        module_path = os.path.join(test_case_base_dir, f"{test_file_name}.py")
-        
-        if not os.path.exists(module_path):
-            print(f"Warning: Test file '{module_path}' not found. Skipping.", file=sys.stderr)
-            continue
-
+    if not test_files_order_list:
+        print("[INFO] No specific test file name provided. Exploring all tests in default directory.")
         try:
-            spec = importlib.util.spec_from_file_location(test_file_name, module_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            combined_suite.addTests(loader.loadTestsFromModule(module))
-            print(f"Successfully added tests from {test_file_name}.py to suite.")
-        except ImportError as e:
-            print(f"Error importing module '{test_file_name}' from '{module_path}': {e}", file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
+            final_suite = loader.discover(
+                start_dir=test_case_base_dir,
+                pattern='test_*.py',
+                top_level_dir=test_case_base_dir
+            )
+            combined_suite.addTests(final_suite)
+            print(f"Explored {final_suite.countTestCases()} test for default run.")
         except Exception as e:
-            print(f"An unexpected error occurred while loading '{test_file_name}' from '{module_path}': {e}", file=sys.stderr)
+            print(f"Error when exploring test in default mode from {test_case_base_dir}: {e}", file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
+            return {"passed": False, "total": 0, "failures": 1, "errors": 0, "skipped": 0, "log": f"Error while exploring default test: {e}"}
+    else:
+        for test_file_name in test_files_order_list:
+            module_path = os.path.join(test_case_base_dir, f"{test_file_name}.py")
+            
+            if not os.path.exists(module_path):
+                print(f"Warning: Test file '{module_path}' not found. Skipping.", file=sys.stderr)
+                continue
+
+            try:
+                spec = importlib.util.spec_from_file_location(test_file_name, module_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                combined_suite.addTests(loader.loadTestsFromModule(module))
+                print(f"Successfully added tests from {test_file_name}.py to suite.")
+            except ImportError as e:
+                print(f"Error importing module '{test_file_name}' from '{module_path}': {e}", file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
+            except Exception as e:
+                print(f"An unexpected error occurred while loading '{test_file_name}' from '{module_path}': {e}", file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
 
     if not combined_suite.countTestCases():
         print("No test cases found to run.", file=sys.stderr)
         return {"passed": False, "total_tests": 0, "message": "No test cases found to run."}
 
-    report_filename = f"{release_version}_{server_name}_{report_name}_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html"
+    report_filename = f"{release_version}-{server_name}-{report_name}_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html"
 
     try:
         test_run_result = webui_test.main(
@@ -76,13 +95,14 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
             headless=headless,
             report=report_filename,
             title=f"{release_version}-{server_name}-Test Report",
-            description="Automated WEBUI Test Case Execution"
+            description="Automated WEBUI Test Case Execution",
+            f8_config=f8_config
         )
         print("All tests completed successfully.", file=sys.stdout)
         return test_run_result
 
     except Exception as e:
-        print(f"An unexpected error occurred during test execution in run_folder_by_api.py: {e}", file=sys.stderr)
+        print(f"An unexpected error occurred during test execution in run_by_api.py: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         return {"passed": False, "total_tests": 0, "message": f"Fatal error: {e}"}
 
@@ -113,6 +133,7 @@ if __name__ == '__main__':
     parser.add_argument("--username-reverse-other-branch", type=str, default=None, help="Username other branch for reverse.")
     parser.add_argument("--password-reverse-other-branch", type=str, default=None, help="Password other branch for reverse.")
     parser.add_argument("--test-files-order", type=str, default="",  help="Comma-separated list of test file names (without .py extension) in the desired execution order. Example: 'test_login,test_create_user'")
+    parser.add_argument("--f8-config", type=str, default="S", help="View mode of F8 screen (optional (S/N). S: Mode view status, N: mode view normal).")
 
     args = parser.parse_args()
 
@@ -139,7 +160,8 @@ if __name__ == '__main__':
         "username_approve_other_branch": args.username_approve_other_branch,
         "password_approve_other_branch": args.password_approve_other_branch,
         "username_reverse_other_branch": args.username_reverse_other_branch,
-        "password_reverse_other_branch": args.password_reverse_other_branch
+        "password_reverse_other_branch": args.password_reverse_other_branch,
+        "f8_config": args.f8_config
     }
 
     test_files_order_list = []
@@ -151,7 +173,7 @@ if __name__ == '__main__':
         print(json.dumps(final_result))
         sys.exit(0 if final_result.get("passed", False) else 1)
     except Exception as e:
-        print(f"An unexpected error occurred in run_folder_by_api.py's main block: {e}", file=sys.stderr)
+        print(f"An unexpected error occurred in run_by_api.py's main block: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         print(json.dumps({"passed": False, "message": f"Fatal error: {e}"}))
         sys.exit(1)

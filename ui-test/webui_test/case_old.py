@@ -741,7 +741,7 @@ class TestCase(unittest.TestCase):
         app_name_xpath = f"//div[@class='malibu-desktop-uChooseApp-item-title' and text()='{app_name}']"
         self.common(xpath=app_name_xpath, method='unobscured', action='click', info=f"Clicked on {app_name} button.", error=f"Click action in choose app {app_name_xpath} failed.")
 
-    def login(self, username, password, one_app='N'):
+    def login(self, username, password, one_app='N', app_name="Shwebank"):
         try:
             email_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your account name']")
             password_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your System password']")
@@ -751,7 +751,7 @@ class TestCase(unittest.TestCase):
             available_app_xpath = "//div[@class='malibu-desktop-uChooseApp-title']/div[text()='Available Applications']"
             self.wait_for_element_visibility_by_xpath(available_app_xpath)
             if one_app=='N':
-                self.open_app("Shwebank")
+                self.open_app(app_name)
             self.wait_app_loading()
             self.wait_process_bar_loading()
             search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
@@ -1426,7 +1426,12 @@ class TestCase(unittest.TestCase):
     # Functions used for testcase - BO screen
     def bo_click_tab(self, tab_name):
         # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
-        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        # xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
+        self.common(xpath=xpath, method='unobscured', action='click', info=f"", error=f"Click tab '{tab_name}' in BO view screen failed.")
+
+    def bo_click_tab_child(self, tab_name):
+        xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]//div[@class='malibu-desktop-uFormTabItem-title' and text()='{tab_name}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"", error=f"Click tab '{tab_name}' in BO view screen failed.")
 
     def bo_click_checkbox(self, title):

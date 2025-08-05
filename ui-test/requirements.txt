@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+xmlrunner
+colorama
+jinja2
+selenium==4.24.0
+parameterized
+openpyxl
+pandas
+numpy
+PyYAML
+pyautogui
+unittest-xml-reporting
+markupsafe
+setuptools
+pyparsing

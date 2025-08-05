@@ -1,54 +1,59 @@
 import os
-import sys 
-import time 
-import inspect 
-import platform 
+import sys
+import time
+from datetime import datetime
+import inspect
+import platform
 import logging.handlers
 from colorama import Fore, Style
 
-stack_t = inspect.stack()
-ins = inspect.getframeinfo(stack_t[1][0])
-file_dir = os.path.dirname(os.path.abspath(ins.filename))
-log_dir = os.path.join(file_dir, "logs")
-if os.path.exists(log_dir) is False:
-    os.mkdir(log_dir)
+DEFAULT_LOGS_DIR = os.path.join(os.getcwd(), "logs")
+LOGS_DIR = os.environ.get("LOGS_PATH", DEFAULT_LOGS_DIR)
 
-now_time = str(time.time()).split('.')[0]
-file_handler = logging.FileHandler(os.path.join(file_dir, "logs", now_time + ".log"), encoding='utf-8')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+    print(f"Created logs directory: {LOGS_DIR}")
+
+if os.path.exists(LOGS_DIR) is False:
+    os.mkdir(LOGS_DIR)
+
+now_time = str(datetime.now().strftime('%d%m%Y_%H%M%S'))
+file_handler = logging.FileHandler(os.path.join(LOGS_DIR, now_time + ".log"), encoding='utf-8')
+print(f"The log file is created at: {os.path.join(LOGS_DIR, now_time + '.log')}")
 
 _logger = logging.getLogger('webui_test')
 _logger.setLevel(logging.DEBUG)
 _handler = logging.StreamHandler(sys.stdout)
 
 if platform.system().lower() == "windows": 
-	_logger.addHandler(file_handler)
-	_logger.addHandler(_handler) 
+    _logger.addHandler(file_handler)
+    _logger.addHandler(_handler) 
 else: 
-	_logger.addHandler(file_handler)
-	_logger.addHandler(_handler) 
+    _logger.addHandler(file_handler)
+    _logger.addHandler(_handler) 
 
 def debug(msg):
-	now = time.strftime("%Y-%m-%d %H:%M:%S")
-	_logger.debug(now + " [DEBUG] " + str(msg))
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    _logger.debug(now + " [DEBUG] " + str(msg))
 
 def info(msg):
-	now = time.strftime("%Y-%m-%d %H:%M:%S")
-	_logger.info(Fore.GREEN + now + " [INFO] " + str(msg) + Style.RESET_ALL)
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    _logger.info(Fore.GREEN + now + " [INFO] " + str(msg) + Style.RESET_ALL)
 
 def error(msg): 
-	now = time.strftime("%Y-%m-%d %H:%M:%S")
-	_logger.error(Fore.RED + now + " [ERROR] " + str(msg) + Style.RESET_ALL)
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    _logger.error(Fore.RED + now + " [ERROR] " + str(msg) + Style.RESET_ALL)
 
 def warn(msg):
-	now = time.strftime("%Y-%m-%d %H:%M:%S")
-	_logger.warning(Fore.YELLOW + now + " [WARNING] " + str(msg) + Style.RESET_ALL)
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    _logger.warning(Fore.YELLOW + now + " [WARNING] " + str(msg) + Style.RESET_ALL)
 
 def _print(msg):
-	now = time.strftime("%Y-%m-%d %H:%M:%S")
-	_logger.debug(Fore.BLUE + now + " [PRINT] " + str(msg) + Style.RESET_ALL)
+    now = time.strftime("%Y-%m-%d %H:%M:%S")
+    _logger.debug(Fore.BLUE + now + " [PRINT] " + str(msg) + Style.RESET_ALL)
 
 def set_level(level):
-	_logger.setLevel(level)
+    _logger.setLevel(level)
 
 def set_level_to_debug():
     _logger.setLevel(logging.DEBUG)

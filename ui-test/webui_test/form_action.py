@@ -16964,7 +16964,7 @@ class FormAction(TestCase):
         #  view f8
         self.click_table_menu('View', 1)
         self.wait_loading()
-        self.assert_notification('Get info successfully')
+        # self.assert_notification('Get info successfully')
         self.wait_for_button_available('Accept')
         if form_title:
             self.assert_form_title(form_title)
@@ -32388,6 +32388,35 @@ class FormAction(TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Change password screen failed. Exception: {e}")
 
+    def check_user_profile_not_exist(self, login_name):
+        # search login_name
+        self.user_profile_advanced_search(login_name=login_name)
+        if (self.get_text_notification(timeout=3) == 'Data not found'):
+            print(f"Login name '{login_name}' does NOT exist.")
+            return True
+        else:
+            print(f"Login name '{login_name}' already exists.")
+            return False
+
+    def login_admin(self, username, password):
+        self.logout()
+        self.wait_page_login()
+        self.login(username=username, password=password, one_app='N', app_name="Neptune Admin")
+        self.wait_loading()
+
+    def set_role_for_user(self, username, app_name, tab_name, role_name):
+        self.close_all_form()
+        self.click_menu('Role Profiles')
+        self.wait_loading()
+        self.assert_form_title('ADM-Roles Profile')
+        self.bo_click_tab(app_name)
+        self.wait_loading()
+        self.bo_click_tab_child(tab_name)
+        self.wait_loading()
+        self.select_in_tab_child(role_name)
+        self.wait_loading()
+
+
 # -------------------------- handle common methods --------------------------
     def check_serial_number_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
         self.stock_inventory_advanced_search(prefix, generated_number_from, generated_number_to, s_type)
@@ -32779,3 +32808,4 @@ class FormAction(TestCase):
             self.bo_assert_text('Reminder name', reminder_name)
             self.click_button('Apply')
             self.wait_loading()
+

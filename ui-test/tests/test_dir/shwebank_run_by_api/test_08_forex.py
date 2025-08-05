@@ -62,7 +62,7 @@ amount_mmk_down_update = '80,500,000.00'
 amount_dif_up_update = '6,230,000.00'
 amount_dif_down_update = '4,270,000.00'
 
-class RegressionForexTest(FormAction):
+class ForexTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
 
