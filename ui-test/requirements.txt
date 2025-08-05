@@ -3,7 +3,7 @@ uvicorn
 xmlrunner
 colorama
 jinja2
-selenium==4.24.0
+selenium
 parameterized
 openpyxl
 pandas

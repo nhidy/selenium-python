@@ -24,12 +24,11 @@ build_app_image:
     - if: '$CI_COMMIT_MESSAGE =~ />>build_test/'
 
 
-# Job dọn dẹp (CẨN THẬN KHI SỬ DỤNG)
+# Job cleanup
 cleanup_docker_resources:
   stage: cleanup
   script:
     - echo "Cleanup Docker resources..."
-    # - docker system prune -a -f # Lệnh này sẽ xóa mọi thứ không sử dụng.
     - docker image prune -f # chỉ xóa hình ảnh dangling
     - docker volume prune -f # chỉ xóa volume không sử dụng
     - docker builder prune -f #chỉ xóa build cache

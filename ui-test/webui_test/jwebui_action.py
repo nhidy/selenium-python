@@ -54,9 +54,9 @@ def start_browser():
                 chrome_options.add_argument('--headless=new')
                 chrome_options.add_argument('--window-size=1920,1080')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            chrome_service = ChromeService()
-            _TEST_BROWSER = webdriver.Chrome(service=chrome_service, options=chrome_options)
-            # _TEST_BROWSER = webdriver.Chrome(options=chrome_options)
+            # chrome_service = ChromeService()
+            # _TEST_BROWSER = webdriver.Chrome(service=chrome_service, options=chrome_options)
+            _TEST_BROWSER = webdriver.Chrome(options=chrome_options)
 
         # Firefox
         elif BrowserConfig.name in ['firefox', 'ff']:
@@ -67,9 +67,9 @@ def start_browser():
             if BrowserConfig.headless: 
                 firefox_options.add_argument('--headless')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            firefox_service = FirefoxService()
-            _TEST_BROWSER = webdriver.Firefox(service=firefox_service, options=firefox_options)
-            # _TEST_BROWSER = webdriver.Firefox(options=firefox_options)
+            # firefox_service = FirefoxService()
+            # _TEST_BROWSER = webdriver.Firefox(service=firefox_service, options=firefox_options)
+            _TEST_BROWSER = webdriver.Firefox(options=firefox_options)
 
         # Edge
         elif BrowserConfig.name in ['edge', 'ed']:
@@ -98,17 +98,17 @@ def start_browser():
                 edge_options.add_argument('--headless=new')
                 edge_options.add_argument('--window-size=1920,1080')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            edge_service = EdgeService()
-            _TEST_BROWSER = webdriver.Edge(service=edge_service, options=edge_options)
-            # _TEST_BROWSER = webdriver.Edge(options=edge_options)
+            # edge_service = EdgeService()
+            # _TEST_BROWSER = webdriver.Edge(service=edge_service, options=edge_options)
+            _TEST_BROWSER = webdriver.Edge(options=edge_options)
         else:
             if _TEMP_DATA_DIR and os.path.exists(_TEMP_DATA_DIR):
                 shutil.rmtree(_TEMP_DATA_DIR)
             raise NameError("Not found '{}' browser".format(BrowserConfig.name))
 
     atexit.register(kill_browser)
-    log.warn(f"Start driver: '{_TEST_BROWSER}'")
     _TEST_BROWSER.implicitly_wait(WaitConfig.timeout_implicitly)
+    log.warn(f"Start driver: '{_TEST_BROWSER}'")
     return _TEST_BROWSER
 
 def kill_browser():

@@ -121,6 +121,7 @@ class TestCase(unittest.TestCase):
         return
 
     def go_to(self, url):
+        log.info("Go to 'go_to'")
         BrowserConfig.url_env = url
         if self.driver:
             self.driver.get(url)
