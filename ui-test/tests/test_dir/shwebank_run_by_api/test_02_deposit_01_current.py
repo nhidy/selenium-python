@@ -33,6 +33,7 @@ amount_deposit_mask='5,000,000.49'
 amount_deposit_to_other_mask='1,000,000.00'
 # data test for cheque withdrawal
 cheque_amount='10,000.54' # 3 times
+withdraw_amount=cheque_amount
 # data test for change status of cheque
 status_change_of_cheque='Damage'
 # data test for close deposit account
@@ -117,7 +118,7 @@ class DepositCurrentTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_cdp_result = self.dpt_cdp(
             account_number=deposit_account_current,
-            amount_deposit=amount_deposit_mask.replace(',', ''),
+            amount_deposit=amount_deposit_mask,
             approve_later='Y'
         )
         transaction_references=dpt_cdp_result[0]
@@ -189,10 +190,16 @@ class DepositCurrentTest(FormAction):
         dpt_cis_result = self.dpt_cis(
             account_number=deposit_account_current,
             from_serial=from_serial_cq,
-            to_serial=to_serial_cq
+            to_serial=to_serial_cq,
+            approve_later='Y',
         )
         self.assertEqual(from_serial_cq, dpt_cis_result[1])
         self.assertEqual(to_serial_cq, dpt_cis_result[2])
+        self.transaction_approve(
+            transaction_references=dpt_cis_result[0], 
+            username=username_approve,
+            password=password_approve,
+        )
 
     def test_014_cheque_05_dpt_cei_issued_hold_balance_for_cheque_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -256,7 +263,7 @@ class DepositCurrentTest(FormAction):
         )
         dpt_cdt_result = self.dpt_cdt(
             cheque_no=from_serial_cq,
-            debit_amount=cheque_amount.replace(',', ''),
+            debit_amount=cheque_amount,
             credit_account=other_deposit_account_mask,
             debit_account=deposit_account_current_mask,
             approve_later='Y'
@@ -345,6 +352,21 @@ class DepositCurrentTest(FormAction):
         )
         self.assertEqual(from_serial_cq, dpt_sls_result[1])
         self.assertEqual(to_serial_cq, dpt_sls_result[2])
+
+    def test_015_current_00_dpt_cwr_cash_withdrawal_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        list_error_message = [
+            'Passbook number: Can not be blank'
+        ]
+        self.dpt_cwr(
+            account_number=deposit_account_current_mask,
+            withdraw_amount=withdraw_amount,
+            withdrawer_name='Test',
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve,
+            list_error_message=list_error_message
+        )
 
     def test_015_current_01_dpt_dls_close_deposit_account_by_deposit_success(self):
         # view account before close

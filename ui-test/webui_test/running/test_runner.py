@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import unittest
-from xmlrunner import XMLTestRunner
 import inspect
 from webui_test.logging import log
 from webui_test.running.HTMLTestRunner import HTMLTestRunner
@@ -20,12 +19,19 @@ if not os.path.exists(REPORTS_DIR):
     except OSError as e:
         print(f"Error create reports directory {REPORTS_DIR}: {e}", file=sys.stderr)
 
-def main(path=None, browser=None, report=None, title="WebUI Test Report", description="WEBUI Test Case Execution", debug=False, rerun=0, save_last_run=False, timeout=10, xmlrunner=False, headless=False, suite_to_run=None, f8_config=None):
+def main(path=None, browser=None, report=None, title="WebUI Test Report", description="WEBUI Test Case Execution", debug=False, rerun=0, save_last_run=False, headless=False, suite_to_run=None, f8_config=None, app_name=None):
         #   window_size="1920,1080"):
     if f8_config is not None:
         F8Config.view_mode = f8_config
     else:
         F8Config.view_mode = "S"
+    if app_name is not None:
+        BrowserConfig.app_name = app_name
+    else:
+        BrowserConfig.app_name = "Shwebank"
+    log.debug(f"HEADLESS MODE: '{headless}'")
+    log.debug(f"F8CONFIG.VIEW_MODE: '{F8Config.view_mode}'")
+    log.debug(f"BROWSERCONFIG.APP_NAME: '{BrowserConfig.app_name}'")
     suits = None
     if suite_to_run:
         suits = suite_to_run
@@ -76,10 +82,7 @@ def main(path=None, browser=None, report=None, title="WebUI Test Report", descri
         final_report_path = None
         if report is None:
             now = time.strftime("%Y_%m_%d_%H_%M_%S")
-            if not xmlrunner:
-                final_report_path = os.path.join(REPORTS_DIR, now + "_result.html")
-            else:
-                final_report_path = os.path.join(REPORTS_DIR, now + ".xml")
+            final_report_path = os.path.join(REPORTS_DIR, now + "_result.html")
         else:
             final_report_path = os.path.join(REPORTS_DIR, report)
 
@@ -88,12 +91,8 @@ def main(path=None, browser=None, report=None, title="WebUI Test Report", descri
 
         with(open(final_report_path, 'wb')) as fp:
             log.info(webui_test_str)
-            if not xmlrunner:
-                runner = HTMLTestRunner(stream=fp, title=title, description=description, browser=BrowserConfig.name)
-                result = runner.run(suits, rerun=rerun, save_last_run=save_last_run)
-            else:
-                runner = XMLTestRunner(output=fp)
-                result = runner.run(suits)
+            runner = HTMLTestRunner(stream=fp, title=title, description=description, browser=BrowserConfig.name)
+            result = runner.run(suits, rerun=rerun, save_last_run=save_last_run)
         
         log.info("Generated html file: file:///{}".format(final_report_path))
 

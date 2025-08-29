@@ -1,3 +1,4 @@
+# This file use for server DOCKER
 import atexit
 from webui_test.logging import log 
 from time import sleep
@@ -23,12 +24,27 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-_TEST_BROWSER=None
-_TEMP_DATA_DIR=None
+# Add import RemoteWebDriver
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+
+# _TEST_BROWSER=None
+# _TEMP_DATA_DIR=None
+
+# _TEST_BROWSER: RemoteWebDriver = None
+_TEST_BROWSER = None
+_TEMP_DATA_DIR = None
+_SELENIUM_HUB_URL = os.getenv("SELENIUM_HUB_URL", "http://localhost:4444")
 
 def start_browser():
     global _TEST_BROWSER, _TEMP_DATA_DIR
-    log.info(f"Starting browser: '{BrowserConfig.name}'")
+    if BrowserConfig.on_server == 'Y':
+        log.info(f"Starting browser: '{BrowserConfig.name}' on Selenium Grid.")
+        log.debug(f"HEADLESS MODE: '{BrowserConfig.headless}'")
+        log.debug(f"BROWSERCONFIG.APP_NAME: '{BrowserConfig.app_name}'")
+    else:
+        log.info(f"Starting browser: '{BrowserConfig.name}' on Local.")
+        log.debug(f"HEADLESS MODE: '{BrowserConfig.headless}'")
+        log.debug(f"BROWSERCONFIG.APP_NAME: '{BrowserConfig.app_name}'")
     if _TEST_BROWSER is None:
         # Chrome
         if BrowserConfig.name is None or BrowserConfig.name in ["chrome", "google chrome", "gc"]:
@@ -52,11 +68,12 @@ def start_browser():
             if BrowserConfig.headless: 
                 # chrome_options.add_argument('--headless')
                 chrome_options.add_argument('--headless=new')
-                chrome_options.add_argument('--window-size=1920,1080')
+                # chrome_options.add_argument('--window-size=1920,1080')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            # chrome_service = ChromeService()
-            # _TEST_BROWSER = webdriver.Chrome(service=chrome_service, options=chrome_options)
-            _TEST_BROWSER = webdriver.Chrome(options=chrome_options)
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=chrome_options)
+            else:
+                _TEST_BROWSER = webdriver.Chrome(options=chrome_options)
 
         # Firefox
         elif BrowserConfig.name in ['firefox', 'ff']:
@@ -67,9 +84,10 @@ def start_browser():
             if BrowserConfig.headless: 
                 firefox_options.add_argument('--headless')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            # firefox_service = FirefoxService()
-            # _TEST_BROWSER = webdriver.Firefox(service=firefox_service, options=firefox_options)
-            _TEST_BROWSER = webdriver.Firefox(options=firefox_options)
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=firefox_options)
+            else:
+                _TEST_BROWSER = webdriver.Firefox(options=firefox_options)
 
         # Edge
         elif BrowserConfig.name in ['edge', 'ed']:
@@ -96,19 +114,20 @@ def start_browser():
             if BrowserConfig.headless: 
                 # edge_options.add_argument('--headless')
                 edge_options.add_argument('--headless=new')
-                edge_options.add_argument('--window-size=1920,1080')
+                # edge_options.add_argument('--window-size=1920,1080')
             log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
-            # edge_service = EdgeService()
-            # _TEST_BROWSER = webdriver.Edge(service=edge_service, options=edge_options)
-            _TEST_BROWSER = webdriver.Edge(options=edge_options)
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=edge_options)
+            else:
+                _TEST_BROWSER = webdriver.Edge(options=edge_options)
         else:
             if _TEMP_DATA_DIR and os.path.exists(_TEMP_DATA_DIR):
                 shutil.rmtree(_TEMP_DATA_DIR)
             raise NameError("Not found '{}' browser".format(BrowserConfig.name))
 
     atexit.register(kill_browser)
-    _TEST_BROWSER.implicitly_wait(WaitConfig.timeout_implicitly)
     log.warn(f"Start driver: '{_TEST_BROWSER}'")
+    _TEST_BROWSER.implicitly_wait(WaitConfig.timeout_implicitly)
     return _TEST_BROWSER
 
 def kill_browser():

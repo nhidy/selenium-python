@@ -137,7 +137,7 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             password=password_approve
         )
 
-# FIXED DEPOSIT (FD) 1 MONTH - NO ROLLOVER (T1)
+# FIXED DEPOSIT (FD) 1 MONTH - PRINCIPAL ROLLOVER ONLY (T1)
     def test_001_fixed_1m_dpt_opn_open_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         global deposit_account_fd_mask
@@ -198,36 +198,6 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    # def test_003_fixed_1m_dpt_cdp_cash_deposit_success(self):
-    #     print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-    #     dpt_cdp_result = self.dpt_cdp(
-    #         account_number=deposit_account_fd_mask,
-    #         amount_deposit=amount_deposit_mask,
-    #         approve_later='Y'
-    #     )
-    #     transaction_references=dpt_cdp_result[0]
-    #     account_number_actual_mask=dpt_cdp_result[1]
-    #     transaction_numbers.append(transaction_references)
-    #     self.assertEqual(account_number_actual_mask, deposit_account_fd_mask)
-    #     self.transaction_approve(
-    #         transaction_references=transaction_references, 
-    #         username=username_approve,
-    #         password=password_approve
-    #     )
-    #     self.deposit_account_view(
-    #         account_number=deposit_account_fd_mask,
-    #         linkage_account_number=other_deposit_account_mask,
-    #         account_status=status_normal,
-    #         current_balance=current_balance_1st,
-    #         rollover_option=rollover_option,
-    #         reason_of_account_opening=reason_of_account_opening,
-    #         expected_account_gl_name=expected_account_gl_name,
-    #         expected_account_gl_number=expected_account_gl_number,
-    #         expected_ifc_codes=expected_ifc_codes,
-    #         expected_ifc_gl_names=expected_ifc_gl_names,
-    #         expected_ifc_gl_numbers=expected_ifc_gl_numbers
-    #     )
-
     def test_003_fixed_1m_dpt_mdp_miscellaneous_deposit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_mdp_result = self.dpt_mdp(
@@ -257,44 +227,6 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_names=expected_ifc_gl_names,
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
-
-    # def test_003_fixed_1m_dpt_trf_get_money_from_other_deposit_account_success(self):
-    #     print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-    #     dpt_trf_result = self.dpt_trf(
-    #         debit_account=other_deposit_account_mask,
-    #         amount=amount_deposit_mask,
-    #         credit_account=deposit_account_fd_mask,
-    #         approve_later='Y'
-    #     )
-    #     transaction_references=dpt_trf_result[0]
-    #     transaction_numbers.append(transaction_references)
-    #     self.assertEqual(other_deposit_account_mask, dpt_trf_result[1])
-    #     self.assertEqual(deposit_account_fd_mask, dpt_trf_result[2])
-    #     self.transaction_approve(
-    #         transaction_references=transaction_references, 
-    #         username=username_approve,
-    #         password=password_approve
-    #     )
-    #     # verify credit deposit account
-    #     self.deposit_account_view(
-    #         account_number=deposit_account_fd_mask,
-    #         linkage_account_number=other_deposit_account_mask,
-    #         account_status=status_normal,
-    #         current_balance=current_balance_1st,
-    #         rollover_option=rollover_option,
-    #         reason_of_account_opening=reason_of_account_opening,
-    #         expected_account_gl_name=expected_account_gl_name,
-    #         expected_account_gl_number=expected_account_gl_number,
-    #         expected_ifc_codes=expected_ifc_codes,
-    #         expected_ifc_gl_names=expected_ifc_gl_names,
-    #         expected_ifc_gl_numbers=expected_ifc_gl_numbers
-    #     )
-    #     # verify debit deposit account
-    #     self.deposit_account_view(
-    #         account_number=other_deposit_account_mask,
-    #         account_status=status_normal,
-    #         current_balance=current_balance_other_1st_after_trf
-    #     )
 
 # PASSBOOK FOR FIXED DEPOSIT
     def test_004_passbook_for_fixed_1m_dpt_srg_stock_registration_success(self):
@@ -355,7 +287,10 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_sbi_result = self.dpt_fbi(
             account_number=deposit_account_fd_mask,
-            serial_no=from_serial_sb
+            serial_no=from_serial_sb,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
         )
         transaction_numbers.append(dpt_sbi_result[0])
         self.assertEqual(from_serial_sb, dpt_sbi_result[1])
@@ -644,8 +579,29 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
+    def test_016_fixed_1m_dpt_dls_close_deposit_account_by_deposit_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_dls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
+    def test_017_fixed_1m_dpt_mls_close_deposit_account_by_gl_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_mls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
+    def test_018_fixed_1m_dpt_cls_close_deposit_account_by_cash_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_cls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
 # DELETE ACCOUNT LINKAGE
-    def test_016_fixed_1m_delete_account_linkage_success(self):
+    def test_019_fixed_1m_delete_account_linkage_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         # verify deposit account before
         self.deposit_account_view(
@@ -684,7 +640,7 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    def test_017_fixed_1m_dpt_dls_close_deposit_account_by_deposit_success(self):
+    def test_020_fixed_1m_dpt_dls_close_deposit_account_by_deposit_success(self):
         # view account before close
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
@@ -786,7 +742,7 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    def test_018_fixed_1m_dpt_mls_close_deposit_account_by_gl_success(self):
+    def test_021_fixed_1m_dpt_mls_close_deposit_account_by_gl_success(self):
         # view account before close
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
@@ -879,7 +835,7 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    def test_019_fixed_1m_dpt_cls_close_deposit_account_by_cash_success(self):
+    def test_022_fixed_1m_dpt_cls_close_deposit_account_by_cash_success(self):
         # view account before close
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
@@ -978,7 +934,7 @@ class Deposit1MPrincipalRolloverOnlyTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    def test_020_fixed_1m_dpt_his_transaction_history_inquiry_success(self):
+    def test_023_fixed_1m_dpt_his_transaction_history_inquiry_success(self):
         # close deposit again
         dpt_mls_result = self.dpt_mls(
             account_number=deposit_account_fd_mask,

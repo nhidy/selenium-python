@@ -16,22 +16,34 @@ USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
 PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
 USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
 PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
+USERNAME_LOGIN_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_LOGIN_OTHER_BRANCH", "")
+PASSWORD_LOGIN_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_LOGIN_OTHER_BRANCH", "")
+USERNAME_APPROVE_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_APPROVE_OTHER_BRANCH", "")
+PASSWORD_APPROVE_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_APPROVE_OTHER_BRANCH", "")
+USERNAME_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_REVERSE_OTHER_BRANCH", "")
+PASSWORD_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_REVERSE_OTHER_BRANCH", "")
 
+customer_code_personal = CUSTOMER_CODE
 class CheckEnvTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
 
     def data_begin(self):
         # get username_reverse and password_reverse
-        global username_approve, password_approve, username_reverse, password_reverse, username, password
+        global username_approve, password_approve, username_reverse, password_reverse, username_login, password_login, username_approve_other_branch, password_approve_other_branch, username_reverse_other_branch, password_reverse_other_branch, username_other_branch, password_other_branch
         username_approve = USERNAME_APPROVE
         password_approve = PASSWORD_APPROVE
         username_reverse = USERNAME_REVERSE
         password_reverse = PASSWORD_REVERSE
-        # get username and password
-        username = USERNAME_LOGIN
-        password = PASSWORD_LOGIN
-        self.login(username, password, one_app=ONE_APP)
+        username_login = USERNAME_LOGIN
+        password_login = PASSWORD_LOGIN
+        username_approve_other_branch = USERNAME_APPROVE_OTHER_BRANCH
+        password_approve_other_branch = PASSWORD_APPROVE_OTHER_BRANCH
+        username_reverse_other_branch = USERNAME_REVERSE_OTHER_BRANCH
+        password_reverse_other_branch = PASSWORD_REVERSE_OTHER_BRANCH
+        username_other_branch = USERNAME_LOGIN_OTHER_BRANCH
+        password_other_branch = PASSWORD_LOGIN_OTHER_BRANCH
+        self.login(username_login, password_login, one_app=ONE_APP)
         global working_date, branch_code
         working_date = self.get_working_date()
         branch_code = self.get_logged_branch_code()
@@ -51,6 +63,10 @@ class CheckEnvTest(FormAction):
 
     def test_000_check_env(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        if self.check_customer_profile_not_exist(customer_code_personal):
+            self.stop()
+            self.fail()
+
 
 if __name__ == '__main__': 
     webui_test.main()

@@ -30,7 +30,6 @@ booking_value_test = '5,000,000.46'
 salvage_value_of_the_asset_test = '4,000,000.52'
 branch_name_test = '003 - Bayint Naung Branch'
 department_name_test = '003 - BYN'
-deposit_account_number = '11-003-097469-6'
 selling_amount_test = '5,000,000.46'
 adjust_accumulate_amount_test = '1,000.45'
 new_branch_test = '005'
@@ -67,12 +66,38 @@ class FixedAssetTest(FormAction):
         self.data_begin()
 
 # Check the data used for testing
-    def test_000_check_test_data_must_exist(self):
+    def test_000_01_check_test_data_must_exist(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.add_gl_level_9_use_for_testing(
             branch_code=branch_code,
             currency_code='MMK',
             account_number=gl_account_number
+        )
+
+# Create other deposit account use for testing
+    def test_000_02_create_deposit_account_use_for_testing(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_number
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code='CAMMK0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        deposit_account_number=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=deposit_account_number,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.dpt_cdp(
+            account_number=deposit_account_number,
+            amount_deposit='50,000,000.46',
+            # debit_accounting=gl_account_number,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
         )
 
     def test_001_fac_opn_open_new_fixed_asset_account_success(self):

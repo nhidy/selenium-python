@@ -19,17 +19,10 @@ _TEST_BROWSER=None
 test_suite_stopped=False
 
 def setUpModule():
-    # global _TEST_BROWSER
-    # if _TEST_BROWSER is None:
-    #     _TEST_BROWSER = start_browser()
     log.info("--- Setting up Module ---")
     pass
 
 def tearDownModule():
-    # global _TEST_BROWSER
-    # if _TEST_BROWSER is not None:
-    #     kill_browser()
-    #     _TEST_BROWSER = None
     log.info("--- Tearing down Module ---")
     pass
 
@@ -45,23 +38,6 @@ class TestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         global _TEST_BROWSER
-        # if BrowserConfig.run_file:
-        #     log.warn('Run file')
-        #     if _TEST_BROWSER is None: 
-        #         cls.driver = start_browser()
-        #         _TEST_BROWSER = cls.driver
-        #         cls.started_browser = True
-        #     else: 
-        #         cls.driver = _TEST_BROWSER
-        #         cls.started_browser = False
-        #     cls().go_to(cls().get_url())
-        #     cls().wait_page_login()
-        #     cls().start_class()
-        # else:
-        #     log.warn('Run somthing else')
-        #     cls.driver = _TEST_BROWSER 
-        #     cls.started_browser = False
-        #     cls().start_class()
         log.warn('Run any type')
         if _TEST_BROWSER is None: 
             cls.driver = start_browser()
@@ -74,18 +50,7 @@ class TestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        global _TEST_BROWSER
-        # if BrowserConfig.run_file:
-        #     cls().end_class()
-        #     if cls.started_browser:
-        #         if _TEST_BROWSER is not None:
-        #             kill_browser()
-        # else:
-        #     cls().end_class()
-        #     kill_browser()
         cls().end_class()
-        # if _TEST_BROWSER is not None:
-        #     kill_browser()
 
     def start(self):
         self.driver = get_driver()
@@ -101,29 +66,25 @@ class TestCase(unittest.TestCase):
         global test_suite_stopped
         test_suite_stopped = True
         log.error("The data used for testing is incorrect.")
-        # log.debug("Go to 'stop' method")
 
     def setUp(self):
         self.driver = get_driver()
-        # log.debug("1. Go to 'setUp' method")
         if test_suite_stopped:
-            # log.debug(f"Go to 'skipTest'")
             self.skipTest('Skipping because the data used for testing is incorrect.')
         self.start()
 
     def tearDown(self):
         self.driver = get_driver()
-        # log.debug("3. Go to 'tearDown' method")
         self.end()
 
     def get_url(self):
-        # log.debug("Go to 'get_url' method")
         return
 
     def go_to(self, url):
         log.info("Go to 'go_to'")
         BrowserConfig.url_env = url
         if self.driver:
+            self.driver.maximize_window()
             self.driver.get(url)
             log.debug(f"Go to 'go_to' method, url: {url}")
 
@@ -454,6 +415,24 @@ class TestCase(unittest.TestCase):
             else:
                 log.warn(f"Login page did NOT load within {max_wait_time} seconds.")
 
+    def wait_page_app(self, max_wait_time=WaitConfig.timeout_explicit):
+        if self.driver.title == 'Loading...':
+            time_number = 1
+            while time_number <= max_wait_time:
+                # self.wait()
+                self.wait_process_bar_loading()
+                # Refresh the page every 5 seconds
+                if time_number % 5 == 0:
+                    self.driver.refresh()
+                # Check if the title has changed to 'Login'
+                if self.driver.title != 'Loading...':
+                    search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
+                    self.wait_for_element_unobscured_by_xpath(search_xpath)
+                    break
+                time_number += 1
+            else:
+                log.warn(f"App page did NOT load within {max_wait_time} seconds.")
+
     def key_escape(self):
         actions = ActionChains(self.driver)
         actions.send_keys(Keys.ESCAPE).perform()
@@ -519,19 +498,19 @@ class TestCase(unittest.TestCase):
                     element.send_keys(Keys.TAB)
                 if need_enter == 'Y':
                     element.send_keys(Keys.ENTER)
-                if info:
-                    log.info(info)
+                # if info:
+                #     log.info(info)
             elif action == 'click':
                 element.click()
-                if info:
-                    log.info(info)
+                # if info:
+                #     log.info(info)
             elif action == 'get_text':
-                if info:
-                    log.info(info)
+                # if info:
+                #     log.info(info)
                 return element.text
             elif action == 'get_value':
-                if info:
-                    log.info(info)
+                # if info:
+                #     log.info(info)
                 return element.get_attribute('value')
             if action == 'send_values':
                 # clear data
@@ -549,8 +528,8 @@ class TestCase(unittest.TestCase):
                     log.debug("Clear data again in get_attribute('value').")
                     actions = ActionChains(self.driver)
                     actions.click(element).send_keys(value).perform()
-                if info:
-                    log.info(info)
+                # if info:
+                #     log.info(info)
         else:
             if error:
                 log.error(error)
@@ -560,8 +539,8 @@ class TestCase(unittest.TestCase):
 
     def choose_item(self, title, value, fieldset_xpath):
         title_xpath = f"{fieldset_xpath}preceding-sibling::input"
-        # value_xpath = f"{fieldset_xpath}following-sibling::div//label[@title='{value}']"
-        value_xpath = f"{fieldset_xpath}following-sibling::div//label[contains(@title,'{value}')]"
+        value_xpath = f"{fieldset_xpath}following-sibling::div//label[@title='{value}']"
+        # value_xpath = f"{fieldset_xpath}following-sibling::div//label[contains(@title,'{value}')]"
         search_xpath = f"{fieldset_xpath}following-sibling::div//input[@class='malibu-desktop-uSelectItem-menu-search-input']"
         scroll_xpath = f"{fieldset_xpath}following-sibling::div/div[@class='virtual-sublist ']/div"
         self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}'.")
@@ -643,6 +622,8 @@ class TestCase(unittest.TestCase):
 
     def click_icon(self, icon):
         icon_xpath = f"//i[@class='material-icons-outlined' and text()='{icon}']"
+        if BrowserConfig.is_old == 'Y':
+            icon_xpath = f"//div[@class='malibu-desktop-uInput-icon']/i[@class='material-icons-outlined' and text()='{icon}']"
         self.common(xpath=icon_xpath, method='visibility', action='click', info="Clicked icon.", error=f"Click icon '{icon}' failed.")
 
     def scroll_down(self, pixels=1000):
@@ -685,6 +666,7 @@ class TestCase(unittest.TestCase):
             log.warn("Clear search icon does not exist.")
 
     def open_fo(self, transaction_code, transaction_name):
+        log.info(f"Open FO: {transaction_code}")
         transaction_name = str(transaction_name).strip()
         self.click_clear_search()
         search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
@@ -746,6 +728,8 @@ class TestCase(unittest.TestCase):
 # ================= handle lookup =================
     def lookup_data(self, title, column_name, value, use_search="Y"):
         icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        if BrowserConfig.is_old == 'Y':
+            icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::div[@class='malibu-desktop-uInput-icon']/i"
         self.common(xpath=icon_xpath, method='unobscured', action='click')
         self.wait_loading()
         table_xpath ="//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-uModal-content-content']//table[@class='malibu-desktop-uTable-info']"
@@ -818,21 +802,27 @@ class TestCase(unittest.TestCase):
         app_name_xpath = f"//div[@class='malibu-desktop-uChooseApp-item-title' and text()='{app_name}']"
         self.common(xpath=app_name_xpath, method='unobscured', action='click', info=f"Clicked on {app_name} button.", error=f"Click action in choose app {app_name_xpath} failed.")
 
-    def login(self, username, password, one_app='N', app_name="Shwebank"):
+    # "Demo Bank", "Shwebank"
+    def login(self, username, password, one_app='N', app_name=None):
+        if app_name is None:
+            app_name = BrowserConfig.app_name
+        log.debug(f"app_name is: '{app_name}'")
         try:
             email_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your account name']")
             password_input = self.wait_for_element_visibility_by_css("input[placeholder='Enter your System password']")
             email_input.send_keys(username)
             password_input.send_keys(password)
             password_input.send_keys(Keys.ENTER)
+            log.info("Login.......")
             available_app_xpath = "//div[@class='malibu-desktop-uChooseApp-title']/div[text()='Available Applications']"
             self.wait_for_element_visibility_by_xpath(available_app_xpath)
             if one_app=='N':
                 self.open_app(app_name)
             self.wait_app_loading()
             self.wait_process_bar_loading()
-            search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
-            self.wait_for_element_unobscured_by_xpath(search_xpath)
+            # search_xpath = "//input[contains(@placeholder,'Search here or Use')]"
+            # self.wait_for_element_unobscured_by_xpath(search_xpath)
+            self.wait_page_app()
             self.is_logged = True
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Login screen failed. Exception: {e}")
@@ -864,6 +854,7 @@ class TestCase(unittest.TestCase):
                 self.wait_loading()
                 self.click_button('Accept')
             else:
+                print('This transaction does not require approval.')
                 log.warn('This transaction does not require approval.')
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Approve in popup failed, in transaction screen. Exception: {e}")
@@ -899,6 +890,8 @@ class TestCase(unittest.TestCase):
 
     def close_popup(self):
         xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header']/i"
+        if BrowserConfig.is_old == 'Y':
+            xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header']/div[@class='malibu-desktop-form-uModalHeader-header-close']/i"
         # self.common(xpath=xpath, method='visibility', action='click', info=f"Clicked close popup.", error=f"Click close popup failed.")
         try:
             close_popup_element = self.driver.find_element(By.XPATH, xpath)
@@ -1347,7 +1340,13 @@ class TestCase(unittest.TestCase):
         """Select field in advanced search F8 screen"""
         # self.key_escape()
         fieldset_xpath = f"//div[@id='content']/div/div/div/div/div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView') and contains(@class,'malibu-component-padding') and contains(@class,'malibu-view-border')]/div/div/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' in advanced search F8 screen.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[contains(@title,'{value}')]"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in advanced search F8 screen.")
 
     def advanced_search_f8_select_group(self, title, value):
         """Select field in advanced search F8 screen and group"""
@@ -1626,7 +1625,13 @@ class TestCase(unittest.TestCase):
         """Select field in advanced search screen"""
         # self.key_escape()
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' in advanced search screen.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[contains(@title,'{value}')]"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in advanced search screen.", error=f"Select value '{value}' at '{title}' in advanced search screen failed.")
 
     def advanced_search_select_group(self, title, value):
         """Select field in advanced search screen and group"""
@@ -2470,7 +2475,13 @@ class TestCase(unittest.TestCase):
         """Select field in any screen"""
         # self.key_escape()
         fieldset_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in any screen.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in any screen.", error=f"Select value '{value}' at title '{title}' in any screen failed.")
 
     def select_in_tab_child(self, title, value):
         """Select field in screen have tab under tab"""
@@ -2491,19 +2502,37 @@ class TestCase(unittest.TestCase):
         """Select field in screen have tab"""
         # self.key_escape()
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in screen have tab.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in screen have tab.", error=f"Select value '{value}' at title '{title}' in screen have tab failed.")
 
     def select_in_tab_group(self, title, value):
         """Select field in screen have tab and group"""
         # self.key_escape()
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in screen have tab.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in screen have tab.", error=f"Select value '{value}' at title '{title}' in screen have tab failed.")
 
     def select_non_tab(self, title, value):
         """Select field in screen non tab"""
         # self.key_escape()
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' in screen NON tab.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in screen NON tab.", error=f"Select value '{value}' at '{title}' in screen NON tab failed.")
 
     def select_non_tab_group(self, title, value):
         """Select field in screen non tab and group"""
@@ -2516,19 +2545,31 @@ class TestCase(unittest.TestCase):
         # self.key_escape()
         # fieldset_xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
         fieldset_xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' below border in screen.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' below border in screen.", error=f"Select value '{value}' at '{title}' below border in screen failed.")
 
     def select_below_collap(self, collap_name, title, value):
         fieldset_xpath = f"//legend[@class='malibu-desktop-uMultiValue-border-title' and text()='{collap_name}']/parent::fieldset/following-sibling::div//legend[@title='{title}']/parent::fieldset/"
-        self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'N':
+            self.choose_item(title=title, value=value, fieldset_xpath=fieldset_xpath)
+        if BrowserConfig.is_old == 'Y':
+            title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+            self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked '{title}' below collap in screen.")
+            value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' below collap in screen.", error=f"Select value '{value}' at '{title}' below collap in screen failed.")
 
     def choose_file_by_xpath(self, file_path, xpath):
         """
         Upload the file based on bsolute file path
         Args:
             file_path: Provide the file path (Use absolute path). 
-                - Windows path: "C:\path\on\your\image.jpg"
-                - Mac/Linux path: "/Users/yourname/path/to/image.jpg"
+                - Windows path: "C:\\path\\on\\your\\image.jpg"
+                - Mac/Linux path: "//Users//yourname//path//to//image.jpg"
             xpath: Locate the file input field.
         """
         try:
@@ -2855,40 +2896,3 @@ class TestCase(unittest.TestCase):
         """Click of 'input' in screen non tab"""
         xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked at '{title}' in screen NON tab.", error=f"Click at '{title}' in screen NON tab failed.")
-
-# class FirstTestCase(TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         global _TEST_BROWSER
-#         if _TEST_BROWSER is None:
-#             cls.driver = start_browser()
-#             _TEST_BROWSER = cls.driver
-#             cls.started_browser = True
-#         else: 
-#             cls.driver = _TEST_BROWSER 
-#             cls.started_browser = False
-#         cls().go_to(cls().get_url())
-#         cls().wait_page_login()
-#         cls().start_class()
-    
-#     @classmethod
-#     def tearDownClass(cls):
-#         global _TEST_BROWSER
-#         cls().end_class()
-#         # pass
-
-# class LastTestCase(TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         global _TEST_BROWSER
-#         # cls.driver = _TEST_BROWSER
-#         # cls.started_browser = False
-#         # cls().start_class()
-#         cls.driver = get_driver()
-    
-#     @classmethod
-#     def tearDownClass(cls):
-#         global _TEST_BROWSER
-#         cls().end_class()
-#         kill_browser()
-#         # pass

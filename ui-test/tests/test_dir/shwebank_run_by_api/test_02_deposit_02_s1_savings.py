@@ -169,7 +169,7 @@ class DepositS1SavingsTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_cdp_result = self.dpt_cdp(
             account_number=deposit_account_saving,
-            amount_deposit=amount_deposit_mask.replace(',', ''),
+            amount_deposit=amount_deposit_mask,
             approve_later='Y'
         )
         transaction_references=dpt_cdp_result[0]
@@ -198,7 +198,7 @@ class DepositS1SavingsTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_mdp_result = self.dpt_mdp(
             account_number=deposit_account_saving_mask,
-            amount_deposit=amount_deposit_mask.replace(',', ''),
+            amount_deposit=amount_deposit_mask,
             debit_accounting=gl_account_number,
             approve_later='Y'
         )
@@ -341,7 +341,10 @@ class DepositS1SavingsTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_sbi_result = self.dpt_sbi(
             account_number=deposit_account_saving_mask,
-            serial_no=from_serial_sb
+            serial_no=from_serial_sb,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
         )
         transaction_numbers.append(dpt_sbi_result[0])
         self.assertEqual(from_serial_sb, dpt_sbi_result[1])
@@ -364,7 +367,7 @@ class DepositS1SavingsTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_trf_result = self.dpt_trf(
             debit_account=deposit_account_saving_mask,
-            amount=withdraw_amount.replace(',', ''),
+            amount=withdraw_amount,
             credit_account=other_deposit_account_mask,
             passbook_number=from_serial_sb,
             approve_later='Y'
@@ -403,7 +406,7 @@ class DepositS1SavingsTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_cwr_result = self.dpt_cwr(
             account_number=deposit_account_saving_mask,
-            withdraw_amount=withdraw_amount.replace(',', ''),
+            withdraw_amount=withdraw_amount,
             passbook_number=from_serial_sb,
             approve_later='Y'
         )

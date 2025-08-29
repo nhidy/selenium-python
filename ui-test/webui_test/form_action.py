@@ -765,6 +765,26 @@ class FormAction(TestCase):
         print(f'F8: Account number: {account_number_out}')
         return transaction_references, account_number_out
 
+    def dpt_opn_error(self, customer_type=None, customer_code=None, catalogue_code=None, error_message=None):
+        # open form
+        self.close_all_form()
+        self.open_fo('DPT_OPN', '1100: Open new deposit account')
+        self.wait_for_button_available('Accept')
+        self.assert_form_title('1100: Open new deposit account')
+        # enter value
+        self.key_escape()
+        if customer_type:
+            self.fo_select('Customer type', customer_type)
+        if customer_code:
+            self.fo_write('Customer code', customer_code)
+        self.key_escape()
+        if catalogue_code:
+            self.fo_write('Catalogue code', catalogue_code)
+        # verify error
+        self.assert_notification(error_message)
+        self.assert_button_disable('Accept')
+        print('Transaction verify failed!')
+
     # DPT_APR: Approve deposit account
     def dpt_apr(self, account_number=None, description=None, account_holder_name=None, account_holding_branch_name=None, catalogue_code=None, catalogue_name=None, customer_segmentation=None, deposit_type=None, deposit_sub_type=None, linkage_account_number=None, created_by=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
         # open form
@@ -1069,18 +1089,18 @@ class FormAction(TestCase):
         self.assert_form_title('1112: Miscellaneous deposit')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if amount_deposit:
             self.fo_write_number_group('Amount Deposit', amount_deposit)
             self.wait_loading()
         if debit_accounting:
-            self.fo_write_group('Debit accounting', str(debit_accounting).replace('-', ''))
+            self.fo_write_group('Debit accounting', self.no_mask(debit_accounting))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
         if depositor_code:
-            self.fo_write('Depositor code', str(depositor_code).replace('-', ''))
+            self.fo_write('Depositor code', self.no_mask(depositor_code))
         if depositor_address:
             self.fo_write_text('Depositor address', depositor_address)
         if mobile_phone:
@@ -1176,13 +1196,13 @@ class FormAction(TestCase):
         self.assert_form_title('1130: Transfer from deposit account to deposit account')
         # enter value
         if debit_account:
-            self.fo_write_group('Debit account', str(debit_account).replace('-', ''))
+            self.fo_write_group('Debit account', self.no_mask(debit_account))
             self.wait_loading()
         if amount:
             self.fo_write_number('Amount', amount)
             self.wait_loading()
         if credit_account:
-            self.fo_write_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if debit_account_name:
             self.fo_write_text('Debit account name', debit_account_name)
@@ -1302,7 +1322,7 @@ class FormAction(TestCase):
         self.assert_form_title('1120: Cash withdrawal')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if withdraw_amount:
             self.fo_write_number('Withdraw amount', withdraw_amount)
@@ -1415,13 +1435,13 @@ class FormAction(TestCase):
         self.assert_form_title('1122: Miscellaneous withdrawal')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if withdraw_amount:
             self.fo_write_number('Withdraw amount', withdraw_amount)
             self.wait_loading()
         if credit_accounting:
-            self.fo_write_group('Credit accounting', str(credit_accounting).replace('-', ''))
+            self.fo_write_group('Credit accounting', self.no_mask(credit_accounting))
             self.wait_loading()
         if withdrawer_name:
             self.fo_write_text('Withdrawer name', withdrawer_name)
@@ -1541,7 +1561,7 @@ class FormAction(TestCase):
         self.assert_form_title('11841: Change account status')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         self.key_escape()
         if new_status:
@@ -1624,7 +1644,7 @@ class FormAction(TestCase):
         self.assert_form_title('11840: Block account')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
@@ -1730,7 +1750,7 @@ class FormAction(TestCase):
         self.assert_form_title('11843: Release block account')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
@@ -1839,7 +1859,7 @@ class FormAction(TestCase):
         self.assert_form_title('DPT-1169: Adjust Deposit Interest')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if ifc_code:
             self.lookup_data('IFC code', 'Code', ifc_code)
@@ -1962,7 +1982,7 @@ class FormAction(TestCase):
         self.assert_form_title('1140: Interest payment by cash')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if gross_paid_interest_amount_update:
             self.fo_write_number('Gross paid interest amount', gross_paid_interest_amount_update)
@@ -2090,12 +2110,12 @@ class FormAction(TestCase):
         self.assert_form_title('1141: Interest payment to deposit account')
         # enter value
         if deposit_account:
-            self.fo_write_group('Deposit account', str(deposit_account).replace('-', ''))
+            self.fo_write_group('Deposit account', self.no_mask(deposit_account))
             self.wait_loading()
         if cross_interest_amount_update:
             self.fo_write_number('Cross interest amount', cross_interest_amount_update)
         if paid_to_this_deposit_account:
-            self.fo_write_group('Paid to this deposit account', str(paid_to_this_deposit_account).replace('-', ''))
+            self.fo_write_group('Paid to this deposit account', self.no_mask(paid_to_this_deposit_account))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
@@ -2227,13 +2247,13 @@ class FormAction(TestCase):
         self.assert_form_title('1142: Miscellaneous interest payment')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if gross_interest_paid_out_update:
             self.fo_write_number('Gross interest paid out', gross_interest_paid_out_update)
             self.wait_loading()
         if gl_account:
-            self.fo_write_group('GL account', str(gl_account).replace('-', ''))
+            self.fo_write_group('GL account', self.no_mask(gl_account))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
@@ -2369,10 +2389,10 @@ class FormAction(TestCase):
         self.assert_form_title('DPT_IPR: Payment Interest For Prepaid Fixed Deposit')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if credit_account:
-            self.fo_write_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if prepaid_interest_update:
             self.fo_write_number('Prepaid interest', prepaid_interest_update)
@@ -2385,7 +2405,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_write_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_write_text_group('Account number for fee', self.no_mask(account_number_for_fee))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -2469,7 +2489,7 @@ class FormAction(TestCase):
         self.assert_form_title('1180:Hold balance')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if hold_amount:
             self.fo_write_number('Hold amount', hold_amount)
@@ -2580,7 +2600,7 @@ class FormAction(TestCase):
         self.assert_form_title('11851:Release hold balance')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         self.key_escape()
         if reference_code:
@@ -2701,7 +2721,7 @@ class FormAction(TestCase):
         self.assert_form_title('1185: Fee collection by transfer')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if amount_for_fee_calculation:
             self.fo_write_number('Amount for fee calculation', amount_for_fee_calculation)
@@ -2786,7 +2806,7 @@ class FormAction(TestCase):
         self.assert_form_title('1184: Fee collection by cash for DD')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if amount_for_fee_calculation:
             self.fo_write_number('Amount for fee calculation', amount_for_fee_calculation)
@@ -2871,7 +2891,7 @@ class FormAction(TestCase):
         self.assert_form_title('DPT - Change Deposit Account Name And Relation Customers')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if new_account_name:
             self.fo_write_text('New account name', new_account_name)
@@ -2960,7 +2980,7 @@ class FormAction(TestCase):
         self.assert_form_title('1193: Close deposit account')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if gross_paid_interest_amount_update:
             self.fo_write_number('Gross paid interest amount', gross_paid_interest_amount_update)
@@ -3088,6 +3108,21 @@ class FormAction(TestCase):
         print(f'F8: Account number: {account_number_out}')
         return transaction_references, account_number_out
 
+    def dpt_cls_error(self, account_number=None, error_message=None):
+        # open form
+        self.close_all_form()
+        self.open_fo('DPT_CLS', '1193')
+        self.wait_for_button_available('Accept')
+        self.assert_form_title('1193: Close deposit account')
+        # enter value
+        if account_number:
+            self.fo_write_group('Account number', self.no_mask(account_number))
+            self.wait_loading()
+        # verify error
+        self.assert_notification(error_message)
+        self.assert_button_disable('Accept')
+        print('Transaction verify failed!')
+
     # DPT_DLS: 1190: Close deposit account by deposit
     def dpt_dls(self, account_number=None, gross_paid_interest_amount=None, gross_paid_interest_amount_update=None, another_deposit_account=None, depositor_name=None, depositor_id=None, depositor_address=None, mobile_phone=None, nrc=None, description=None, account_holding_branch_name=None, passbook_number=None, balance=None, interest_payable_receivable=None, interest_due=None, interest_re_calculate=None, penalty_fee=None, balance_received=None, balance_received_update=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
         # open form
@@ -3097,13 +3132,13 @@ class FormAction(TestCase):
         self.assert_form_title('1190: Close deposit account by deposit')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if gross_paid_interest_amount_update:
             self.fo_write_number('Gross interest paid out', gross_paid_interest_amount_update)
             self.wait_loading()
         if another_deposit_account:
-            self.fo_write_group('Another deposit account', str(another_deposit_account).replace('-', ''))
+            self.fo_write_group('Another deposit account', self.no_mask(another_deposit_account))
             self.wait_loading()
         if depositor_name:
             self.fo_write_text('Depositor name', depositor_name)
@@ -3234,6 +3269,21 @@ class FormAction(TestCase):
         print(f'F8: Another deposit account: {another_deposit_account_out}')
         return transaction_references, account_number_out, another_deposit_account_out
 
+    def dpt_dls_error(self, account_number=None, error_message=None):
+        # open form
+        self.close_all_form()
+        self.open_fo('DPT_DLS', '1190')
+        self.wait_for_button_available('Accept')
+        self.assert_form_title('1190: Close deposit account by deposit')
+        # enter value
+        if account_number:
+            self.fo_write_group('Account number', self.no_mask(account_number))
+            self.wait_loading()
+        # verify error
+        self.assert_notification(error_message)
+        self.assert_button_disable('Accept')
+        print('Transaction verify failed!')
+
     # DPT_MLS: 1191: Close deposit account by miscellaneous
     def dpt_mls(self, account_number=None, gross_paid_interest_amount=None, gross_paid_interest_amount_update=None, depositor_name=None, depositor_id=None, depositor_address=None, mobile_phone=None, nrc=None, description=None, accounting_number=None, account_holding_branch_name=None, passbook_number=None, balance=None, interest_payable_receivable=None, interest_due=None, interest_re_calculate=None, penalty_fee=None, balance_received=None, balance_received_update=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
         # open form
@@ -3243,7 +3293,7 @@ class FormAction(TestCase):
         self.assert_form_title('1191: Close deposit account by miscellaneous')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if gross_paid_interest_amount_update:
             self.fo_write_number('Interest amount', gross_paid_interest_amount_update)
@@ -3381,6 +3431,21 @@ class FormAction(TestCase):
         print(f'F8: Accounting number: {accounting_number_out}')
         return transaction_references, account_number_out, accounting_number_out
 
+    def dpt_mls_error(self, account_number=None, error_message=None):
+        # open form
+        self.close_all_form()
+        self.open_fo('DPT_MLS', '1191')
+        self.wait_for_button_available('Accept')
+        self.assert_form_title('1191: Close deposit account by miscellaneous')
+        # enter value
+        if account_number:
+            self.fo_write_group('Account number', self.no_mask(account_number))
+            self.wait_loading()
+        # verify error
+        self.assert_notification(error_message)
+        self.assert_button_disable('Accept')
+        print('Transaction verify failed!')
+
     # DPT_HIS: 1160: Transaction history inquiry
     def dpt_his(self, account_number, from_date=None, to_date=None, transaction_codes=None, expected_debits=None, expected_credits=None, expected_balances=None, expected_channels=None, expected_transaction_code=None, expected_transaction_codes=None, expected_debit=None, expected_credit=None, expected_balance=None, expected_channel=None, transaction_numbers=None, expected_transaction_number=None, expected_transaction_dates=None, expected_transaction_date=None, expected_created_bys=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
         # open form
@@ -3389,7 +3454,7 @@ class FormAction(TestCase):
         self.wait_for_button_available('Accept')
         self.assert_form_title('1160: Transaction history inquiry')
         # enter value
-        self.fo_write_group('Account number', str(account_number).replace('-', ''))
+        self.fo_write_group('Account number', self.no_mask(account_number))
         self.wait_loading()
         if from_date:
             self.fo_write_date('From date', from_date)
@@ -3504,10 +3569,10 @@ class FormAction(TestCase):
             self.fo_select('Stock type', stock_type)
             self.wait_loading()
         if from_serial:
-            self.fo_write('From serial', str(from_serial).replace('-', ''))
+            self.fo_write('From serial', self.no_mask(from_serial))
             self.wait_loading()
         if to_serial:
-            self.fo_write('To serial', str(to_serial).replace('-', ''))
+            self.fo_write('To serial', self.no_mask(to_serial))
             self.wait_loading()
         if number_of_leaves_update:
             self.fo_write_number('Number of leaves', number_of_leaves_update)
@@ -4309,13 +4374,13 @@ class FormAction(TestCase):
         self.assert_form_title('1111: Deposit by cheque')
         # enter value
         if cheque_no:
-            self.fo_write('Cheque no', str(cheque_no).replace('-', ''))
+            self.fo_write('Cheque no', self.no_mask(cheque_no))
             self.wait_loading()
         if debit_amount:
             self.fo_write_number('Debit amount', debit_amount)
             self.wait_loading()
         if credit_account:
-            self.fo_write_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if debit_account_name:
             self.fo_write_text('Debit account name', debit_account_name)
@@ -4435,7 +4500,7 @@ class FormAction(TestCase):
         self.assert_form_title('1121: Cash withdrawal by cheque')
         # enter value
         if cheque_no:
-            self.fo_write('Cheque no', str(cheque_no).replace('-', ''))
+            self.fo_write('Cheque no', self.no_mask(cheque_no))
             self.wait_loading()
         if cheque_amount:
             self.fo_write_number('Cheque amount', cheque_amount)
@@ -4552,13 +4617,13 @@ class FormAction(TestCase):
         self.assert_form_title('1125: Misellaneous debit by cheque')
         # enter value
         if cheque_no:
-            self.fo_write('Cheque no', str(cheque_no).replace('-', ''))
+            self.fo_write('Cheque no', self.no_mask(cheque_no))
             self.wait_loading()
         if cheque_amount:
             self.fo_write_number('Cheque amount', cheque_amount)
             self.wait_loading()
         if credit_accounting:
-            self.fo_write_group('Credit accounting', str(credit_accounting).replace('-', ''))
+            self.fo_write_group('Credit accounting', self.no_mask(credit_accounting))
             self.wait_loading()
         if accounting_amount_update:
             self.fo_write_number('Accounting amount', accounting_amount_update)
@@ -4696,17 +4761,17 @@ class FormAction(TestCase):
         self.assert_form_title('11837: Change status of stock')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         self.key_escape()
         if stock_type:
             self.fo_select('Stock type', stock_type)
             self.wait_loading()
         if from_serial:
-            self.fo_write('From serial', str(from_serial).replace('-', ''))
+            self.fo_write('From serial', self.no_mask(from_serial))
             self.wait_loading()
         if to_serial:
-            self.fo_write('To serial', str(to_serial).replace('-', ''))
+            self.fo_write('To serial', self.no_mask(to_serial))
             self.wait_loading()
         self.key_escape()
         if status:
@@ -4806,10 +4871,10 @@ class FormAction(TestCase):
         self.assert_form_title('1167: Cheque inquiry')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if serial_number:
-            self.fo_write('Serial number', str(serial_number).replace('-', ''))
+            self.fo_write('Serial number', self.no_mask(serial_number))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -4863,10 +4928,10 @@ class FormAction(TestCase):
         self.assert_form_title('DPT-1162: Cheque Leaves Status Inquiry')
         # enter value
         if from_serial:
-            self.fo_write('From serial', str(from_serial).replace('-', ''))
+            self.fo_write('From serial', self.no_mask(from_serial))
             self.wait_loading()
         if to_serial:
-            self.fo_write('To serial', str(to_serial).replace('-', ''))
+            self.fo_write('To serial', self.no_mask(to_serial))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -4918,10 +4983,10 @@ class FormAction(TestCase):
         self.assert_form_title('11802: Deposit savings book issue')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -4931,7 +4996,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_write_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_write_text_group('Account number for fee', self.no_mask(account_number_for_fee))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -4986,7 +5051,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_assert_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_assert_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_assert_text_group('Account number for fee', self.no_mask(account_number_for_fee))
         if account_holding_branch_name:
             self.fo_assert_text('Account holding branch name', account_holding_branch_name)
         if expected_posting:
@@ -5009,10 +5074,10 @@ class FormAction(TestCase):
         self.assert_form_title('11804: Fixed deposit book issue')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5022,7 +5087,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_write_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_write_text_group('Account number for fee', self.no_mask(account_number_for_fee))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -5077,7 +5142,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_assert_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_assert_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_assert_text_group('Account number for fee', self.no_mask(account_number_for_fee))
         if account_holding_branch_name:
             self.fo_assert_text('Account holding branch name', account_holding_branch_name)
         if expected_posting:
@@ -5100,10 +5165,10 @@ class FormAction(TestCase):
         self.assert_form_title('11803: Fixed deposit receipt issued')
         # enter value
         if account_number:
-            self.fo_write_group('Account number', str(account_number).replace('-', ''))
+            self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         if cerfiticate_serial:
-            self.fo_write('Cerfiticate serial', str(cerfiticate_serial).replace('-', ''))
+            self.fo_write('Cerfiticate serial', self.no_mask(cerfiticate_serial))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5113,7 +5178,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_write_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_write_text_group('Account number for fee', self.no_mask(account_number_for_fee))
             self.wait_loading()
         if ifc_codes:
             self.add_fees(ifc_codes, values, total_fee)
@@ -5170,7 +5235,7 @@ class FormAction(TestCase):
         if fee_collect_method:
             self.fo_assert_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
-            self.fo_assert_text_group('Account number for fee', str(account_number_for_fee).replace('-', ''))
+            self.fo_assert_text_group('Account number for fee', self.no_mask(account_number_for_fee))
         if account_holding_branch_name:
             self.fo_assert_text('Account holding branch name', account_holding_branch_name)
         if currency:
@@ -5195,7 +5260,7 @@ class FormAction(TestCase):
         self.assert_form_title('11816: Payment order issued')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         if expired_date:
             self.fo_write_date('Expired date', expired_date)
@@ -5224,7 +5289,7 @@ class FormAction(TestCase):
         if debit_method:
             self.fo_select('Debit method', debit_method)
         if debit_account:
-            self.fo_write_text_group('Debit account', str(debit_account).replace('-', ''))
+            self.fo_write_text_group('Debit account', self.no_mask(debit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5297,7 +5362,7 @@ class FormAction(TestCase):
         if debit_method:
             self.fo_assert_select('Debit method', debit_method)
         if debit_account:
-            self.fo_assert_text_group('Debit account', str(debit_account).replace('-', ''))
+            self.fo_assert_text_group('Debit account', self.no_mask(debit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -5322,13 +5387,13 @@ class FormAction(TestCase):
         self.assert_form_title('11817: Payment order withdrawal')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         self.key_escape()
         if withdrawal_method:
             self.fo_select('Withdrawal method', withdrawal_method)
         if credit_account:
-            self.fo_write_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_text_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5399,7 +5464,7 @@ class FormAction(TestCase):
         if withdrawal_method:
             self.fo_assert_select('Withdrawal method', withdrawal_method)
         if credit_account:
-            self.fo_assert_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_assert_text_group('Credit account', self.no_mask(credit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -5444,13 +5509,13 @@ class FormAction(TestCase):
         self.assert_form_title('11818: Payment order return')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         self.key_escape()
         if return_method:
             self.fo_select('Return method', return_method)
         if credit_account:
-            self.fo_write_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_text_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5521,7 +5586,7 @@ class FormAction(TestCase):
         if return_method:
             self.fo_assert_select('Return method', return_method)
         if credit_account:
-            self.fo_assert_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_assert_text_group('Credit account', self.no_mask(credit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -5566,7 +5631,7 @@ class FormAction(TestCase):
         self.assert_form_title('11806: Gift cheque issued')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         if expired_date:
             self.fo_write_date('Expired date', expired_date)
@@ -5595,7 +5660,7 @@ class FormAction(TestCase):
         if debit_method:
             self.fo_select('Debit method', debit_method)
         if debit_account:
-            self.fo_write_text_group('Debit account', str(debit_account).replace('-', ''))
+            self.fo_write_text_group('Debit account', self.no_mask(debit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5668,7 +5733,7 @@ class FormAction(TestCase):
         if debit_method:
             self.fo_assert_select('Debit method', debit_method)
         if debit_account:
-            self.fo_assert_text_group('Debit account', str(debit_account).replace('-', ''))
+            self.fo_assert_text_group('Debit account', self.no_mask(debit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -5693,13 +5758,13 @@ class FormAction(TestCase):
         self.assert_form_title('11807: Gift Cheque withdrawal')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         self.key_escape()
         if withdrawal_method:
             self.fo_select('Withdrawal method', withdrawal_method)
         if credit_account:
-            self.fo_write_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_text_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5770,7 +5835,7 @@ class FormAction(TestCase):
         if withdrawal_method:
             self.fo_assert_select('Withdrawal method', withdrawal_method)
         if credit_account:
-            self.fo_assert_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_assert_text_group('Credit account', self.no_mask(credit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -5815,13 +5880,13 @@ class FormAction(TestCase):
         self.assert_form_title('11808: Gift cheque return')
         # enter value
         if serial_no:
-            self.fo_write('Serial no', str(serial_no).replace('-', ''))
+            self.fo_write('Serial no', self.no_mask(serial_no))
             self.wait_loading()
         self.key_escape()
         if return_method:
             self.fo_select('Return method', return_method)
         if credit_account:
-            self.fo_write_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_write_text_group('Credit account', self.no_mask(credit_account))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -5892,7 +5957,7 @@ class FormAction(TestCase):
         if return_method:
             self.fo_assert_select('Return method', return_method)
         if credit_account:
-            self.fo_assert_text_group('Credit account', str(credit_account).replace('-', ''))
+            self.fo_assert_text_group('Credit account', self.no_mask(credit_account))
         if description is None or description == '':
             description = 'AUTO TEST'
         if description:
@@ -7342,7 +7407,7 @@ class FormAction(TestCase):
             self.fo_write_group('Counterparty code', str(counterparty_code).replace('-', ''))
             self.wait_loading()
         if catalogue_code:
-            self.fo_write_text_group('Catalogue code', catalogue_code)
+            self.lookup_data('Catalogue code', 'Code', catalogue_code)
         if account_name:
             self.fo_write_text('Account name', account_name)
         self.key_escape()
@@ -7829,7 +7894,7 @@ class FormAction(TestCase):
         self.assert_form_title('MM - Deposit to MM account')
         # enter value
         if account_number:
-            self.fo_write('Account number', str(account_number).replace('-', ''))
+            self.fo_write('Account number', self.no_mask(account_number))
             self.wait_loading()
         if amount:
             self.fo_write_number('Amount', amount)
@@ -7840,7 +7905,7 @@ class FormAction(TestCase):
         if counterparty_type:
             self.fo_assert_select('Counterparty type', counterparty_type)
         if counterparty_code:
-            self.fo_assert_text_group('Counterparty code', counterparty_code)
+            self.fo_assert_text_group('Counterparty code', self.no_mask(counterparty_code))
         if counterparty_mm_limit_bcy:
             self.fo_assert_value('Counterparty MM limit (BCY)', counterparty_mm_limit_bcy)
         if category_code:
@@ -7856,7 +7921,7 @@ class FormAction(TestCase):
         if currency_code_02:
             self.fo_assert_select('Currency code', currency_code_02)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         self.wait_loading()
         self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
         self.wait_loading()
@@ -7904,7 +7969,7 @@ class FormAction(TestCase):
         if counterparty_type:
             self.fo_assert_select('Counterparty type', counterparty_type)
         if counterparty_code:
-            self.fo_assert_text_group('Counterparty code', counterparty_code)
+            self.fo_assert_text_group('Counterparty code', self.no_mask(counterparty_code))
         if counterparty_mm_limit_bcy:
             self.fo_assert_value('Counterparty MM limit (BCY)', counterparty_mm_limit_bcy)
         if category_code:
@@ -7920,7 +7985,7 @@ class FormAction(TestCase):
         if currency_code_02:
             self.fo_assert_select('Currency code', currency_code_02)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if expected_posting:
             self.assert_posting_data(**expected_posting)
         self.fo_assert_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.', True)
@@ -7939,7 +8004,7 @@ class FormAction(TestCase):
         self.assert_form_title('MM - Placement to MM account')
         # enter value
         if account_number:
-            self.fo_write('Account number', str(account_number).replace('-', ''))
+            self.fo_write('Account number', self.no_mask(account_number))
             self.wait_loading()
         if amount:
             self.fo_write_number('Amount', amount)
@@ -7966,7 +8031,7 @@ class FormAction(TestCase):
         if currency_code_02:
             self.fo_assert_select('Currency code', currency_code_02)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         self.wait_loading()
         self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
         self.wait_loading()
@@ -8030,7 +8095,7 @@ class FormAction(TestCase):
         if currency_code_02:
             self.fo_assert_select('Currency code', currency_code_02)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if expected_posting:
             self.assert_posting_data(**expected_posting)
         self.fo_assert_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.', True)
@@ -8440,7 +8505,7 @@ class FormAction(TestCase):
         self.assert_form_title('MM - Withdraw and close MM Deposit account')
         # enter value
         if account_number:
-            self.fo_write('Account number', str(account_number).replace('-', ''))
+            self.fo_write('Account number', self.no_mask(account_number))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -8453,7 +8518,7 @@ class FormAction(TestCase):
         if currency_code:
             self.fo_assert_select('Currency code', currency_code)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if interest_accrual:
             self.fo_assert_value('Interest accrual', interest_accrual)
         if interest_due:
@@ -8511,7 +8576,7 @@ class FormAction(TestCase):
         if currency_code:
             self.fo_assert_select('Currency code', currency_code)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if interest_accrual:
             self.fo_assert_value('Interest accrual', interest_accrual)
         if interest_due:
@@ -8538,7 +8603,7 @@ class FormAction(TestCase):
         self.assert_form_title('MM - Withdraw and close MM Placement account')
         # enter value
         if account_number:
-            self.fo_write('Account number', str(account_number).replace('-', ''))
+            self.fo_write('Account number', self.no_mask(account_number))
             self.wait_loading()
         if description is None or description == '':
             description = 'AUTO TEST'
@@ -8551,7 +8616,7 @@ class FormAction(TestCase):
         if currency_code:
             self.fo_assert_select('Currency code', currency_code)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if interest_accrual:
             self.fo_assert_value('Interest accrual', interest_accrual)
         if interest_payable:
@@ -8609,7 +8674,7 @@ class FormAction(TestCase):
         if currency_code:
             self.fo_assert_select('Currency code', currency_code)
         if account_no:
-            self.fo_assert_text_group('Account No.', account_no)
+            self.fo_assert_text_group('Account No.', self.no_mask(account_no))
         if interest_accrual:
             self.fo_assert_value('Interest accrual', interest_accrual)
         if interest_payable:
@@ -16955,7 +17020,10 @@ class FormAction(TestCase):
         self.wait_loading()
         self.assert_table_data('Tran Number', 1, transaction_references)
 
-    def transaction_view(self, transaction_references, form_title=None, mode=F8Config.view_mode):
+    def transaction_view(self, transaction_references, form_title=None, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        log.debug(f"F8 view mode is: '{mode}'")
         # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
@@ -16970,7 +17038,9 @@ class FormAction(TestCase):
             self.assert_form_title(form_title)
         self.fo_assert_text('Transaction references', transaction_references)
 
-    def transaction_view_no_return_transaction_references(self, transaction_references, form_title=None, mode=F8Config.view_mode):
+    def transaction_view_no_return_transaction_references(self, transaction_references, form_title=None, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
         # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
@@ -16984,7 +17054,9 @@ class FormAction(TestCase):
         if form_title:
             self.assert_form_title(form_title)
 
-    def transaction_reverse(self, transaction_references, username, password, reason=None, allow_reverse=None, list_error_message=None, mode=F8Config.view_mode):
+    def transaction_reverse(self, transaction_references, username, password, reason=None, allow_reverse=None, list_error_message=None, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
         # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
@@ -17020,7 +17092,9 @@ class FormAction(TestCase):
             self.assert_status_table_data('Status', 1, 'Reversed')
             print(f'Transaction references has been reversed: {transaction_references}')
 
-    def transaction_approve(self, transaction_references, username, password, reason=None, allow_approve=None, list_error_message=None, mode=F8Config.view_mode):
+    def transaction_approve(self, transaction_references, username, password, reason=None, allow_approve=None, list_error_message=None, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
         # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
@@ -17054,7 +17128,9 @@ class FormAction(TestCase):
                 self.transaction_search(transaction_references)
             self.assert_status_table_data('Status', 1, 'Completed')
 
-    def transaction_reject(self, transaction_references, username, password, reason=None, mode=F8Config.view_mode):
+    def transaction_reject(self, transaction_references, username, password, reason=None, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
         # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
@@ -19343,8 +19419,8 @@ class FormAction(TestCase):
 
     def product_limit_view(self, product_limit_code=None, product_name=None, customer_type=None, customer_code=None, reference_code=None, currency=None, amount=None, available_amount=None, limit_type=None, status=None, created_user=None, approved_user=None, secure_type=None, secure_rate=None):
         # search
-        self.product_limit_simple_search(self.account_number_no_mask(product_limit_code))
-        self.assert_table_data('Product limit code', 1, self.account_number_no_mask(product_limit_code))
+        self.product_limit_simple_search(self.no_mask(product_limit_code))
+        self.assert_table_data('Product limit code', 1, self.no_mask(product_limit_code))
         # view
         self.click_table_menu('View', 1)
         self.wait_for_button_available('Modify')
@@ -19479,8 +19555,8 @@ class FormAction(TestCase):
 
     def sub_product_limit_view(self, sub_product_limit_code=None, sub_product_name=None, customer_type=None, customer_code=None, product_code=None, reference_code=None, currency=None, amount=None, available_amount=None, credit_facility=None, status=None, created_user=None, approved_user=None):
         # search
-        self.sub_product_limit_simple_search(self.account_number_no_mask(sub_product_limit_code))
-        self.assert_table_data('Sub product limit code', 1, self.account_number_no_mask(sub_product_limit_code))
+        self.sub_product_limit_simple_search(self.no_mask(sub_product_limit_code))
+        self.assert_table_data('Sub product limit code', 1, self.no_mask(sub_product_limit_code))
         # view
         self.click_table_menu('View', 1)
         self.wait_for_button_available('Modify')
@@ -19827,7 +19903,7 @@ class FormAction(TestCase):
         self.bo_click_tab('Account GLs Information')
         if expected_account_gl_names:
             for account_gl_name, account_gl_number in zip(expected_account_gl_names, expected_account_gl_numbers):
-                self.bo_assert_text_table_account_gls(account_gl_name, self.account_number_no_mask(account_gl_number))
+                self.bo_assert_text_table_account_gls(account_gl_name, self.no_mask(account_gl_number))
         self.bo_click_tab('IFC list')
         if expected_ifc_names:
             for ifc_code, ifc_name in zip(expected_ifc_list_codes, expected_ifc_names):
@@ -19859,7 +19935,7 @@ class FormAction(TestCase):
         self.bo_click_tab('IFC GLs Information')
         if expected_ifc_codes:
             for ifc_code, ifc_gl_name, ifc_gl_number in zip(expected_ifc_codes, expected_ifc_gl_names, expected_ifc_gl_numbers):
-                self.bo_assert_text_table_ifc_gls(ifc_code, ifc_gl_name, self.account_number_no_mask(ifc_gl_number))
+                self.bo_assert_text_table_ifc_gls(ifc_code, ifc_gl_name, self.no_mask(ifc_gl_number))
         self.bo_click_tab('Notification channel')
         if email:
             self.bo_click_collap('Notification type')
@@ -21867,7 +21943,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('On value date', 'Currency', currency_on_value_date)
         if account_no_on_value_date:
             self.bo_click_collap('On value date')
-            self.bo_assert_text_multi('On value date', 'Account No', self.account_number_no_mask(account_no_on_value_date))
+            self.bo_assert_text_multi('On value date', 'Account No', self.no_mask(account_no_on_value_date))
         if settlement_by_on_maturity:
             self.bo_click_collap('On maturity')
             self.bo_assert_value_multi('On maturity', 'Settlement by', settlement_by_on_maturity)
@@ -21876,7 +21952,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('On maturity', 'Currency', currency_on_maturity)
         if account_no_on_maturity:
             self.bo_click_collap('On maturity')
-            self.bo_assert_text_multi('On maturity', 'Account No', self.account_number_no_mask(account_no_on_maturity))
+            self.bo_assert_text_multi('On maturity', 'Account No', self.no_mask(account_no_on_maturity))
         if trade_date:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Trade date', trade_date)
@@ -21897,7 +21973,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 1', 'Debit by', debit_by)
         if debit_account:
             self.bo_click_collap('Phase 1')
-            self.bo_assert_text_multi('Phase 1', 'Debit account', self.account_number_no_mask(debit_account))
+            self.bo_assert_text_multi('Phase 1', 'Debit account', self.no_mask(debit_account))
         if debit_currency:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Debit currency', debit_currency)
@@ -21921,7 +21997,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 1', 'Credit by', credit_by)
         if credit_account:
             self.bo_click_collap('Phase 1')
-            self.bo_assert_text_multi('Phase 1', 'Credit account', self.account_number_no_mask(credit_account))
+            self.bo_assert_text_multi('Phase 1', 'Credit account', self.no_mask(credit_account))
         if credit_currency:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Credit currency', credit_currency)
@@ -21948,7 +22024,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 2', 'Debit by', debit_by_p2)
         if debit_account_p2:
             self.bo_click_collap('Phase 2')
-            self.bo_assert_text_multi('Phase 2', 'Debit account', self.account_number_no_mask(debit_account_p2))
+            self.bo_assert_text_multi('Phase 2', 'Debit account', self.no_mask(debit_account_p2))
         if debit_currency_p2:
             self.bo_click_collap('Phase 2')
             self.bo_assert_value_multi('Phase 2', 'Debit currency', debit_currency_p2)
@@ -21972,7 +22048,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 2', 'Credit by', credit_by_p2)
         if credit_account_p2:
             self.bo_click_collap('Phase 2')
-            self.bo_assert_text_multi('Phase 2', 'Credit account', self.account_number_no_mask(credit_account_p2))
+            self.bo_assert_text_multi('Phase 2', 'Credit account', self.no_mask(credit_account_p2))
         if credit_currency_p2:
             self.bo_click_collap('Phase 2')
             self.bo_assert_value_multi('Phase 2', 'Credit currency', credit_currency_p2)
@@ -21991,7 +22067,7 @@ class FormAction(TestCase):
         self.bo_click_tab('Account GLs Information')
         if expected_account_gl_names:
             for account_gl_name, account_gl_number in zip(expected_account_gl_names, expected_account_gl_numbers):
-                self.bo_assert_text_table_account_gls(account_gl_name, self.account_number_no_mask(account_gl_number))
+                self.bo_assert_text_table_account_gls(account_gl_name, self.no_mask(account_gl_number))
         self.bo_click_tab('IFC list')
         if expected_ifc_names:
             for ifc_code, ifc_name in zip(expected_ifc_list_codes, expected_ifc_names):
@@ -22023,7 +22099,7 @@ class FormAction(TestCase):
         self.bo_click_tab('IFC GLs Information')
         if expected_ifc_codes:
             for ifc_code, ifc_gl_name, ifc_gl_number in zip(expected_ifc_codes, expected_ifc_gl_names, expected_ifc_gl_numbers):
-                self.bo_assert_text_table_ifc_gls(ifc_code, ifc_gl_name, self.account_number_no_mask(ifc_gl_number))
+                self.bo_assert_text_table_ifc_gls(ifc_code, ifc_gl_name, self.no_mask(ifc_gl_number))
 
     def treasury_account_update(self, account_number=None, account_name=None, counterparty_type=None, counterparty_code=None, branch_code=None, catalogue_code=None, currency_code=None, trade_group=None, details_category=None, trade_type=None, deal_ticket_number=None, account_status=None, margin_trading_y_n=None, margin_trading_rate=None, open_date=None, value_date=None, tenor=None, tenor_unit=None, settle_tenor=None, settle_tenor_unit=None, interest_payment_tenor=None, interest_payment_tenor_unit=None, from_date=None, to_date=None, last_transaction_date=None, close_date=None, rollover_option=None, rollover_to_catalogue=None, dealer=None, created_by=None, approved_by=None, account_manager_staff_code=None, amount=None, average_price=None, margin_amount=None, interest_accrual_amount=None, intpayable_receivebe=None, interest_due=None, interest_overdue=None, interest_suspense=None, interest_prepaid=None, interest_not_paid=None, interest_payment_method=None, interest_paid=None, settlement_by_on_value_date=None, currency_on_value_date=None, account_no_on_value_date=None, settlement_by_on_maturity=None, currency_on_maturity=None, account_no_on_maturity=None, trade_date=None, tenor_p1=None, tenor_unit_p1=None, value_date_p1=None, broker=None, debit_by=None, debit_account=None, debit_currency=None, debit_amount=None, reference_rate=None, swap_point=None, trade_rate=None, forward_rate=None, credit_by=None, credit_account=None, credit_currency=None, credit_amount=None, trade_date_p2=None, tenor_p2=None, tenor_unit_p2=None, value_date_p2=None, broker_p2=None, debit_by_p2=None, debit_account_p2=None, debit_currency_p2=None, debit_amount_p2=None, spot_rate_p2=None, swap_point_p2=None, trade_rate_p2=None, forward_rate_p2=None, credit_by_p2=None, credit_account_p2=None, credit_currency_p2=None, credit_amount_p2=None, other_reference=None, other_settlement_instruction=None, remark=None, user_define_field=None, list_error_message=None):
         # view
@@ -22144,7 +22220,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('On value date', 'Currency', currency_on_value_date)
         if account_no_on_value_date:
             self.bo_click_collap('On value date')
-            self.bo_assert_text_multi('On value date', 'Account No', self.account_number_no_mask(account_no_on_value_date))
+            self.bo_assert_text_multi('On value date', 'Account No', self.no_mask(account_no_on_value_date))
         if settlement_by_on_maturity:
             self.bo_click_collap('On maturity')
             self.bo_assert_value_multi('On maturity', 'Settlement by', settlement_by_on_maturity)
@@ -22153,7 +22229,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('On maturity', 'Currency', currency_on_maturity)
         if account_no_on_maturity:
             self.bo_click_collap('On maturity')
-            self.bo_assert_text_multi('On maturity', 'Account No', self.account_number_no_mask(account_no_on_maturity))
+            self.bo_assert_text_multi('On maturity', 'Account No', self.no_mask(account_no_on_maturity))
         if trade_date:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Trade date', trade_date)
@@ -22174,7 +22250,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 1', 'Debit by', debit_by)
         if debit_account:
             self.bo_click_collap('Phase 1')
-            self.bo_assert_text_multi('Phase 1', 'Debit account', self.account_number_no_mask(debit_account))
+            self.bo_assert_text_multi('Phase 1', 'Debit account', self.no_mask(debit_account))
         if debit_currency:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Debit currency', debit_currency)
@@ -22198,7 +22274,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 1', 'Credit by', credit_by)
         if credit_account:
             self.bo_click_collap('Phase 1')
-            self.bo_assert_text_multi('Phase 1', 'Credit account', self.account_number_no_mask(credit_account))
+            self.bo_assert_text_multi('Phase 1', 'Credit account', self.no_mask(credit_account))
         if credit_currency:
             self.bo_click_collap('Phase 1')
             self.bo_assert_value_multi('Phase 1', 'Credit currency', credit_currency)
@@ -22225,7 +22301,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 2', 'Debit by', debit_by_p2)
         if debit_account_p2:
             self.bo_click_collap('Phase 2')
-            self.bo_assert_text_multi('Phase 2', 'Debit account', self.account_number_no_mask(debit_account_p2))
+            self.bo_assert_text_multi('Phase 2', 'Debit account', self.no_mask(debit_account_p2))
         if debit_currency_p2:
             self.bo_click_collap('Phase 2')
             self.bo_assert_value_multi('Phase 2', 'Debit currency', debit_currency_p2)
@@ -22249,7 +22325,7 @@ class FormAction(TestCase):
             self.bo_assert_value_multi('Phase 2', 'Credit by', credit_by_p2)
         if credit_account_p2:
             self.bo_click_collap('Phase 2')
-            self.bo_assert_text_multi('Phase 2', 'Credit account', self.account_number_no_mask(credit_account_p2))
+            self.bo_assert_text_multi('Phase 2', 'Credit account', self.no_mask(credit_account_p2))
         if credit_currency_p2:
             self.bo_click_collap('Phase 2')
             self.bo_assert_value_multi('Phase 2', 'Credit currency', credit_currency_p2)
@@ -23854,7 +23930,7 @@ class FormAction(TestCase):
         self.wait_loading()
         # verify
         self.assert_form_title_header_popup('Document Viewer')
-        self.bo_assert_info_signature('Account number', self.account_number_no_mask(account_number))
+        self.bo_assert_info_signature('Account number', self.no_mask(account_number))
         if account_name:
             self.bo_assert_info_signature('Account name', account_name)
         self.close_popup()
@@ -26004,7 +26080,7 @@ class FormAction(TestCase):
         # click 'Get information'
         self.click_button('Get information')
         # verify
-        self.assert_form_title_header_popup('Signature Viewer')
+        self.assert_form_title_header_popup('Signature View')
         self.bo_assert_info_signature('Customer code', str(customer_code).replace('-', ''))
         if dob:
             self.bo_assert_info_signature('DOB', dob)
@@ -28804,7 +28880,7 @@ class FormAction(TestCase):
         # verify value
         self.bo_click_tab('General information')
         if account_number:
-            self.bo_assert_text('Account code', self.account_number_no_mask(account_number))
+            self.bo_assert_text('Account code', self.no_mask(account_number))
         if account_name:
             self.bo_assert_text('Account name', account_name)
         if cc_contract:
@@ -29107,7 +29183,7 @@ class FormAction(TestCase):
         # assert value
         self.bo_click_tab('General information')
         if account_number:
-            self.bo_assert_text('Account code', self.account_number_no_mask(account_number))
+            self.bo_assert_text('Account code', self.no_mask(account_number))
         if currency_code:
             self.bo_assert_select('Currency code', currency_code)
         if book_currency_code:
@@ -30203,7 +30279,7 @@ class FormAction(TestCase):
         if clearing_branch_code:
             self.assert_table_data('Clear Branch Name', 1, self.get_branch_name(clearing_branch_code))
         if account_number:
-            self.assert_table_data('Account Number', 1, self.account_number_no_mask(account_number))
+            self.assert_table_data('Account Number', 1, self.no_mask(account_number))
         # view
         self.click_table_menu('View', 1)
         self.wait_for_button_available('Modify')
@@ -30219,7 +30295,7 @@ class FormAction(TestCase):
         if clearing_type:
             self.bo_assert_select('Clearing Type', clearing_type)
         if account_number:
-            self.bo_assert_text_group('Account Number', self.account_number_no_mask(account_number))
+            self.bo_assert_text_group('Account Number', self.no_mask(account_number))
 
     def clearing_account_definition_update(self, branch_name=None, currency_code=None, clearing_branch_code=None, clearing_type=None, account_number=None, account_number_update=None, list_error_message=None):
         # view
@@ -30273,7 +30349,7 @@ class FormAction(TestCase):
         if clearing_branch_code:
             self.assert_table_data('Clear Branch Name', 1, self.get_branch_name(clearing_branch_code))
         if account_number:
-            self.assert_table_data('Account Number', 1, self.account_number_no_mask(account_number))
+            self.assert_table_data('Account Number', 1, self.no_mask(account_number))
         # delete
         self.click_table_menu('Delete', 1)
         self.wait_loading()
@@ -30395,7 +30471,7 @@ class FormAction(TestCase):
         if clearing_type:
             self.bo_assert_select('Clearing type', clearing_type)
         if account_number:
-            self.bo_assert_value_group('Account number', self.account_number_no_mask(account_number))
+            self.bo_assert_value_group('Account number', self.no_mask(account_number))
 
     def foreign_exchange_account_definition_update(self, branch_name=None, account_currency=None, clearing_currency=None, clearing_type=None, account_number=None, account_number_update=None, list_error_message=None):
         # view
@@ -30517,7 +30593,7 @@ class FormAction(TestCase):
     def account_map_table_view(self, neptune_gl_account=None, mapping_gl_account=None, mapping_type=None, account_name=None):
         # search
         self.account_map_table_simple_search(str(neptune_gl_account).replace('-', ''))
-        self.assert_table_data('Neptune GL Account', 1, self.account_number_no_mask(neptune_gl_account))
+        self.assert_table_data('Neptune GL Account', 1, self.no_mask(neptune_gl_account))
         # view
         self.click_table_menu('View', 1)
         self.wait_for_button_available('Modify')
@@ -30525,7 +30601,7 @@ class FormAction(TestCase):
         # verify value
         self.bo_click_tab('General information')
         if neptune_gl_account:
-            self.bo_assert_value_group('Neptune GL Account', self.account_number_no_mask(neptune_gl_account))
+            self.bo_assert_value_group('Neptune GL Account', self.no_mask(neptune_gl_account))
         if mapping_gl_account:
             self.bo_assert_text('Mapping GL Account', mapping_gl_account)
         if mapping_type:
@@ -30550,7 +30626,7 @@ class FormAction(TestCase):
         # assert value
         self.bo_click_tab('General information')
         if neptune_gl_account:
-            self.bo_assert_value_group('Neptune GL Account', self.account_number_no_mask(neptune_gl_account))
+            self.bo_assert_value_group('Neptune GL Account', self.no_mask(neptune_gl_account))
         self.wait_loading()
         # click 'Save'
         self.click_button('Save')
@@ -30573,7 +30649,7 @@ class FormAction(TestCase):
     def account_map_table_delete(self, neptune_gl_account, list_error_message=None):
         # search
         self.account_map_table_simple_search(str(neptune_gl_account).replace('-', ''))
-        self.assert_table_data('Neptune GL Account', 1, self.account_number_no_mask(neptune_gl_account))
+        self.assert_table_data('Neptune GL Account', 1, self.no_mask(neptune_gl_account))
         # delete
         self.click_table_menu('Delete', 1)
         self.wait_loading()
@@ -32492,9 +32568,9 @@ class FormAction(TestCase):
             return ''
         return stock_number_no_mask
 
-    def account_number_no_mask(self, account_number):
-        account_number_no_mask = str(account_number).replace('-', '')
-        return account_number_no_mask
+    def no_mask(self, value_mask):
+        value_no_mask = str(value_mask).replace('-', '')
+        return value_no_mask
 
     def deposit_account_number_mask(self, account_number):
         account_number = str(account_number).replace('-', '')

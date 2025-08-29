@@ -19,39 +19,40 @@ PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
 
 customer_code_personal = CUSTOMER_CODE
 
-# data test for 'Passbook for Fixed Deposit'
-stock_type_fb = 'Passbook for Fixed Deposit'
-stock_prefix_fb = 'FB'
-number_of_leaves_fb = '1'
-number_of_book_fb = '1'
+# data test for 'Receipt'
+stock_type_fr = 'Receipt'
+stock_prefix_fr = 'FR'
+number_of_leaves_fr = '1'
+number_of_book_fr = '1'
 
-# data test for fixed deposit account
-catalogue_code='FD01PIMMK'
+# data test for prepaid fixed deposit
+catalogue_code='PR007MMK1'
 deposit_type='Fixed Deposit'
-deposit_sub_type='Fixed Deposit Account - 1 M'
-rollover_option='Principal plus interest rollover'
-auto_transfer_option='- Select one -'
-
-reason_of_account_opening='Reason opening FD 1M (T1) account'
+deposit_sub_type='Shwe Prepaid Fixed Deposit Account'
+rollover_option='No rollover'
+auto_transfer_option='Auto collection(transfer) for both P and I'
+reason_of_account_opening='Reason opening prepaid FD (T6) account'
+# 
 expected_account_gl_name='DEPOSIT'
-expected_ifc_codes=['114'] * 2
-expected_ifc_gl_names=['PAID_INTEREST', 'INTEREST']
+expected_ifc_codes=['155'] * 2
+expected_ifc_gl_names=['PREPAID_INTEREST', 'PAID_INTEREST']
 # data test for deposit money
 amount_deposit_mask='50,000,000.49'
-current_balance_1st='50,000,000.49'
+interest_prepaid = '81,506.88'
+# data test for other account
 amount_deposit_to_other_mask='51,000,000.96'
-current_balance_other_1st_after_trf='1,000,000.47'
-current_balance_other_2nd_after_dls='51,000,000.96'
+current_balance_other_1st_receive_interest='1,081,507.35'
 # data test for withdrawal money
 withdraw_amount='5,000,000.54'
 # data test for close
-balance_close=current_balance_1st
+balance_close='49,918,493.61'
 interest_payable_receivable='0.00'
 interest_due='0.00'
 interest_re_calculate='0.00'
 gross_paid_interest_amount='0.00'
 penalty_fee='0.00'
-balance_received=current_balance_1st
+# balance_received=current_balance_1st
+balance_received=amount_deposit_mask
 # data test deposit status
 status_pending='Pending to approve'
 status_new='New'
@@ -64,7 +65,7 @@ status_reject='Reject'
 expected_interest_accrual='0.00'
 transaction_numbers=[]
 
-class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
+class DepositPrepaidNoRolloverTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
 
@@ -80,9 +81,11 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         global working_date, branch_code
         working_date = self.get_working_date()
         branch_code = self.get_logged_branch_code()
-        global expected_account_gl_number, expected_ifc_gl_numbers, expected_other_account_gl_number
-        expected_account_gl_number=f'{branch_code}-2020302030101-01'
-        expected_ifc_gl_numbers=[f'{branch_code}-4010201010101-01', f'{branch_code}-2070101000202-01']
+        global expected_account_gl_number, expected_ifc_gl_numbers, expected_other_account_gl_number, expected_ifc_gl_prepaid_interest, expected_ifc_gl_paid_interest
+        expected_account_gl_number=f'{branch_code}-2020202032020-01'
+        expected_ifc_gl_prepaid_interest=f'{branch_code}-1100701001212-01'
+        expected_ifc_gl_paid_interest=f'{branch_code}-4010201011414-01'
+        expected_ifc_gl_numbers=[expected_ifc_gl_prepaid_interest, expected_ifc_gl_paid_interest]
         global gl_account_number, gl_cash
         gl_account_number=f'{branch_code}-1100601000000-01'
         gl_cash=f'{branch_code}-1010301000101-01'
@@ -106,6 +109,26 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             branch_code=branch_code,
             currency_code='MMK',
             account_number=gl_account_number
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_account_gl_number
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_other_account_gl_number
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_prepaid_interest
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_paid_interest
         )
         if self.check_customer_profile_not_exist(customer_code_personal):
             self.stop()
@@ -137,8 +160,8 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             password=password_approve
         )
 
-# FIXED DEPOSIT (FD) 1 MONTH - PRINCIPAL PLUS INTEREST (T1)
-    def test_001_fixed_1m_dpt_opn_open_account_success(self):
+# PREPAID FIXED DEPOSIT - PRINCIPAL ROLLOVER ONLY (T6)
+    def test_001_prepaid_7d_dpt_opn_open_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         global deposit_account_fd_mask
         dpt_opn_result = self.dpt_opn(
@@ -146,15 +169,15 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             customer_type='Single customer',
             catalogue_code=catalogue_code,
             reason_of_account_opening=reason_of_account_opening,
-            # to_account_number=other_deposit_account_mask,
-            # mpu_card=True,
-            # passbook_cheque_book=True
+            to_account_number=other_deposit_account_mask,
+            mpu_card=True,
+            passbook_cheque_book=True
         )
         transaction_numbers.append(dpt_opn_result[0])
         deposit_account_fd_mask=dpt_opn_result[1]
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_pending,
             account_holder=customer_code_personal,
             catalogue_code=catalogue_code,
@@ -170,10 +193,11 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_002_fixed_1m_dpt_apr_approve_account_success(self):
+    def test_002_prepaid_7d_dpt_apr_approve_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_apr_result = self.dpt_apr(
             account_number=deposit_account_fd_mask,
@@ -186,7 +210,7 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         self.assertEqual(account_number_actual_mask, deposit_account_fd_mask)
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_new,
             current_balance='0.00',
             rollover_option=rollover_option,
@@ -195,10 +219,11 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_003_fixed_1m_dpt_trf_get_money_from_other_deposit_account_success(self):
+    def test_003_prepaid_7d_dpt_trf_get_money_from_other_deposit_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_trf_result = self.dpt_trf(
             debit_account=other_deposit_account_mask,
@@ -215,110 +240,112 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             username=username_approve,
             password=password_approve
         )
-        # verify credit deposit account
+        # verify prepaid fixed deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            current_balance=current_balance_1st,
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
-        # verify debit deposit account
+        # verify other deposit account
         self.deposit_account_view(
             account_number=other_deposit_account_mask,
             account_status=status_normal,
-            current_balance=current_balance_other_1st_after_trf
+            current_balance=current_balance_other_1st_receive_interest
         )
 
-# PASSBOOK FOR FIXED DEPOSIT
-    def test_004_passbook_for_fixed_1m_dpt_srg_stock_registration_success(self):
+# RECEIPT FOR PREPAID INTEREST FIXED DEPOSIT
+    def test_004_receipt_for_prepaid_7d_dpt_srg_stock_registration_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        global from_serial_sb, to_serial_sb
-        generated_number = self.gen_serial_number(stock_prefix_fb, stock_type_fb, 0)
+        global from_serial_fr, to_serial_fr
+        generated_number = self.gen_serial_number(stock_prefix_fr, stock_type_fr, 0)
         print(f'generated_number: {generated_number}')
         from_serial = generated_number[0]
         to_serial = generated_number[1]
         dpt_srg_result = self.dpt_srg(
-            stock_type=stock_type_fb,
+            stock_type=stock_type_fr,
             from_serial=from_serial,
             to_serial=to_serial,
-            stock_prefix=stock_prefix_fb,
-            number_of_leaves=number_of_leaves_fb,
-            number_of_book=number_of_book_fb,
+            stock_prefix=stock_prefix_fr,
+            number_of_leaves=number_of_leaves_fr,
+            number_of_book=number_of_book_fr,
             approve_later='Y'
         )
         transaction_references=dpt_srg_result[0]
-        from_serial_sb = dpt_srg_result[1]
-        to_serial_sb = dpt_srg_result[2]
-        self.assertEqual(from_serial_sb, from_serial)
-        self.assertEqual(to_serial_sb, to_serial)
+        from_serial_fr = dpt_srg_result[1]
+        to_serial_fr = dpt_srg_result[2]
+        self.assertEqual(from_serial_fr, from_serial)
+        self.assertEqual(to_serial_fr, to_serial)
         self.transaction_approve(
             transaction_references=transaction_references, 
             username=username_approve,
             password=password_approve
         )
 
-    def test_005_passbook_for_fixed_1m_dpt_sat_stock_assign_to_staff_success(self):
+    def test_005_receipt_for_prepaid_7d_dpt_sat_stock_assign_to_staff_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_sat_result = self.dpt_sat(
-            stock_type=stock_type_fb,
-            from_serial=from_serial_sb,
-            to_serial=to_serial_sb,
+            stock_type=stock_type_fr,
+            from_serial=from_serial_fr,
+            to_serial=to_serial_fr,
             assigned_staff_code=username
         )
-        self.assertEqual(from_serial_sb, dpt_sat_result[1])
-        self.assertEqual(to_serial_sb, dpt_sat_result[2])
+        self.assertEqual(from_serial_fr, dpt_sat_result[1])
+        self.assertEqual(to_serial_fr, dpt_sat_result[2])
 
-    def test_006_passbook_for_fixed_1m_dpt_ccr_stock_confirm_received_success(self):
+    def test_006_receipt_for_prepaid_7d_dpt_ccr_stock_confirm_received_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_ccr_result = self.dpt_ccr(
-            stock_type=stock_type_fb,
-            from_serial=from_serial_sb,
-            to_serial=to_serial_sb,
+            stock_type=stock_type_fr,
+            from_serial=from_serial_fr,
+            to_serial=to_serial_fr,
             approve_later='Y'
         )
-        self.assertEqual(from_serial_sb, dpt_ccr_result[1])
-        self.assertEqual(to_serial_sb, dpt_ccr_result[2])
+        self.assertEqual(from_serial_fr, dpt_ccr_result[1])
+        self.assertEqual(to_serial_fr, dpt_ccr_result[2])
         self.transaction_approve(
             transaction_references=dpt_ccr_result[0], 
             username=username_approve,
             password=password_approve
         )
 
-    def test_007_passbook_for_fixed_1m_dpt_fbi_book_issue_success(self):
+    def test_007_receipt_for_prepaid_7d_dpt_cer_receipt_issue_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        dpt_sbi_result = self.dpt_fbi(
+        dpt_cer_result = self.dpt_cer(
             account_number=deposit_account_fd_mask,
-            serial_no=from_serial_sb,
+            cerfiticate_serial=from_serial_fr,
             approve_on_form='Y',
             username=username_approve,
             password=password_approve
         )
-        transaction_numbers.append(dpt_sbi_result[0])
-        self.assertEqual(from_serial_sb, dpt_sbi_result[1])
+        transaction_numbers.append(dpt_cer_result[0])
+        self.assertEqual(from_serial_fr, dpt_cer_result[1])
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=str(from_serial_sb).replace('-',''),
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=str(from_serial_fr).replace('-',''),
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_008_fixed_1m_dpt_cwr_cash_withdrawal_error(self):
+    def test_008_prepaid_7d_dpt_cwr_cash_withdrawal_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         list_error_message = [
             'Passbook number: Can not be blank'
@@ -335,20 +362,21 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=str(from_serial_sb).replace('-',''),
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=str(from_serial_fr).replace('-',''),
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_009_fixed_1m_dpt_mwr_miscellaneous_withdrawal_error(self):
+    def test_009_prepaid_7d_dpt_mwr_miscellaneous_withdrawal_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         deposit_account_fd = str(deposit_account_fd_mask).replace('-','')
         list_error_message = [
@@ -366,20 +394,21 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=str(from_serial_sb).replace('-',''),
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=str(from_serial_fr).replace('-',''),
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
-
-    def test_010_fixed_1m_dpt_trf_transfer_money_to_other_deposit_account_error(self):
+    
+    def test_010_prepaid_7d_dpt_trf_transfer_money_to_other_deposit_account_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         deposit_account_fd = str(deposit_account_fd_mask).replace('-','')
         list_error_message = [
@@ -397,26 +426,27 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify debit deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=str(from_serial_sb).replace('-',''),
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=str(from_serial_fr).replace('-',''),
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
         # verify credit deposit account
         self.deposit_account_view(
             account_number=other_deposit_account_mask,
             account_status=status_normal,
-            current_balance=current_balance_other_1st_after_trf
+            current_balance=current_balance_other_1st_receive_interest
         )
 
-    def test_011_fixed_1m_dpt_cas_change_account_status_error(self):
+    def test_011_prepaid_7d_dpt_cas_change_account_status_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         # change from 'Normal' to 'Dormant'
         dpt_cas_result = self.dpt_cas(
@@ -441,22 +471,23 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
             dormant_date='',
             last_change_dormant_to_normal_date='',
-            passbook_or_receipt_number=from_serial_sb,
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_012_fixed_1m_dpt_blk_block_account_success(self):
+    def test_012_prepaid_7d_dpt_blk_block_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_blk_result = self.dpt_blk(
             account_number=deposit_account_fd_mask,
@@ -473,20 +504,21 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_block,
-            passbook_or_receipt_number=from_serial_sb,
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_013_fixed_1m_dpt_rls_release_block_account_success(self):
+    def test_013_prepaid_7d_dpt_rls_release_block_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         dpt_rls_result = self.dpt_rls(
             account_number=deposit_account_fd_mask,
@@ -503,20 +535,21 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_014_fixed_1m_dpt_emk_hold_balance_success(self):
+    def test_014_prepaid_7d_dpt_emk_hold_balance_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         hold_amount='200,000.45'
         dpt_emk_result = self.dpt_emk(
@@ -537,10 +570,10 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             earmark_block_amount=hold_amount,
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
@@ -548,10 +581,11 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_015_fixed_1m_dpt_erl_release_hold_balance_success(self):
+    def test_015_prepaid_7d_dpt_erl_release_hold_balance_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         hold_amount='200,000.45'
         dpt_erl_result = self.dpt_erl(
@@ -573,10 +607,10 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
         # verify deposit account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
-            linkage_account_number='',
+            linkage_account_number=other_deposit_account_mask,
             account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            current_balance=current_balance_1st,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             earmark_block_amount='0.00',
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
@@ -584,18 +618,62 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
 
-    def test_016_fixed_1m_dpt_dls_close_deposit_account_by_deposit_success(self):
-        # view account before close
+    def test_016_prepaid_7d_dpt_dls_close_deposit_account_by_deposit_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_dls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
+    def test_017_prepaid_7d_dpt_mls_close_deposit_account_by_gl_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_mls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
+    def test_018_prepaid_7d_dpt_cls_close_deposit_account_by_cash_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.dpt_cls_error(
+            account_number=deposit_account_fd_mask,
+            error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+
+# DELETE ACCOUNT LINKAGE
+    def test_019_prepaid_7d_delete_account_linkage_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        # verify deposit account before
+        self.deposit_account_view(
+            account_number=deposit_account_fd_mask,
+            linkage_account_number=other_deposit_account_mask,
+            account_status=status_normal,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
+            earmark_block_amount='0.00',
+            rollover_option=rollover_option,
+            reason_of_account_opening=reason_of_account_opening,
+            expected_account_gl_name=expected_account_gl_name,
+            expected_account_gl_number=expected_account_gl_number,
+            expected_ifc_codes=expected_ifc_codes,
+            expected_ifc_gl_names=expected_ifc_gl_names,
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
+        )
+        dpt_account_linkage_delete_result = self.dpt_account_linkage_delete(
+            master_account_number=deposit_account_fd_mask
+        )
+        self.assertEqual(str(deposit_account_fd_mask).replace('-', ''), dpt_account_linkage_delete_result)
+        # verify deposit account after
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
             linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
             account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
+            passbook_or_receipt_number=from_serial_fr,
+            current_balance=amount_deposit_mask,
             earmark_block_amount='0.00',
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
@@ -603,51 +681,39 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
+
+    def test_020_prepaid_7d_dpt_dls_close_deposit_account_by_deposit_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        # close deposit account
-        dpt_dls_result = self.dpt_dls(
+        list_error_message = [
+            f'InvalidEarlywdr: Invalid Early withdrawal [No] of account [{self.no_mask(deposit_account_fd_mask)}]'
+        ]
+        # close deposit account error
+        self.dpt_dls(
             account_number=deposit_account_fd_mask,
             another_deposit_account=other_deposit_account_mask,
-            balance=balance_close,
+            balance=amount_deposit_mask,
             interest_payable_receivable=interest_payable_receivable,
             interest_due=interest_due,
             interest_re_calculate=interest_re_calculate,
             gross_paid_interest_amount=gross_paid_interest_amount,
             penalty_fee=penalty_fee,
             balance_received=balance_received,
-            approve_later='Y'
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_dls_result[1])
-        self.transaction_approve(
-            transaction_references=dpt_dls_result[0], 
+            approve_on_form='Y',
             username=username_approve,
-            password=password_approve
+            password=password_approve,
+            list_error_message=list_error_message
         )
-        # view transaction
-        self.transaction_view(
-            transaction_references=dpt_dls_result[0]
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_dls_result[1])
-        # verify posting
-        expected_posting_01 = {
-            'expected_debits': [
-                (expected_account_gl_number, balance_close),
-            ],
-            'expected_credits': [
-                (expected_other_account_gl_number, balance_close),
-            ],
-        }
-        self.assert_posting_data(**expected_posting_01)
-        # view account after close
+        # view account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
             linkage_account_number='',
-            current_balance='0.00',
-            interest_accrual='0.00',
-            account_status=status_closed,
-            passbook_or_receipt_number=from_serial_sb,
+            current_balance=amount_deposit_mask,
+            interest_accrual=expected_interest_accrual,
+            account_status=status_normal,
+            passbook_or_receipt_number=from_serial_fr,
             earmark_block_amount='0.00',
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
@@ -655,238 +721,68 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
-        # view another account after close
+        # view another account
         self.deposit_account_view(
             account_number=other_deposit_account_mask,
-            current_balance=current_balance_other_2nd_after_dls,
+            current_balance=current_balance_other_1st_receive_interest,
             account_status=status_normal,
             earmark_block_amount='0.00',
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_other_account_gl_number
         )
-        self.transaction_reverse(
-            transaction_references=dpt_dls_result[0],
-            username=username_reverse,
-            password=password_reverse
-        )
-        # view account after reverse close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
-            account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
 
-    def test_017_fixed_1m_dpt_mls_close_deposit_account_by_gl_success(self):
-        # view account before close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
-            account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
+    def test_021_prepaid_7d_dpt_mls_close_deposit_account_by_gl_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        # close deposit account
-        dpt_mls_result = self.dpt_mls(
+        list_error_message = [
+            f'InvalidEarlywdr: Invalid Early withdrawal [No] of account [{self.no_mask(deposit_account_fd_mask)}]'
+        ]
+        # close deposit account error
+        self.dpt_mls(
             account_number=deposit_account_fd_mask,
             accounting_number=gl_account_number,
-            balance=balance_close,
+            balance=amount_deposit_mask,
             interest_payable_receivable=interest_payable_receivable,
             interest_due=interest_due,
             interest_re_calculate=interest_re_calculate,
             gross_paid_interest_amount=gross_paid_interest_amount,
             penalty_fee=penalty_fee,
             balance_received=balance_received,
-            approve_later='Y'
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_mls_result[1])
-        self.transaction_approve(
-            transaction_references=dpt_mls_result[0],
-            username=username_approve,
-            password=password_approve
-        )
-        # view transaction
-        self.transaction_view(
-            transaction_references=dpt_mls_result[0]
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_mls_result[1])
-        # verify posting
-        expected_posting_01 = {
-            'expected_debits': [
-                (expected_account_gl_number, balance_close),
-            ],
-            'expected_credits': [
-                (gl_account_number, balance_close),
-            ],
-        }
-        self.assert_posting_data(**expected_posting_01)
-        # view account after close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance='0.00',
-            interest_accrual='0.00',
-            account_status=status_closed,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
-        self.transaction_reverse(
-            transaction_references=dpt_mls_result[0],
-            username=username_reverse,
-            password=password_reverse
-        )
-        # view account after reverse close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
-            account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
-
-    def test_018_fixed_1m_dpt_cls_close_deposit_account_by_cash_success(self):
-        # view account before close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
-            account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
-        self.dpt_cdp(
-            account_number=other_deposit_account_mask,
-            amount_deposit=current_balance_1st,
             approve_on_form='Y',
             username=username_approve,
-            password=password_approve
+            password=password_approve,
+            list_error_message=list_error_message
         )
+        # view account
+        self.deposit_account_view(
+            account_number=deposit_account_fd_mask,
+            linkage_account_number='',
+            current_balance=amount_deposit_mask,
+            interest_accrual=expected_interest_accrual,
+            account_status=status_normal,
+            passbook_or_receipt_number=from_serial_fr,
+            earmark_block_amount='0.00',
+            rollover_option=rollover_option,
+            reason_of_account_opening=reason_of_account_opening,
+            expected_account_gl_name=expected_account_gl_name,
+            expected_account_gl_number=expected_account_gl_number,
+            expected_ifc_codes=expected_ifc_codes,
+            expected_ifc_gl_names=expected_ifc_gl_names,
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
+        )
+
+    def test_022_prepaid_7d_dpt_cls_close_deposit_account_by_cash_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
-        # close deposit account
-        dpt_cls_result = self.dpt_cls(
+        list_error_message = [
+            f'InvalidEarlywdr: Invalid Early withdrawal [No] of account [{self.no_mask(deposit_account_fd_mask)}]'
+        ]
+        # close deposit account error
+        self.dpt_cls(
             account_number=deposit_account_fd_mask,
-            balance=balance_close,
-            interest_payable_receivable=interest_payable_receivable,
-            interest_due=interest_due,
-            interest_re_calculate=interest_re_calculate,
-            gross_paid_interest_amount=gross_paid_interest_amount,
-            penalty_fee=penalty_fee,
-            balance_received=balance_received,
-            approve_later='Y'
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_cls_result[1])
-        self.transaction_approve(
-            transaction_references=dpt_cls_result[0], 
-            username=username_approve,
-            password=password_approve
-        )
-        # view transaction
-        self.transaction_view(
-            transaction_references=dpt_cls_result[0]
-        )
-        self.assertEqual(deposit_account_fd_mask, dpt_cls_result[1])
-        # verify posting
-        expected_posting_01 = {
-            'expected_debits': [
-                (expected_account_gl_number, balance_close),
-            ],
-            'expected_credits': [
-                (gl_cash, balance_close),
-            ],
-        }
-        self.assert_posting_data(**expected_posting_01)
-        # view account after close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance='0.00',
-            interest_accrual='0.00',
-            account_status=status_closed,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
-        self.transaction_reverse(
-            transaction_references=dpt_cls_result[0],
-            username=username_reverse,
-            password=password_reverse
-        )
-        # view account after reverse close
-        self.deposit_account_view(
-            account_number=deposit_account_fd_mask,
-            linkage_account_number='',
-            current_balance=current_balance_1st,
-            interest_accrual=expected_interest_accrual,
-            account_status=status_normal,
-            passbook_or_receipt_number=from_serial_sb,
-            earmark_block_amount='0.00',
-            rollover_option=rollover_option,
-            reason_of_account_opening=reason_of_account_opening,
-            expected_account_gl_name=expected_account_gl_name,
-            expected_account_gl_number=expected_account_gl_number,
-            expected_ifc_codes=expected_ifc_codes,
-            expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
-        )
-
-    def test_019_fixed_1m_dpt_his_transaction_history_inquiry_success(self):
-        # close deposit again
-        dpt_dls_result = self.dpt_dls(
-            account_number=deposit_account_fd_mask,
-            another_deposit_account=other_deposit_account_mask,
-            balance=balance_close,
+            balance=amount_deposit_mask,
             interest_payable_receivable=interest_payable_receivable,
             interest_due=interest_due,
             interest_re_calculate=interest_re_calculate,
@@ -895,28 +791,17 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             balance_received=balance_received,
             approve_on_form='Y',
             username=username_approve,
-            password=password_approve
+            password=password_approve,
+            list_error_message=list_error_message
         )
-        transaction_numbers.append(dpt_dls_result[0])
-        self.assertEqual(deposit_account_fd_mask, dpt_dls_result[1])
-        # verify posting
-        expected_posting_01 = {
-            'expected_debits': [
-                (expected_account_gl_number, balance_close),
-            ],
-            'expected_credits': [
-                (expected_other_account_gl_number, balance_close),
-            ],
-        }
-        self.assert_posting_data(**expected_posting_01)
-        # view account after close success
+        # view account
         self.deposit_account_view(
             account_number=deposit_account_fd_mask,
             linkage_account_number='',
-            current_balance='0.00',
-            interest_accrual='0.00',
-            account_status=status_closed,
-            passbook_or_receipt_number=from_serial_sb,
+            current_balance=amount_deposit_mask,
+            interest_accrual=expected_interest_accrual,
+            account_status=status_normal,
+            passbook_or_receipt_number=from_serial_fr,
             earmark_block_amount='0.00',
             rollover_option=rollover_option,
             reason_of_account_opening=reason_of_account_opening,
@@ -924,15 +809,18 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_account_gl_number=expected_account_gl_number,
             expected_ifc_codes=expected_ifc_codes,
             expected_ifc_gl_names=expected_ifc_gl_names,
-            expected_ifc_gl_numbers=expected_ifc_gl_numbers
+            expected_ifc_gl_numbers=expected_ifc_gl_numbers,
+            early_withdrawal='No',
         )
-        expected_trans_code=['DPT_OPN','DPT_APR','DPT_TRF','DPT_FBI','DPT_BLK','DPT_RLS','DPT_EMK','DPT_ERL','DPT_DLS']
-        expected_users=[username] * 9
-        expected_channels=['Core Banking'] * 9
-        expected_debits=['0.00'] * 8 + [current_balance_1st]
-        expected_credits=['0.00'] * 2 + [current_balance_1st] + ['0.00'] * 6
-        expected_balances=['0.00'] * 2 + [current_balance_1st] * 6 + ['0.00']
-        expected_dates=[working_date] * 9
+
+    def test_023_prepaid_7d_dpt_his_transaction_history_inquiry_success(self):
+        expected_trans_code=['DPT_OPN','DPT_APR','DPT_TRF','DPT_CER','DPT_BLK','DPT_RLS','DPT_EMK','DPT_ERL']
+        expected_users=[username] * 8
+        expected_channels=['Core Banking'] * 8
+        expected_debits=['0.00'] * 8 + [amount_deposit_mask]
+        expected_credits=['0.00'] * 2 + [amount_deposit_mask] + ['0.00'] * 6
+        expected_balances=['0.00'] * 2 + [amount_deposit_mask] * 6 + ['0.00']
+        expected_dates=[working_date] * 8
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         # make transaction
         dpt_his_result = self.dpt_his(
@@ -947,6 +835,15 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_transaction_dates=expected_dates
         )
         self.assertEqual(deposit_account_fd_mask, dpt_his_result[1])
+        # view another account after close success
+        self.deposit_account_view(
+            account_number=other_deposit_account_mask,
+            current_balance=current_balance_other_1st_receive_interest,
+            account_status=status_normal,
+            earmark_block_amount='0.00',
+            expected_account_gl_name=expected_account_gl_name,
+            expected_account_gl_number=expected_other_account_gl_number
+        )
 
 if __name__ == '__main__':
     webui_test.main()

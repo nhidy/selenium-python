@@ -214,9 +214,30 @@ class PaymentTest(FormAction):
         pmt_oit_reference_number=pmt_oit_view_result[1]
 
     def test_002_pmt_iit_inward_internal_bank_success_approve_later(self):
-        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.logout()
         self.login(username_other_branch, password_other_branch, one_app='Y')
+        global deposit_account_number
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code='CAMMK0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        deposit_account_number=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=deposit_account_number,
+            approve_on_form='Y',
+            username=username_approve_other_branch,
+            password=password_approve_other_branch
+        )
+        self.dpt_cdp(
+            account_number=deposit_account_number,
+            amount_deposit='50,000,000.46',
+            approve_on_form='Y',
+            username=username_approve_other_branch,
+            password=password_approve_other_branch
+        )
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         product_code = None
         message_code = pmt_oit_reference_number
         remitting_branch = None

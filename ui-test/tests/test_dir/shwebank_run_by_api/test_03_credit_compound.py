@@ -34,11 +34,12 @@ dealer_name_test = 'Dealer name test'
 type_of_commodity_test = 'Type of commodity test'
 purpose_of_loan_test = 'N2'
 disbursement_amount_test = '5,000,000.65'
-deposit_account_number_test = '11-003-097469-6'
+# deposit_account_number_test = '11-003-097469-6'
 interest_collect_test = '0.00'
 principal_collect_test = '5,000,000.65'
 new_status_test = 'Normal'
-adjustment_amount_test = '-1,000,000.23'
+adjustment_amount_test_enter = '-100.23'
+adjustment_amount_test_ui = '-1,000.23'
 
 # data test mortgage
 catalogue_code_mortgage = '00000003'
@@ -89,7 +90,7 @@ class CreditCompoundTest(FormAction):
         self.data_begin()
 
 # Check the data used for testing
-    def test_000_check_test_data_must_exist(self):
+    def test_000_01_check_test_data_must_exist(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.add_gl_level_9_use_for_testing(
             branch_code=branch_code,
@@ -99,6 +100,32 @@ class CreditCompoundTest(FormAction):
         if self.check_customer_profile_not_exist(customer_code_personal):
             self.stop()
             self.fail()
+
+# Create other deposit account use for testing
+    def test_000_02_create_deposit_account_use_for_testing(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_number_test
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code='CAMMK0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        deposit_account_number_test=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=deposit_account_number_test,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.dpt_cdp(
+            account_number=deposit_account_number_test,
+            amount_deposit='50,000,000.46',
+            # debit_accounting=gl_account_number,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
 
     def test_001_crd_plo_open_product_limit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -1429,7 +1456,6 @@ class CreditCompoundTest(FormAction):
     def test_016_crd_spad_adjust_sub_product_limit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         sub_product_limit_code = sub_product_limit_code_mask
-        adjustment_amount = adjustment_amount_test
         description = None
         current_limit = None
         avaiable_limit = None
@@ -1446,7 +1472,7 @@ class CreditCompoundTest(FormAction):
 
         crd_spad_result = self.crd_spad(
             sub_product_limit_code=sub_product_limit_code,
-            adjustment_amount=adjustment_amount,
+            adjustment_amount=adjustment_amount_test_enter,
             description=description,
             current_limit=current_limit,
             avaiable_limit=avaiable_limit,
@@ -1468,7 +1494,7 @@ class CreditCompoundTest(FormAction):
         self.crd_spad_view(
             transaction_references=transaction_references,
             sub_product_limit_code=sub_product_limit_code,
-            adjustment_amount=adjustment_amount,
+            adjustment_amount=adjustment_amount_test_ui,
             description=description,
             current_limit=current_limit,
             avaiable_limit=avaiable_limit,
@@ -1480,7 +1506,6 @@ class CreditCompoundTest(FormAction):
     def test_017_crd_plad_adjust_product_limit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         product_limit_code = product_limit_code_mask
-        adjustment_amount = adjustment_amount_test
         description = None
         current_limit = None
         avaiable_limit = None
@@ -1497,7 +1522,7 @@ class CreditCompoundTest(FormAction):
 
         crd_plad_result = self.crd_plad(
             product_limit_code=product_limit_code,
-            adjustment_amount=adjustment_amount,
+            adjustment_amount=adjustment_amount_test_enter,
             description=description,
             current_limit=current_limit,
             avaiable_limit=avaiable_limit,
@@ -1519,7 +1544,7 @@ class CreditCompoundTest(FormAction):
         self.crd_plad_view(
             transaction_references=transaction_references,
             product_limit_code=product_limit_code,
-            adjustment_amount=adjustment_amount,
+            adjustment_amount=adjustment_amount_test_ui,
             description=description,
             current_limit=current_limit,
             avaiable_limit=avaiable_limit,
