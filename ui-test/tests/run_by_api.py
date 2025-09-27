@@ -36,9 +36,13 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
     release_version = config_data.get("release_version", "")
     server_name = config_data.get("server_name", "")
     f8_config = config_data.get("f8_config", "S")
+    app_name = config_data.get("app_name", "Shwebank")
+    folder_name = config_data.get("folder_name", "shwebank_run_by_api")
 
     # From run_by_api.py, relative path is ../tests/test_dir/shwebank_run_by_api/
-    test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', 'shwebank_run_by_api')
+    # test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', 'shwebank_run_by_api')
+    print(f"Folder containing the test script: {folder_name}")
+    test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', folder_name)
 
     combined_suite = unittest.TestSuite()
     loader = unittest.TestLoader()
@@ -96,7 +100,8 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
             report=report_filename,
             title=f"{release_version}-{server_name}-Test Report",
             description="Automated WEBUI Test Case Execution",
-            f8_config=f8_config
+            f8_config=f8_config,
+            app_name = app_name
         )
         print("All tests completed successfully.", file=sys.stdout)
         return test_run_result
@@ -114,10 +119,11 @@ if __name__ == '__main__':
     parser.add_argument("--run-on-url", type=str, default="", help="URL to run tests on.")
     parser.add_argument("--username-login", type=str, default="", help="Username for login.")
     parser.add_argument("--password-login", type=str, default="", help="Password for login.")
-    parser.add_argument("--one-app", type=str, default="", help="One app parameter.")
+    parser.add_argument("--one-app", type=str, default="Y", help="One app parameter.")
     parser.add_argument("--browser", type=str, default="chrome", help="Browser to use (e.g., chrome, firefox).")
     parser.add_argument("--headless", type=str_to_bool, default=False, help="Run browser in headless mode (true/false, Y/N).")
-    parser.add_argument("--customer-code", type=str, default="", help="Customer code.")
+    parser.add_argument("--customer-code", type=str, default="", help="Customer code personal use for testing DPT, CRD, MTG.")
+    parser.add_argument("--customer-code-corporate", type=str, default="", help="Customer code corporate use for testing TMM.")
     parser.add_argument("--username-approve", type=str, default="", help="Username for approval.")
     parser.add_argument("--password-approve", type=str, default="", help="Password for approval.")
     parser.add_argument("--username-reverse", type=str, default="", help="Username for reverse.")
@@ -134,6 +140,8 @@ if __name__ == '__main__':
     parser.add_argument("--password-reverse-other-branch", type=str, default=None, help="Password other branch for reverse.")
     parser.add_argument("--test-files-order", type=str, default="",  help="Comma-separated list of test file names (without .py extension) in the desired execution order. Example: 'test_login,test_create_user'")
     parser.add_argument("--f8-config", type=str, default="S", help="View mode of F8 screen (optional (S/N). S: Mode view status, N: mode view normal).")
+    parser.add_argument("--app-name", type=str, default="Shwebank", help="App name use for core banking, default is 'Shwebank'.")
+    parser.add_argument("--folder-name", type=str, default="shwebank_run_by_api", help="Folder containing the test script, default is 'shwebank_run_by_api'.")
 
     args = parser.parse_args()
 
@@ -147,6 +155,7 @@ if __name__ == '__main__':
         "browser": args.browser,
         "headless": args.headless,
         "customer_code": args.customer_code,
+        "customer_code_corporate": args.customer_code_corporate,
         "username_approve": args.username_approve,
         "password_approve": args.password_approve,
         "username_reverse": args.username_reverse,
@@ -161,7 +170,9 @@ if __name__ == '__main__':
         "password_approve_other_branch": args.password_approve_other_branch,
         "username_reverse_other_branch": args.username_reverse_other_branch,
         "password_reverse_other_branch": args.password_reverse_other_branch,
-        "f8_config": args.f8_config
+        "f8_config": args.f8_config,
+        "app_name": args.app_name,
+        "folder_name": args.folder_name
     }
 
     test_files_order_list = []

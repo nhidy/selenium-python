@@ -16,35 +16,7 @@ browser='edge'
 # browser='firefox'
 # browser='chrome'
 headless=False
-if __name__ == '__main__':
-# ----------------------------------------- ALL SHWE FO -----------------------------------------
-    # webui_test.main(path="./test_dir/shwebank_posting/test_open_saving_and_deposit_withdrawal.py", browser=browser, debug=False, report=f"test_open_saving_and_deposit_withdrawal_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html", headless=headless)
-    # webui_test.main(path="./test_dir/shwebank_posting/test_open_saving_and_deposit_cardzone.py", browser=browser, debug=False, report=f"test_open_saving_and_deposit_cardzone_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html", headless=headless)
-    # webui_test.main(path="./test_dir/shwebank_posting/test_open_saving_and_deposit_withdrawal_diff_branch.py", browser=browser, debug=False, report=f"test_open_saving_and_deposit_withdrawal_diff_branch_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html", headless=headless)
-    # webui_test.main(path="./test_dir/shwebank_posting/test_open_saving_and_deposit_withdrawal_diff_branch_reverse.py", browser=browser, debug=False, report=f"test_open_saving_and_deposit_withdrawal_diff_branch_reverse_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html", headless=headless)
-
-
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, report=f"test_add_customer_and_open_deposit_account_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, window_size="2340,1940", report=f"test_add_customer_and_open_deposit_account_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, window_size="2340,740", report=f"test_add_customer_and_open_deposit_account_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, window_size="1340,840", report=f"test_add_customer_and_open_deposit_account_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, report=f"test_add_customer_and_open_deposit_account_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, report=f"test_add_customer_and_open_deposit_account_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_add_customer_and_open_deposit_account.py", browser=browser, debug=False, headless=headless, report=f"test_add_customer_and_open_deposit_account_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    
-
-    # webui_test.main(path="./test_dir/shwebank_performance/deposit/test_account_information.py", browser=browser, debug=False, headless=headless, report=f"test_account_information_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-
-    # webui_test.main(path="./test_dir/shwebank_performance/deposit/test_account_information_cashier003_10.py", browser=browser, debug=False, headless=headless, report=f"test_account_information_cashier003_10_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    
-
-    # webui_test.main(path="./test_dir/shwebank_integration/test_method.py", browser=browser, debug=False, headless=headless, report=f"test_method_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_method.py", browser=browser, debug=False, headless=headless, report=f"test_method_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_integration/test_method.py", browser=browser, debug=False, headless=headless, report=f"test_method_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-
-    # webui_test.main(path="./test_dir/shwebank_integration/test_method.py", browser=browser, debug=False, headless=headless, report=f"test_method_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-
-
+# if __name__ == '__main__':
 # ---------------------------------- FO - DEPOSIT - DATA GET FROM EXCEL FILE ----------------------------------
     # webui_test.main(path="./test_dir/shwebank_fo/deposit_xlsx/test_01_dpt_opn.py", browser=browser, debug=False, headless=headless, report=f"test_01_dpt_opn_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
     # webui_test.main(path="./test_dir/shwebank_fo/deposit_xlsx/test_02_dpt_apr.py", browser=browser, debug=False, headless=headless, report=f"test_02_dpt_apr_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
@@ -166,28 +138,3 @@ if __name__ == '__main__':
 
 # ---------------------------------- BO - ACCOUNTING ----------------------------------
     # webui_test.main(path="./test_dir/shwebank_bo/accounting/test_01_bank_account_definition.py", browser=browser, debug=False, headless=headless, report=f"test_01_bank_account_definition_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-
-# ---------------------------------- REGRESSION TEST ----------------------------------
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression.py", browser=browser, debug=False, headless=headless, report=f"test_regression_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_forex.py", browser=browser, debug=False, headless=headless, report=f"test_regression_forex_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_trade.py", browser=browser, debug=False, headless=headless, report=f"test_regression_trade_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_trade_no_approve.py", browser=browser, debug=False, headless=headless, report=f"test_regression_trade_no_approve_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_issue_4237.py", browser=browser, debug=False, headless=headless, report=f"test_regression_issue_4237_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_01_regression_customer.py", browser=browser, debug=False, headless=headless, report=f"test_01_regression_customer_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_02_regression_deposit_current.py", browser=browser, debug=False, headless=headless, report=f"test_02_regression_deposit_current_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_03_regression_deposit_s1_savings.py", browser=browser, debug=False, headless=headless, report=f"test_03_regression_deposit_s1_savings_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_04_regression_deposit_t1_fd_no_rollover.py", browser=browser, debug=False, headless=headless, report=f"test_04_regression_deposit_t1_fd_no_rollover_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_04_regression_deposit_t1_fd_pri_plus_int_rollover.py", browser=browser, debug=False, headless=headless, report=f"test_04_regression_deposit_t1_fd_pri_plus_int_rollover_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    webui_test.main(path="./test_dir/shwebank_regression/test_04_regression_deposit_t1_fd_pri_rollover_only.py", browser=browser, debug=False, headless=headless, report=f"test_04_regression_deposit_t1_fd_pri_rollover_only_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_02_regression_deposit_current_new.py", browser=browser, debug=False, headless=headless, report=f"test_02_regression_deposit_current_new_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_mortgage.py", browser=browser, debug=False, headless=headless, report=f"test_regression_mortgage_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_fixed_asset.py", browser=browser, debug=False, headless=headless, report=f"test_regression_fixed_asset_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_credit.py", browser=browser, debug=False, headless=headless, report=f"test_regression_credit_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_payment.py", browser=browser, debug=False, headless=headless, report=f"test_regression_payment_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_deposit_payment_order.py", browser=browser, debug=False, headless=headless, report=f"test_regression_deposit_payment_order_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_deposit_gift_cheque.py", browser=browser, debug=False, headless=headless, report=f"test_regression_deposit_gift_cheque_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")
-
-
-# ---------------------------------- REGRESSION TEST 117 ----------------------------------
-    # webui_test.main(path="./test_dir/shwebank_regression/test_regression_117.py", browser=browser, debug=False, headless=headless, report=f"test_regression_117_{browser}_result_" + datetime.now().strftime('%d%m%Y_%H%M%S') + ".html")

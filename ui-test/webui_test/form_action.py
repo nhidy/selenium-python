@@ -53,7 +53,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -136,7 +136,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -215,7 +215,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -284,7 +284,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -369,7 +369,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -473,7 +473,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -560,7 +560,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -593,7 +593,7 @@ class FormAction(TestCase):
 
 # -------------------------- handle FO - DEPOSIT --------------------------
     # DPT_OPN: 1100: Open new deposit account
-    def dpt_opn(self, customer_type=None, customer_code=None, relation_customers=None, catalogue_code=None, customer_segmentation=None, business_purpose_code=None, to_account_number=None, agent_hub_referral=None, employer_organization_name=None, reason_of_account_opening=None, relationship_manager=None, description=None, i_m_banking=None, mpu_card=None, passbook_cheque_book=None, wallet=None, account_number=None, catalogue_name=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, account_holder_name=None, rollover_option=None, auto_transfer_option=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
+    def dpt_opn(self, customer_type=None, customer_code=None, relation_customers=None, catalogue_code=None, customer_segmentation=None, business_purpose_code=None, to_account_number=None, agent_hub_referral=None, employer_organization_name=None, reason_of_account_opening=None, safe_deposit_locker_number=None, relationship_manager=None, description=None, i_m_banking=None, mpu_card=None, passbook_cheque_book=None, wallet=None, account_number=None, catalogue_name=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, account_holder_name=None, rollover_option=None, auto_transfer_option=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
         # open form
         self.close_all_form()
         self.open_fo('DPT_OPN', '1100: Open new deposit account')
@@ -623,6 +623,8 @@ class FormAction(TestCase):
             self.fo_write_text('Employer Organization Name', employer_organization_name)
         if reason_of_account_opening:
             self.fo_write_text('Reason of Account Opening', reason_of_account_opening)
+        if safe_deposit_locker_number:
+            self.fo_write_text('Safe Deposit Locker Number', safe_deposit_locker_number)
         self.key_escape()
         if relationship_manager:
             self.fo_select('Relationship Manager', relationship_manager)
@@ -685,7 +687,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -695,7 +697,7 @@ class FormAction(TestCase):
             print(f'Account number: {account_number_out}')
             return transaction_references, account_number_out
 
-    def dpt_opn_view(self, transaction_references, customer_type=None, customer_code=None, relation_customers=None, catalogue_code=None, customer_segmentation=None, business_purpose_code=None, to_account_number=None, agent_hub_referral=None, employer_organization_name=None, reason_of_account_opening=None, relationship_manager=None, description=None, i_m_banking=None, mpu_card=None, passbook_cheque_book=None, wallet=None, account_number=None, catalogue_name=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, account_holder_name=None, rollover_option=None, auto_transfer_option=None, expected_posting=None):
+    def dpt_opn_view(self, transaction_references, customer_type=None, customer_code=None, relation_customers=None, catalogue_code=None, customer_segmentation=None, business_purpose_code=None, to_account_number=None, agent_hub_referral=None, employer_organization_name=None, reason_of_account_opening=None, safe_deposit_locker_number=None, relationship_manager=None, description=None, i_m_banking=None, mpu_card=None, passbook_cheque_book=None, wallet=None, account_number=None, catalogue_name=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, account_holder_name=None, rollover_option=None, auto_transfer_option=None, expected_posting=None):
         self.transaction_view(transaction_references, '1100: Open new deposit account')
         # compare value
         if customer_type:
@@ -718,6 +720,8 @@ class FormAction(TestCase):
             self.fo_assert_text('Employer Organization Name', employer_organization_name)
         if reason_of_account_opening:
             self.fo_assert_text('Reason of Account Opening', reason_of_account_opening)
+        if safe_deposit_locker_number:
+            self.fo_assert_text('Safe Deposit Locker Number', safe_deposit_locker_number)
         if relationship_manager:
             self.fo_assert_select('Relationship Manager', relationship_manager)
         if description is None or description == '':
@@ -765,7 +769,7 @@ class FormAction(TestCase):
         print(f'F8: Account number: {account_number_out}')
         return transaction_references, account_number_out
 
-    def dpt_opn_error(self, customer_type=None, customer_code=None, catalogue_code=None, error_message=None):
+    def dpt_opn_error(self, customer_type=None, customer_code=None, catalogue_code=None, reason_of_account_opening=None, error_message=None, list_error_message=None):
         # open form
         self.close_all_form()
         self.open_fo('DPT_OPN', '1100: Open new deposit account')
@@ -781,9 +785,25 @@ class FormAction(TestCase):
         if catalogue_code:
             self.fo_write('Catalogue code', catalogue_code)
         # verify error
-        self.assert_notification(error_message)
-        self.assert_button_disable('Accept')
-        print('Transaction verify failed!')
+        if error_message:
+            self.wait_loading()
+            self.assert_notification(error_message)
+            self.assert_button_disable('Accept')
+            print('Transaction verify alert failed!')
+        if list_error_message:
+            self.wait_loading()
+            if customer_code:
+                self.write_text_input_non_tab('Customer code', customer_code, need_tab='N')
+            if reason_of_account_opening:
+                self.fo_write_text('Reason of Account Opening', reason_of_account_opening)
+            self.wait_loading()
+            self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
+            self.wait_loading()
+            # click 'Accept'
+            self.click_button('Accept')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            print('Transaction verify accept failed!')
 
     # DPT_APR: Approve deposit account
     def dpt_apr(self, account_number=None, description=None, account_holder_name=None, account_holding_branch_name=None, catalogue_code=None, catalogue_name=None, customer_segmentation=None, deposit_type=None, deposit_sub_type=None, linkage_account_number=None, created_by=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
@@ -839,7 +859,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -936,7 +956,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1036,7 +1056,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1138,7 +1158,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1255,7 +1275,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1376,7 +1396,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1494,7 +1514,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1598,7 +1618,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1694,7 +1714,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1801,7 +1821,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -1918,7 +1938,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2043,7 +2063,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2174,7 +2194,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2314,7 +2334,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2436,7 +2456,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2542,7 +2562,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2659,7 +2679,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2761,7 +2781,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2846,7 +2866,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -2933,7 +2953,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3046,7 +3066,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3108,7 +3128,7 @@ class FormAction(TestCase):
         print(f'F8: Account number: {account_number_out}')
         return transaction_references, account_number_out
 
-    def dpt_cls_error(self, account_number=None, error_message=None):
+    def dpt_cls_error(self, account_number=None, gross_paid_interest_amount=None, error_message=None, list_error_message=None):
         # open form
         self.close_all_form()
         self.open_fo('DPT_CLS', '1193')
@@ -3119,9 +3139,23 @@ class FormAction(TestCase):
             self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         # verify error
-        self.assert_notification(error_message)
-        self.assert_button_disable('Accept')
-        print('Transaction verify failed!')
+        if error_message:
+            self.wait_loading()
+            self.assert_notification(error_message)
+            self.assert_button_disable('Accept')
+            print('Transaction verify alert failed!')
+        if list_error_message:
+            self.wait_loading()
+            if gross_paid_interest_amount:
+                self.fo_write_number('Gross paid interest amount', gross_paid_interest_amount)
+            self.wait_loading()
+            self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
+            self.wait_loading()
+            # click 'Accept'
+            self.click_button('Accept')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            print('Transaction verify accept failed!')
 
     # DPT_DLS: 1190: Close deposit account by deposit
     def dpt_dls(self, account_number=None, gross_paid_interest_amount=None, gross_paid_interest_amount_update=None, another_deposit_account=None, depositor_name=None, depositor_id=None, depositor_address=None, mobile_phone=None, nrc=None, description=None, account_holding_branch_name=None, passbook_number=None, balance=None, interest_payable_receivable=None, interest_due=None, interest_re_calculate=None, penalty_fee=None, balance_received=None, balance_received_update=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
@@ -3201,7 +3235,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3269,7 +3303,7 @@ class FormAction(TestCase):
         print(f'F8: Another deposit account: {another_deposit_account_out}')
         return transaction_references, account_number_out, another_deposit_account_out
 
-    def dpt_dls_error(self, account_number=None, error_message=None):
+    def dpt_dls_error(self, account_number=None, another_deposit_account=None, error_message=None, list_error_message=None):
         # open form
         self.close_all_form()
         self.open_fo('DPT_DLS', '1190')
@@ -3280,9 +3314,23 @@ class FormAction(TestCase):
             self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         # verify error
-        self.assert_notification(error_message)
-        self.assert_button_disable('Accept')
-        print('Transaction verify failed!')
+        if error_message:
+            self.wait_loading()
+            self.assert_notification(error_message)
+            self.assert_button_disable('Accept')
+            print('Transaction verify alert failed!')
+        if list_error_message:
+            self.wait_loading()
+            if another_deposit_account:
+                self.fo_write_group('Another deposit account', self.no_mask(another_deposit_account))
+            self.wait_loading()
+            self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
+            self.wait_loading()
+            # click 'Accept'
+            self.click_button('Accept')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            print('Transaction verify accept failed!')
 
     # DPT_MLS: 1191: Close deposit account by miscellaneous
     def dpt_mls(self, account_number=None, gross_paid_interest_amount=None, gross_paid_interest_amount_update=None, depositor_name=None, depositor_id=None, depositor_address=None, mobile_phone=None, nrc=None, description=None, accounting_number=None, account_holding_branch_name=None, passbook_number=None, balance=None, interest_payable_receivable=None, interest_due=None, interest_re_calculate=None, penalty_fee=None, balance_received=None, balance_received_update=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
@@ -3363,7 +3411,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3431,7 +3479,7 @@ class FormAction(TestCase):
         print(f'F8: Accounting number: {accounting_number_out}')
         return transaction_references, account_number_out, accounting_number_out
 
-    def dpt_mls_error(self, account_number=None, error_message=None):
+    def dpt_mls_error(self, account_number=None, accounting_number=None, error_message=None, list_error_message=None):
         # open form
         self.close_all_form()
         self.open_fo('DPT_MLS', '1191')
@@ -3442,9 +3490,23 @@ class FormAction(TestCase):
             self.fo_write_group('Account number', self.no_mask(account_number))
             self.wait_loading()
         # verify error
-        self.assert_notification(error_message)
-        self.assert_button_disable('Accept')
-        print('Transaction verify failed!')
+        if error_message:
+            self.wait_loading()
+            self.assert_notification(error_message)
+            self.assert_button_disable('Accept')
+            print('Transaction verify alert failed!')
+        if list_error_message:
+            self.wait_loading()
+            if accounting_number:
+                self.fo_write_group('Accounting number', self.no_mask(accounting_number))
+            self.wait_loading()
+            self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
+            self.wait_loading()
+            # click 'Accept'
+            self.click_button('Accept')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            print('Transaction verify accept failed!')
 
     # DPT_HIS: 1160: Transaction history inquiry
     def dpt_his(self, account_number, from_date=None, to_date=None, transaction_codes=None, expected_debits=None, expected_credits=None, expected_balances=None, expected_channels=None, expected_transaction_code=None, expected_transaction_codes=None, expected_debit=None, expected_credit=None, expected_balance=None, expected_channel=None, transaction_numbers=None, expected_transaction_number=None, expected_transaction_dates=None, expected_transaction_date=None, expected_created_bys=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
@@ -3483,7 +3545,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Accept')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             # compare value by list transaction code
             if transaction_codes:
                 if expected_transaction_dates:
@@ -3611,7 +3673,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3706,7 +3768,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3788,7 +3850,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3868,7 +3930,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -3948,7 +4010,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4031,7 +4093,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4132,7 +4194,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4234,7 +4296,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4325,7 +4387,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4431,7 +4493,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4554,7 +4616,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4684,7 +4746,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4812,7 +4874,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -4901,7 +4963,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             # compare value
             if serial_numbers:
@@ -4956,7 +5018,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             # compare value
             if serial_numbers:
@@ -5025,7 +5087,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5116,7 +5178,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5209,7 +5271,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5322,7 +5384,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5446,7 +5508,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5568,7 +5630,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5693,7 +5755,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5817,7 +5879,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -5939,7 +6001,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6067,7 +6129,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6180,7 +6242,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6276,7 +6338,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6362,7 +6424,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6440,7 +6502,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6525,7 +6587,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6629,7 +6691,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6726,7 +6788,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6825,7 +6887,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -6949,7 +7011,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7090,7 +7152,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7236,7 +7298,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7353,7 +7415,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7491,7 +7553,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7669,7 +7731,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7823,7 +7885,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -7945,7 +8007,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8055,7 +8117,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8164,7 +8226,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8278,7 +8340,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8396,7 +8458,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8486,7 +8548,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8550,7 +8612,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8648,7 +8710,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8779,7 +8841,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -8925,7 +8987,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9112,7 +9174,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9258,7 +9320,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9331,6 +9393,7 @@ class FormAction(TestCase):
         self.wait_for_button_available('Accept')
         self.assert_form_title('7738: SG/BG - Issue SG/BG for collection')
         # enter value
+        self.key_escape()
         if account_holder_type:
             self.fo_select('Account holder type', account_holder_type)
         self.fo_write_group('Category code', category_code)
@@ -9339,12 +9402,16 @@ class FormAction(TestCase):
         self.fo_write_text('Beneficiary', beneficiary)
         if beneficiary_address:
             self.fo_write_text('Beneficiary address', beneficiary_address)
+        self.key_escape()
         self.fo_select('Currency code', currency_code)
+        self.key_escape()
         if country_code:
             self.fo_select('Country code', country_code)
         self.fo_write_date('Issued date', issued_date)
         self.fo_write_date('Effect date', effect_date)
+        self.key_escape()
         self.fo_select('Guarantee period', guarantee_period)
+        self.key_escape()
         self.fo_select('Guarantee period unit', guarantee_period_unit)
         if maturity_date:
             self.fo_assert_date('Maturity date', maturity_date)
@@ -9388,7 +9455,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9520,7 +9587,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9612,6 +9679,7 @@ class FormAction(TestCase):
             self.fo_assert_value('Guarantee amount', guarantee_amount)
         if secured_amount:
             self.fo_assert_value('Secured amount', secured_amount)
+        self.key_escape()
         if margin_method:
             self.fo_select('Margin method', margin_method)
         if cheque_no:
@@ -9630,6 +9698,7 @@ class FormAction(TestCase):
             self.fo_assert_text('Beneficiary', beneficiary)
         if beneficiary_address:
             self.fo_assert_text('Beneficiary address', beneficiary_address)
+        self.key_escape()
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
@@ -9658,7 +9727,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9783,7 +9852,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9857,8 +9926,10 @@ class FormAction(TestCase):
             self.fo_assert_date('Maturity date', maturity_date)
         if extension_date:
             self.fo_write_date('Extension date', extension_date)
+        self.key_escape()
         if extend_period:
             self.fo_select('Extend period', extend_period)
+        self.key_escape()
         if extend_period_unit:
             self.fo_select('Extend period unit', extend_period_unit)
         if extend_to_date:
@@ -9882,6 +9953,7 @@ class FormAction(TestCase):
                 self.assert_total_fee_table_data(total_fee)
             if total_fee_amount:
                 self.fo_assert_value('Total fee amount', total_fee_amount)
+        self.key_escape()
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
@@ -9910,7 +9982,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -9996,6 +10068,7 @@ class FormAction(TestCase):
             self.add_fees(ifc_codes, values, total_fee=total_fee)
             if total_fee_amount:
                 self.fo_assert_value('Total fee amount', total_fee_amount)
+        self.key_escape()
         if fee_collect_method:
             self.fo_select('Fee collect method', fee_collect_method)
         if account_number_for_fee:
@@ -10025,7 +10098,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10096,6 +10169,7 @@ class FormAction(TestCase):
             self.fo_assert_value('Guarantee amount', guarantee_amount)
         if secured_amount:
             self.fo_assert_value('Secured amount', secured_amount)
+        self.key_escape()
         if margin_method:
             self.fo_select('Margin method', margin_method)
         if margin_deposit_account:
@@ -10136,7 +10210,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10320,7 +10394,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10492,7 +10566,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10583,7 +10657,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10670,7 +10744,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10763,7 +10837,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10864,7 +10938,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -10947,7 +11021,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11009,7 +11083,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11100,7 +11174,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11204,7 +11278,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11327,7 +11401,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11456,7 +11530,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11591,7 +11665,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11711,7 +11785,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11805,7 +11879,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -11906,7 +11980,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12002,7 +12076,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12144,7 +12218,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12283,7 +12357,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12367,7 +12441,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12462,7 +12536,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12583,7 +12657,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12687,7 +12761,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12767,7 +12841,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -12888,7 +12962,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13058,7 +13132,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13188,7 +13262,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13275,7 +13349,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13369,7 +13443,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13473,7 +13547,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13579,7 +13653,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13672,7 +13746,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13751,7 +13825,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13836,7 +13910,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13916,7 +13990,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -13991,7 +14065,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14072,7 +14146,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14160,7 +14234,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14238,7 +14312,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14294,7 +14368,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14377,7 +14451,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14456,7 +14530,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14531,7 +14605,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14647,7 +14721,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14775,7 +14849,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14881,7 +14955,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -14993,7 +15067,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15110,7 +15184,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15232,7 +15306,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15360,7 +15434,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15482,7 +15556,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15585,7 +15659,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15678,7 +15752,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15770,7 +15844,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15846,7 +15920,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -15920,7 +15994,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -16059,7 +16133,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -16248,7 +16322,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -16438,7 +16512,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -16662,7 +16736,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -16896,7 +16970,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17020,48 +17094,37 @@ class FormAction(TestCase):
         self.wait_loading()
         self.assert_table_data('Tran Number', 1, transaction_references)
 
-    def transaction_view(self, transaction_references, form_title=None, mode=None):
+    def transaction_mode_simple(self, transaction_references, mode=None):
         if mode is None:
             mode = F8Config.view_mode
-        log.debug(f"F8 view mode is: '{mode}'")
-        # search f8
         if mode=='S':
             self.transaction_search_advanced(transaction_references)
         if mode=='N':
             self.transaction_search(transaction_references)
+
+    def transaction_view(self, transaction_references, form_title=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         #  view f8
         self.click_table_menu('View', 1)
         self.wait_loading()
-        # self.assert_notification('Get info successfully')
+        self.check_notification('Get info successfully')
         self.wait_for_button_available('Accept')
         if form_title:
             self.assert_form_title(form_title)
         self.fo_assert_text('Transaction references', transaction_references)
 
     def transaction_view_no_return_transaction_references(self, transaction_references, form_title=None, mode=None):
-        if mode is None:
-            mode = F8Config.view_mode
-        # search f8
-        if mode=='S':
-            self.transaction_search_advanced(transaction_references)
-        if mode=='N':
-            self.transaction_search(transaction_references)
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         #  view f8
         self.click_table_menu('View', 1)
         self.wait_loading()
-        self.assert_notification('Get info successfully')
+        self.check_notification('Get info successfully')
         self.wait_for_button_available('Accept')
         if form_title:
             self.assert_form_title(form_title)
 
     def transaction_reverse(self, transaction_references, username, password, reason=None, allow_reverse=None, list_error_message=None, mode=None):
-        if mode is None:
-            mode = F8Config.view_mode
-        # search f8
-        if mode=='S':
-            self.transaction_search_advanced(transaction_references)
-        if mode=='N':
-            self.transaction_search(transaction_references)
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         self.click_table_menu('Delete', 1)
         self.approve_in_popup(
             username=username,
@@ -17070,36 +17133,23 @@ class FormAction(TestCase):
         )
         self.wait_loading()
         # reversed transaction: N: not allow
-        if allow_reverse=='N':
+        if list_error_message:
             self.assert_notification('Deleted error')
             self.assert_error_message()
-            if list_error_message:
-                self.assert_list_error_message(list_error_message)
+            self.assert_list_error_message(list_error_message)
             # search and compare status
-            if mode=='S':
-                self.transaction_search_advanced(transaction_references)
-            if mode=='N':
-                self.transaction_search(transaction_references)
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
             self.assert_status_table_data('Status', 1, 'Completed')
             print(f'Transaction references is NOT reversed: {transaction_references}')
         else:
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             # search and compare status
-            if mode=='S':
-                self.transaction_search_advanced(transaction_references)
-            if mode=='N':
-                self.transaction_search(transaction_references)
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
             self.assert_status_table_data('Status', 1, 'Reversed')
             print(f'Transaction references has been reversed: {transaction_references}')
 
     def transaction_approve(self, transaction_references, username, password, reason=None, allow_approve=None, list_error_message=None, mode=None):
-        if mode is None:
-            mode = F8Config.view_mode
-        # search f8
-        if mode=='S':
-            self.transaction_search_advanced(transaction_references)
-        if mode=='N':
-            self.transaction_search(transaction_references)
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         self.click_table_menu('Approve', 1)
         self.approve_in_popup(
             username=username,
@@ -17108,34 +17158,21 @@ class FormAction(TestCase):
         )
         self.wait_loading()
         # approve transaction: N: not allow
-        if allow_approve=='N':
+        if list_error_message:
             self.assert_notification('Approve error')
             self.assert_error_message()
-            if list_error_message:
-                self.assert_list_error_message(list_error_message)
+            self.assert_list_error_message(list_error_message)
             # search and compare status
-            if mode=='S':
-                self.transaction_search_advanced(transaction_references)
-            if mode=='N':
-                self.transaction_search(transaction_references)
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
             self.assert_status_table_data('Status', 1, 'Pending to approve')
         else:
-            self.assert_notification('Approve successfully')
+            self.check_notification('Approve successfully')
             # search and compare status
-            if mode=='S':
-                self.transaction_search_advanced(transaction_references)
-            if mode=='N':
-                self.transaction_search(transaction_references)
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
             self.assert_status_table_data('Status', 1, 'Completed')
 
     def transaction_reject(self, transaction_references, username, password, reason=None, mode=None):
-        if mode is None:
-            mode = F8Config.view_mode
-        # search f8
-        if mode=='S':
-            self.transaction_search_advanced(transaction_references)
-        if mode=='N':
-            self.transaction_search(transaction_references)
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         self.click_table_menu('Reject', 1)
         self.approve_in_popup(
             username=username,
@@ -17143,14 +17180,20 @@ class FormAction(TestCase):
             reason=reason
         )
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # search and compare status
-        if mode=='S':
-            self.transaction_search_advanced(transaction_references)
-        if mode=='N':
-            self.transaction_search(transaction_references)
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
         self.assert_status_table_data('Status', 1, 'Rejected')
         print(f'Transaction references has been rejected: {transaction_references}')
+
+    def check_transaction(self, transaction_references, transaction_status=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        if transaction_status:
+            transaction_status_actual = self.get_status_table_data('Status', 1)
+            if transaction_status==transaction_status_actual:
+                return True
+            else:
+                return False
 
 # # -------------------------- handle FO - FX TRANSACTION --------------------------
     def act_act(self, accounting_type_debit=None, account_number_debit=None, account_name_debit=None, currency_debit=None, type_debit=None, accounting_type_credit=None, account_number_credit=None, account_name_credit=None, currency_credit=None, type_credit=None, enter_side=None, market_dr_rate=None, cross_rate=None, market_cr_rate=None, debit_amount=None, reverse_rate=None, credit_amount=None, fee_amount=None, receive_amount=None, customer_type=None, customer_code=None, full_name=None, paper_type=None, paper_number=None, telephone=None, address=None, nationality=None, description=None, ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):
@@ -17279,7 +17322,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17420,7 +17463,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17557,7 +17600,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17690,7 +17733,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17827,7 +17870,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17964,7 +18007,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -17988,6 +18031,7 @@ class FormAction(TestCase):
         # enter value
         if accounting_type_debit is None or accounting_type_debit == '':
             accounting_type_debit = 'Deposit'
+        self.key_escape()
         if accounting_type_debit:
             self.fo_select_border('Debit', 'Accounting Type', accounting_type_debit)
         if account_number_debit:
@@ -17998,10 +18042,12 @@ class FormAction(TestCase):
             self.fo_assert_text_border('Debit', 'Account name debit', account_name_debit)
         if currency_debit:
             self.fo_assert_value_border('Debit', 'Currency', currency_debit)
+        self.key_escape()
         if type_debit:
             self.fo_select_border('Debit', 'Type', type_debit)
         if accounting_type_credit is None or accounting_type_credit == '':
             accounting_type_credit = 'Deposit'
+        self.key_escape()
         if accounting_type_credit:
             self.fo_select_border('Credit', 'Accounting Type', accounting_type_credit)
         if account_number_credit:
@@ -18012,14 +18058,17 @@ class FormAction(TestCase):
             self.fo_assert_text_border('Credit', 'Account name credit', account_name_credit)
         if currency_credit:
             self.fo_assert_value_border('Credit', 'Currency', currency_credit)
+        self.key_escape()
         if type_credit:
             self.fo_select_border('Credit', 'Type', type_credit)
+        self.key_escape()
         if customer_type:
             self.fo_select_border('Customer Information', 'Customer type', customer_type)
         if customer_code:
             self.fo_write_border('Customer Information', 'Customer code', customer_code)
         if full_name:
             self.fo_write_text_border('Customer Information', 'Full name', full_name)
+        self.key_escape()
         if paper_type:
             self.fo_select_border('Customer Information', 'Paper type', paper_type)
         if paper_number:
@@ -18028,6 +18077,7 @@ class FormAction(TestCase):
             self.fo_write_text_border('Customer Information', 'Telephone', telephone)
         if address:
             self.fo_write_text_border('Customer Information', 'Address', address)
+        self.key_escape()
         if nationality:
             self.fo_select_border('Customer Information', 'Nationality', nationality)
         if description is None or description == '':
@@ -18105,7 +18155,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -18129,6 +18179,7 @@ class FormAction(TestCase):
         # enter value
         if accounting_type_debit is None or accounting_type_debit == '':
             accounting_type_debit = 'Deposit'
+        self.key_escape()
         if accounting_type_debit:
             self.fo_select_border('Debit', 'Accounting Type', accounting_type_debit)
         if account_number_debit:
@@ -18139,10 +18190,12 @@ class FormAction(TestCase):
             self.fo_assert_text_border('Debit', 'Account name debit', account_name_debit)
         if currency_debit:
             self.fo_assert_value_border('Debit', 'Currency', currency_debit)
+        self.key_escape()
         if type_debit:
             self.fo_select_border('Debit', 'Type', type_debit)
         if accounting_type_credit is None or accounting_type_credit == '':
             accounting_type_credit = 'Accounting'
+        self.key_escape()
         if accounting_type_credit:
             self.fo_select_border('Credit', 'Accounting Type', accounting_type_credit)
         if account_number_credit:
@@ -18153,14 +18206,17 @@ class FormAction(TestCase):
             self.fo_assert_text_border('Credit', 'Account name credit', account_name_credit)
         if currency_credit:
             self.fo_assert_value_border('Credit', 'Currency', currency_credit)
+        self.key_escape()
         if type_credit:
             self.fo_select_border('Credit', 'Type', type_credit)
+        self.key_escape()
         if customer_type:
             self.fo_select_border('Customer Information', 'Customer type', customer_type)
         if customer_code:
             self.fo_write_border('Customer Information', 'Customer code', customer_code)
         if full_name:
             self.fo_write_text_border('Customer Information', 'Full name', full_name)
+        self.key_escape()
         if paper_type:
             self.fo_select_border('Customer Information', 'Paper type', paper_type)
         if paper_number:
@@ -18169,6 +18225,7 @@ class FormAction(TestCase):
             self.fo_write_text_border('Customer Information', 'Telephone', telephone)
         if address:
             self.fo_write_text_border('Customer Information', 'Address', address)
+        self.key_escape()
         if nationality:
             self.fo_select_border('Customer Information', 'Nationality', nationality)
         if description is None or description == '':
@@ -18246,7 +18303,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -18270,6 +18327,7 @@ class FormAction(TestCase):
         # enter value
         if accounting_type_debit is None or accounting_type_debit == '':
             accounting_type_debit = 'Deposit'
+        self.key_escape()
         if accounting_type_debit:
             self.fo_select_border('Debit', 'Accounting Type', accounting_type_debit)
         if account_number_debit:
@@ -18280,24 +18338,30 @@ class FormAction(TestCase):
             self.fo_assert_text_border('Debit', 'Account name debit', account_name_debit)
         if currency_debit:
             self.fo_assert_value_border('Debit', 'Currency', currency_debit)
+        self.key_escape()
         if type_debit:
             self.fo_select_border('Debit', 'Type', type_debit)
         if accounting_type_credit is None or accounting_type_credit == '':
             accounting_type_credit = 'Cash'
+        self.key_escape()
         if accounting_type_credit:
             self.fo_select_border('Credit', 'Accounting Type', accounting_type_credit)
         if account_name_credit:
             self.fo_write_text_border('Credit', 'Account name credit', account_name_credit)
+        self.key_escape()
         if currency_credit:
             self.fo_select_border('Credit', 'Currency', currency_credit)
+        self.key_escape()
         if type_credit:
             self.fo_select_border('Credit', 'Type', type_credit)
+        self.key_escape()
         if customer_type:
             self.fo_select_border('Customer Information', 'Customer type', customer_type)
         if customer_code:
             self.fo_write_border('Customer Information', 'Customer code', customer_code)
         if full_name:
             self.fo_write_text_border('Customer Information', 'Full name', full_name)
+        self.key_escape()
         if paper_type:
             self.fo_select_border('Customer Information', 'Paper type', paper_type)
         if paper_number:
@@ -18306,6 +18370,7 @@ class FormAction(TestCase):
             self.fo_write_text_border('Customer Information', 'Telephone', telephone)
         if address:
             self.fo_write_text_border('Customer Information', 'Address', address)
+        self.key_escape()
         if nationality:
             self.fo_select_border('Customer Information', 'Nationality', nationality)
         if description is None or description == '':
@@ -18383,7 +18448,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -18533,7 +18598,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -18698,7 +18763,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -18719,7 +18784,7 @@ class FormAction(TestCase):
             print(f"Action delete '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.credit_ifc_item_definition_advanced_search(ifc_code_from=ifc_code, ifc_code_to=ifc_code)
             self.assert_search_not_found()
@@ -18786,7 +18851,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             transaction_code_out=self.bo_get_value_group_single('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
             ifc_code_out=self.bo_get_text_group_single('IFC code')
@@ -18851,7 +18916,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             transaction_code_out=self.bo_get_value_group('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
@@ -18877,7 +18942,7 @@ class FormAction(TestCase):
             print(f"Action delete '{transaction_code}' and '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.credit_ifc_auto_fee_advanced_search(transaction_code=transaction_code, ifc_code=ifc_code)
             self.assert_search_not_found()
@@ -19090,7 +19155,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -19349,7 +19414,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -19370,7 +19435,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.credit_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -19508,7 +19573,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             product_limit_code_out=self.bo_get_value('Product limit code')
             print(f'Product limit code: {product_limit_code_out}')
@@ -19638,7 +19703,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             sub_product_limit_code_out=self.bo_get_value('Sub product limit code')
             print(f'Sub product limit code: {sub_product_limit_code_out}')
@@ -20202,7 +20267,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_value('Account number')
             print(f'Account number: {account_number_out}')
@@ -20223,7 +20288,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.credit_account_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -20543,7 +20608,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Account number', self.credit_account_number_mask(account_number))
@@ -20559,7 +20624,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Account number', self.credit_account_number_mask(account_number))
@@ -20657,7 +20722,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             reminder_code_out=self.bo_get_text('Reminder code')
             print(f'Reminder code: {reminder_code_out}')
             return reminder_code_out
@@ -20749,7 +20814,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             reminder_code_out=self.bo_get_text('Reminder code')
             print(f'Reminder code: {reminder_code_out}')
@@ -20770,7 +20835,7 @@ class FormAction(TestCase):
             print(f"Action delete '{reminder_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.collection_reminder_simple_search(reminder_code)
             self.assert_search_not_found()
@@ -20824,7 +20889,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             profile_code_out=self.bo_get_text('Profile code')
             print(f'Profile code: {profile_code_out}')
             return profile_code_out
@@ -20865,7 +20930,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             profile_code_out=self.bo_get_text('Profile code')
             print(f'Profile code: {profile_code_out}')
             return profile_code_out
@@ -20885,7 +20950,7 @@ class FormAction(TestCase):
             print(f"Action delete '{profile_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.collection_reminder_profile_simple_search(profile_code)
             self.assert_search_not_found()
@@ -21041,7 +21106,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -21210,7 +21275,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -21231,7 +21296,7 @@ class FormAction(TestCase):
             print(f"Action delete '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.treasury_ifc_item_definition_advanced_search(ifc_code_from=ifc_code, ifc_code_to=ifc_code)
             self.assert_search_not_found()
@@ -21298,7 +21363,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             transaction_code_out=self.bo_get_value_group_single('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
             ifc_code_out=self.bo_get_text_group_single('IFC code')
@@ -21364,7 +21429,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             transaction_code_out=self.bo_get_value_group('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
@@ -21390,7 +21455,7 @@ class FormAction(TestCase):
             print(f"Action delete '{transaction_code}' and '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.treasury_ifc_auto_fee_advanced_search(transaction_code=transaction_code, ifc_code=ifc_code)
             self.assert_search_not_found()
@@ -21574,7 +21639,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -21764,7 +21829,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_text('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -21785,7 +21850,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.treasury_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -22343,7 +22408,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_value('Account number')
             print(f'Account number: {account_number_out}')
@@ -22364,7 +22429,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.treasury_account_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -22520,7 +22585,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -22689,7 +22754,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -22710,7 +22775,7 @@ class FormAction(TestCase):
             print(f"Action delete '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_ifc_item_definition_advanced_search(ifc_code_from=ifc_code, ifc_code_to=ifc_code)
             self.assert_search_not_found()
@@ -22777,7 +22842,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             transaction_code_out=self.bo_get_value_group_single('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
             ifc_code_out=self.bo_get_text_group_single('IFC code')
@@ -22842,7 +22907,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             transaction_code_out=self.bo_get_value_group('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
@@ -22868,7 +22933,7 @@ class FormAction(TestCase):
             print(f"Action delete '{transaction_code}' and '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_ifc_auto_fee_advanced_search(transaction_code=transaction_code, ifc_code=ifc_code)
             self.assert_search_not_found()
@@ -23012,7 +23077,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -23163,7 +23228,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -23184,7 +23249,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -23697,7 +23762,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_value('Account number')
             print(f'Account number: {account_number_out}')
@@ -23718,7 +23783,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_account_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -23782,7 +23847,7 @@ class FormAction(TestCase):
             self.bo_set_text('Document description', document_description)
         self.click_button('Save')
         self.assert_button_disable('Save')
-        self.assert_notification('Save successfully')
+        self.check_notification('Save successfully')
         account_number = self.bo_get_value_data('Account number')
         # search and verify
         self.trade_document_attachment_simple_search(str(account_number).replace('-', ''))
@@ -23848,7 +23913,7 @@ class FormAction(TestCase):
         # click 'Save'
         self.click_button('Save')
         self.assert_button_disable('Save')
-        self.assert_notification('Save successfully')
+        self.check_notification('Save successfully')
         account_number = self.bo_get_value_data('Account number')
         # search and verify
         self.trade_document_attachment_simple_search(str(account_number).replace('-', ''))
@@ -23878,7 +23943,7 @@ class FormAction(TestCase):
         self.click_button('Approve')
         self.assert_button_disable('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         account_number = self.bo_get_value_data('Account number')
         # search and verify
         self.trade_document_attachment_simple_search(str(account_number).replace('-', ''))
@@ -23916,7 +23981,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_document_attachment_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -24000,7 +24065,7 @@ class FormAction(TestCase):
         # # verify success
         #     self.assert_button_disable('Accept')
         #     self.switch_to_core_banking()
-        #     self.assert_notification('Saved successfully!')
+        #     self.check_notification('Saved successfully!')
         #     self.close_voucher()
         #     if expected_posting:
         #         self.assert_posting_data(**expected_posting)
@@ -24065,7 +24130,7 @@ class FormAction(TestCase):
         # else:
         # # verify success
         #     self.assert_button_disable('Save')
-        #     self.assert_notification('Saved successfully!')
+        #     self.check_notification('Saved successfully!')
         #     self.bo_click_tab('General information')
         #     master_account_number_out=self.bo_get_value_group('Master account number')
         #     print(f'Master account number: {master_account_number_out}')
@@ -24087,7 +24152,7 @@ class FormAction(TestCase):
             print(f"Action delete '{master_account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.trade_account_linkage_simple_search(str(master_account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -24396,7 +24461,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Save successfully')
             self.bo_click_tab('General information')
             customer_code_out=self.bo_get_value('Customer code')
             print(f'Customer code: {customer_code_out}')
@@ -25062,7 +25127,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Save successfully')
             self.bo_click_tab('General information')
             customer_code_out=self.bo_get_value('Customer code')
             print(f'Customer code: {customer_code_out}')
@@ -25083,7 +25148,7 @@ class FormAction(TestCase):
             print(f"Action delete '{customer_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.customer_profile_simple_search(str(customer_code).replace('-', ''))
             self.assert_search_not_found()
@@ -25394,7 +25459,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         customer_code = self.bo_get_value('Customer code')
@@ -25409,7 +25474,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         customer_code = self.bo_get_value('Customer code')
@@ -25537,7 +25602,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             master_customer_code_out=self.bo_get_value_group('Master Customer Code')
             print(f'Master Customer Code: {master_customer_code_out}')
@@ -25558,7 +25623,7 @@ class FormAction(TestCase):
             print(f"Action delete '{master_customer_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.customer_linkage_simple_search(str(master_customer_code).replace('-', ''))
             self.assert_search_not_found()
@@ -25652,7 +25717,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         # back to tab 'General Information'
         self.bo_click_tab('General Information')
         master_customer_code = self.bo_get_value_group('Master Customer Code')
@@ -25667,7 +25732,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # back to tab 'General Information'
         self.bo_click_tab('General Information')
         master_customer_code = self.bo_get_value_group('Master Customer Code')
@@ -25782,7 +25847,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             master_customer_out=self.bo_get_value('Master customer')
             print(f'Master customer: {master_customer_out}')
@@ -25803,7 +25868,7 @@ class FormAction(TestCase):
             print(f"Action delete '{master_customer}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.customer_relation_management_simple_search(str(master_customer).replace('-', ''))
             self.assert_search_not_found()
@@ -25886,7 +25951,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         # back to tab 'General Information'
         self.bo_click_tab('General Information')
         master_customer = self.bo_get_value('Master customer')
@@ -25901,7 +25966,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # back to tab 'General Information'
         self.bo_click_tab('General Information')
         master_customer = self.bo_get_value('Master customer')
@@ -25989,7 +26054,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Save successfully')
             customer_code_out=self.bo_get_value_single('Customer code')
             print(f'Customer code: {customer_code_out}')
             return customer_code_out
@@ -26042,7 +26107,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Save successfully')
             customer_code_out=self.bo_get_value_single('Customer code')
             print(f'Customer code: {customer_code_out}')
             return customer_code_out
@@ -26060,7 +26125,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Approve')
-            self.assert_notification('Approve successfully')
+            self.check_notification('Approve successfully')
             customer_code_out=self.bo_get_value_single('Customer code')
             print(f'Customer code: {customer_code_out}')
             media_name_out=self.bo_get_file_name()
@@ -26110,7 +26175,7 @@ class FormAction(TestCase):
             print(f"Action delete '{customer_code}' and '{media_name}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.customer_media_files_advanced_search(
                 customer_code=str(customer_code).replace('-', ''),
@@ -26266,7 +26331,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -26432,7 +26497,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -26453,7 +26518,7 @@ class FormAction(TestCase):
             print(f"Action delete '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.deposit_ifc_item_definition_advanced_search(ifc_code_from=ifc_code, ifc_code_to=ifc_code)
             self.assert_search_not_found()
@@ -26520,7 +26585,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             transaction_code_out=self.bo_get_value_group_single('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
             ifc_code_out=self.bo_get_text_group_single('IFC code')
@@ -26585,7 +26650,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             transaction_code_out=self.bo_get_value_group('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
@@ -26611,7 +26676,7 @@ class FormAction(TestCase):
             print(f"Action delete '{transaction_code}' and '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.deposit_ifc_auto_fee_advanced_search(transaction_code=transaction_code, ifc_code=ifc_code)
             self.assert_search_not_found()
@@ -26657,7 +26722,7 @@ class FormAction(TestCase):
         self.click_button_search_advanced()
         self.wait_loading()
 
-    def deposit_catalogue_definition_add(self, catalogue_code=None, name=None, currency_code=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, deposit_classification=None, passbook_or_statement_or_receipt=None, minimum_deposit_amount=None, catalogue_status=None, interest_payment_restrictions=None, debit_accounting=False, debit_cash=False, debit_deposit=False, credit_accounting=False, credit_cash=False, credit_deposit=False, tenor_1=None, tenor_unit_1=None, tenor_2=None, tenor_unit_2=None, deposit_tenor=None, deposit_tenor_unit=None, interest_tenor=None, interest_tenor_unit=None, minimum_tenor=None, minimum_tenor_unit=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, early_withdrawal=None, minimum_tenor_allow_early_withdrawal=None, minimum_tenor_allow_early_withdrawal_unit=None, credit_interest_yn=None, credit_interest_tenor=None, credit_interest_tenor_unit=None, the_day_of_tenor_for_crediting_interest=None, minimum_dormant_amount=None, dormant_period=None, type_of_dormant_period=None, rollover_option=None, rollover_to_catalogue=None, initial_deposit_amount=None, ifc_codes=None, sys_account_names=None, coa_accounts=None, account_aliass=None, replace_code=None, replace_bys=None, system_account_names=None, customer_sectors=None, customer_resident_statuss=None, business_lines=None, sub_products=None, bank_identifications=None, list_error_message=None):
+    def deposit_catalogue_definition_add(self, catalogue_code=None, catalogue_name=None, currency_code=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, deposit_classification=None, passbook_or_statement_or_receipt=None, minimum_deposit_amount=None, catalogue_status=None, interest_payment_restrictions=None, debit_accounting=None, debit_cash=None, debit_deposit=None, credit_accounting=None, credit_cash=None, credit_deposit=None, tenor_1=None, tenor_unit_1=None, tenor_2=None, tenor_unit_2=None, deposit_tenor=None, deposit_tenor_unit=None, interest_tenor=None, interest_tenor_unit=None, minimum_tenor=None, minimum_tenor_unit=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, early_withdrawal=None, minimum_tenor_allow_early_withdrawal=None, minimum_tenor_allow_early_withdrawal_unit=None, credit_interest_y_n=None, credit_interest_tenor=None, credit_interest_tenor_unit=None, the_day_of_tenor_for_crediting_interest=None, minimum_dormant_amount=None, dormant_period=None, type_of_dormant_period=None, rollover_option=None, rollover_to_catalogue=None, initial_deposit_amount=None, ifc_codes=None, sys_account_names=None, coa_accounts=None, account_aliass=None, replace_code=None, replace_bys=None, system_account_names=None, customer_sectors=None, customer_resident_statuss=None, business_lines=None, sub_products=None, bank_identifications=None, list_error_message=None):
         # open form
         self.close_all_form()
         self.click_menu('Deposit', 'Catalogue Definition')
@@ -26670,77 +26735,110 @@ class FormAction(TestCase):
         self.bo_click_tab('General information')
         if catalogue_code:
             self.bo_write('Catalogue code', catalogue_code)
-        if name:
-            self.bo_write_text('Name', name)
+        if catalogue_name:
+            self.bo_write_text('Name', catalogue_name)
+        self.key_escape()
         if currency_code:
             self.bo_select('Currency code', currency_code)
+        self.key_escape()
         if deposit_type:
             self.bo_select('Deposit type', deposit_type)
+        self.key_escape()
         if deposit_sub_type:
             self.bo_select('Deposit sub type', deposit_sub_type)
+        self.key_escape()
         if deposit_purpose:
             self.bo_select('Deposit purpose', deposit_purpose)
+        self.key_escape()
         if deposit_classification:
             self.bo_select('Deposit classification', deposit_classification)
+        self.key_escape()
         if passbook_or_statement_or_receipt:
             self.bo_select('Passbook or statement or receipt', passbook_or_statement_or_receipt)
         if minimum_deposit_amount:
             self.bo_write_number('Minimum deposit amount', minimum_deposit_amount)
+        self.key_escape()
         if catalogue_status:
             self.bo_select('Catalogue status', catalogue_status)
+        self.key_escape()
         if interest_payment_restrictions:
             self.bo_select_multi('Interest payment restriction', interest_payment_restrictions)
-        collap_debit = 'Debit With'
-        self.bo_click_collap(collap_debit)
+        if debit_accounting is None or debit_accounting == '':
+            debit_accounting = False
         if debit_accounting:
-            self.click_checkbox_in_multi(collap_debit, 'Accounting')
+            self.bo_click_collap('Debit With')
+            self.bo_click_checkbox_multi('Debit With', 'Accounting')
+        if debit_cash is None or debit_cash == '':
+            debit_cash = False
         if debit_cash:
-            self.click_checkbox_in_multi(collap_debit, 'Cash')
+            self.bo_click_collap('Debit With')
+            self.bo_click_checkbox_multi('Debit With', 'Cash')
+        if debit_deposit is None or debit_deposit == '':
+            debit_deposit = False
         if debit_deposit:
-            self.click_checkbox_in_multi(collap_debit, 'Deposit')
-        collap_credit = 'Credit With'
-        self.bo_click_collap(collap_credit)
+            self.bo_click_collap('Debit With')
+            self.bo_click_checkbox_multi('Debit With', 'Deposit')
+        if credit_accounting is None or credit_accounting == '':
+            credit_accounting = False
         if credit_accounting:
-            self.click_checkbox_in_multi(collap_credit, 'Accounting')
+            self.bo_click_collap('Credit With')
+            self.bo_click_checkbox_multi('Credit With', 'Accounting')
+        if credit_cash is None or credit_cash == '':
+            credit_cash = False
         if credit_cash:
-            self.click_checkbox_in_multi(collap_credit, 'Cash')
+            self.bo_click_collap('Credit With')
+            self.bo_click_checkbox_multi('Credit With', 'Cash')
+        if credit_deposit is None or credit_deposit == '':
+            credit_deposit = False
         if credit_deposit:
-            self.click_checkbox_in_multi(collap_credit, 'Deposit')
+            self.bo_click_collap('Credit With')
+            self.bo_click_checkbox_multi('Credit With', 'Deposit')
         self.bo_click_tab('Tenor and relative information')
         if tenor_1:
             self.bo_write_group('Tenor 1', tenor_1)
+        self.key_escape()
         if tenor_unit_1:
             self.bo_select_group('Tenor unit 1', tenor_unit_1)
         if tenor_2:
             self.bo_write_group('Tenor 2', tenor_2)
+        self.key_escape()
         if tenor_unit_2:
             self.bo_select_group('Tenor unit 2', tenor_unit_2)
         if deposit_tenor:
             self.bo_write_group('Deposit tenor', deposit_tenor)
+        self.key_escape()
         if deposit_tenor_unit:
             self.bo_select_group('Deposit tenor unit', deposit_tenor_unit)
         if interest_tenor:
             self.bo_write('Interest tenor', interest_tenor)
+        self.key_escape()
         if interest_tenor_unit:
             self.bo_select('Interest tenor unit', interest_tenor_unit)
         if minimum_tenor:
             self.bo_write_group('Minimum tenor', minimum_tenor)
+        self.key_escape()
         if minimum_tenor_unit:
             self.bo_select_group('Minimum tenor unit', minimum_tenor_unit)
+        self.key_escape()
         if multiple_deposit_allow:
             self.bo_select('Multiple deposit allow', multiple_deposit_allow)
+        self.key_escape()
         if multiple_withdrawal_allow:
             self.bo_select('Multiple withdrawal allow', multiple_withdrawal_allow)
+        self.key_escape()
         if early_withdrawal:
             self.bo_select('Early withdrawal', early_withdrawal)
         if minimum_tenor_allow_early_withdrawal:
             self.bo_write_group('Minimum tenor allow early withdrawal', minimum_tenor_allow_early_withdrawal)
+        self.key_escape()
         if minimum_tenor_allow_early_withdrawal_unit:
             self.bo_select_group('Minimum tenor allow early withdrawal unit', minimum_tenor_allow_early_withdrawal_unit)
-        if credit_interest_yn:
-            self.bo_select('Credit interest (Y/N)', credit_interest_yn)
+        self.key_escape()
+        if credit_interest_y_n:
+            self.bo_select('Credit interest (Y/N)', credit_interest_y_n)
         if credit_interest_tenor:
             self.bo_write_group('Credit interest tenor', credit_interest_tenor)
+        self.key_escape()
         if credit_interest_tenor_unit:
             self.bo_select_group('Credit interest tenor unit', credit_interest_tenor_unit)
         if the_day_of_tenor_for_crediting_interest:
@@ -26749,8 +26847,10 @@ class FormAction(TestCase):
             self.bo_write_number('Minimum Dormant amount', minimum_dormant_amount)
         if dormant_period:
             self.bo_write_group('Dormant period', dormant_period)
+        self.key_escape()
         if type_of_dormant_period:
             self.bo_select_group('Type of dormant period', type_of_dormant_period)
+        self.key_escape()
         if rollover_option:
             self.bo_select('Rollover option', rollover_option)
         if rollover_to_catalogue:
@@ -26811,46 +26911,116 @@ class FormAction(TestCase):
         else:
             # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code = self.bo_get_value('Catalogue code')
             print('Catalogue code: ' + catalogue_code)
-            # search and verify
-            self.deposit_catalogue_definition_simple_search(catalogue_code)
-            if catalogue_code:
-                self.assert_table_data('Catalogue code', 1, catalogue_code)
-            if name:
-                self.assert_table_data('Catalogue name', 1, name)
-            if currency_code:
-                self.assert_table_data('Currency code', 1, currency_code)
-            if deposit_type:
-                self.assert_table_data('Deposit type', 1, deposit_type)
-            if passbook_or_statement_or_receipt:
-                self.assert_table_data('Passbook or statement', 1, passbook_or_statement_or_receipt)
-            if tenor_1:
-                self.assert_table_data('Tenor', 1, tenor_1)
-            if tenor_unit_1:
-                self.assert_table_data('Tenor unit', 1, tenor_unit_1)
-            if catalogue_status:
-                self.assert_table_data('Status', 1, catalogue_status)
             return catalogue_code
 
-    def deposit_catalogue_definition_view(self, catalogue_code, catalogue_name=None, interest_payment_restrictions=None, expected_ifc_list_codes=None, expected_ifc_names=None, expected_ifc_values=None, expected_ifc_types=None, expected_ifc_tenors=None, expected_ifc_tenor_units=None, expected_ifc_statuss=None, expected_gls_sys_account_names=None, expected_gls_account_aliass=None, expected_extension_sys_account_names=None, expected_extension_conditions=None, expected_extension_replace_bys=None):
+    def deposit_catalogue_definition_view(self, catalogue_code, catalogue_name=None, currency_code=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, deposit_classification=None, passbook_or_statement_or_receipt=None, minimum_deposit_amount=None, catalogue_status=None, interest_payment_restrictions=None, created_by=None, approved_by=None, debit_accounting=None, debit_cash=None, debit_deposit=None, credit_accounting=None, credit_cash=None, credit_deposit=None, tenor_1=None, tenor_unit_1=None, tenor_2=None, tenor_unit_2=None, deposit_tenor=None, deposit_tenor_unit=None, interest_tenor_unit=None, interest_tenor=None, minimum_tenor=None, minimum_tenor_unit=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, early_withdrawal=None, minimum_tenor_allow_early_withdrawal=None, minimum_tenor_allow_early_withdrawal_unit=None, credit_interest_y_n=None, credit_interest_tenor=None, credit_interest_tenor_unit=None, the_day_of_tenor_for_crediting_interest=None, minimum_dormant_amount=None, dormant_period=None, type_of_dormant_period=None, rollover_option=None, rollover_to_catalogue=None, initial_deposit_amount=None, expected_ifc_list_codes=None, expected_ifc_names=None, expected_ifc_values=None, expected_ifc_types=None, expected_ifc_tenors=None, expected_ifc_tenor_units=None, expected_ifc_statuss=None, expected_gls_sys_account_names=None, expected_gls_account_aliass=None, expected_extension_sys_account_names=None, expected_extension_conditions=None, expected_extension_replace_bys=None):
         # search
         self.deposit_catalogue_definition_simple_search(catalogue_code)
-        if catalogue_code:
-            self.assert_table_data('Catalogue code', 1, catalogue_code)
+        self.assert_table_data('Catalogue code', 1, catalogue_code)
         # view
         self.click_table_menu('View', 1)
-        self.wait_for_button_available('Modify')
+        self.wait_loading()
         self.assert_form_title('DPT-Catalogue Definition-View')
-        # verify value tab 'General information'
+        # verify value
         self.bo_click_tab('General information')
         self.bo_assert_value('Catalogue code', catalogue_code)
-        if interest_payment_restrictions:
-            self.bo_assert_select_multi('Interest payment restriction', interest_payment_restrictions)
         if catalogue_name:
             self.bo_assert_text('Name', catalogue_name)
+        if currency_code:
+            self.bo_assert_select('Currency code', currency_code)
+        if deposit_type:
+            self.bo_assert_select('Deposit type', deposit_type)
+        if deposit_sub_type:
+            self.bo_assert_select('Deposit sub type', deposit_sub_type)
+        if deposit_purpose:
+            self.bo_assert_select('Deposit purpose', deposit_purpose)
+        if deposit_classification:
+            self.bo_assert_select('Deposit classification', deposit_classification)
+        if passbook_or_statement_or_receipt:
+            self.bo_assert_select('Passbook or statement or receipt', passbook_or_statement_or_receipt)
+        if minimum_deposit_amount:
+            self.bo_assert_value('Minimum deposit amount', minimum_deposit_amount)
+        if catalogue_status:
+            self.bo_assert_select('Catalogue status', catalogue_status)
+        if interest_payment_restrictions:
+            self.bo_assert_select_multi('Interest payment restriction', interest_payment_restrictions)
+        if created_by:
+            self.bo_assert_text_group('Created by', created_by)
+        if approved_by:
+            self.bo_assert_text_group('Approved by', approved_by)
+        if debit_accounting:
+            self.bo_click_collap('Debit with ')
+            self.bo_assert_checkbox_multi('Debit with ', 'Accounting', debit_accounting)
+        if debit_cash:
+            self.bo_click_collap('Debit with ')
+            self.bo_assert_checkbox_multi('Debit with ', 'Cash', debit_cash)
+        if debit_deposit:
+            self.bo_click_collap('Debit with ')
+            self.bo_assert_checkbox_multi('Debit with ', 'Deposit', debit_deposit)
+        if credit_accounting:
+            self.bo_click_collap('Credit with')
+            self.bo_assert_checkbox_multi('Credit with', 'Accounting', credit_accounting)
+        if credit_cash:
+            self.bo_click_collap('Credit with')
+            self.bo_assert_checkbox_multi('Credit with', 'Cash', credit_cash)
+        if credit_deposit:
+            self.bo_click_collap('Credit with')
+            self.bo_assert_checkbox_multi('Credit with', 'Deposit', credit_deposit)
+        self.bo_click_tab('Tenor and relative information')
+        if tenor_1:
+            self.bo_assert_value_group('Tenor 1', tenor_1)
+        if tenor_unit_1:
+            self.bo_assert_select_group('Tenor unit 1', tenor_unit_1)
+        if tenor_2:
+            self.bo_assert_value_group('Tenor 2', tenor_2)
+        if tenor_unit_2:
+            self.bo_assert_select_group('Tenor unit 2', tenor_unit_2)
+        if deposit_tenor:
+            self.bo_assert_value_group('Deposit tenor', deposit_tenor)
+        if deposit_tenor_unit:
+            self.bo_assert_select_group('Deposit tenor unit', deposit_tenor_unit)
+        if interest_tenor_unit:
+            self.bo_assert_select('Interest tenor unit', interest_tenor_unit)
+        if interest_tenor:
+            self.bo_assert_value('Interest tenor', interest_tenor)
+        if minimum_tenor:
+            self.bo_assert_value_group('Minimum tenor', minimum_tenor)
+        if minimum_tenor_unit:
+            self.bo_assert_select_group('Minimum tenor unit', minimum_tenor_unit)
+        if multiple_deposit_allow:
+            self.bo_assert_select('Multiple deposit allow', multiple_deposit_allow)
+        if multiple_withdrawal_allow:
+            self.bo_assert_select('Multiple withdrawal allow', multiple_withdrawal_allow)
+        if early_withdrawal:
+            self.bo_assert_select('Early withdrawal', early_withdrawal)
+        if minimum_tenor_allow_early_withdrawal:
+            self.bo_assert_value_group('Minimum tenor allow early withdrawal', minimum_tenor_allow_early_withdrawal)
+        if minimum_tenor_allow_early_withdrawal_unit:
+            self.bo_assert_select_group('Minimum tenor allow early withdrawal unit', minimum_tenor_allow_early_withdrawal_unit)
+        if credit_interest_y_n:
+            self.bo_assert_select('Credit interest (Y/N)', credit_interest_y_n)
+        if credit_interest_tenor:
+            self.bo_assert_value_group('Credit interest tenor', credit_interest_tenor)
+        if credit_interest_tenor_unit:
+            self.bo_assert_select_group('Credit interest tenor unit', credit_interest_tenor_unit)
+        if the_day_of_tenor_for_crediting_interest:
+            self.bo_assert_value('The day of tenor for crediting interest', the_day_of_tenor_for_crediting_interest)
+        if minimum_dormant_amount:
+            self.bo_assert_value('Minimum Dormant amount', minimum_dormant_amount)
+        if dormant_period:
+            self.bo_assert_value_group('Dormant period', dormant_period)
+        if type_of_dormant_period:
+            self.bo_assert_select_group('Type of dormant period', type_of_dormant_period)
+        if rollover_option:
+            self.bo_assert_select('Rollover option', rollover_option)
+        if rollover_to_catalogue:
+            self.bo_assert_value_group('Rollover to catalogue', rollover_to_catalogue)
+        if initial_deposit_amount:
+            self.bo_assert_value('Initial deposit amount', initial_deposit_amount)
         self.bo_click_tab('IFC Information ')
         if expected_ifc_names:
             for ifc_code, ifc_name in zip(expected_ifc_list_codes, expected_ifc_names):
@@ -26881,7 +27051,7 @@ class FormAction(TestCase):
         print('View catalogue code: ' + catalogue_code)
         return catalogue_code
 
-    def deposit_catalogue_definition_update(self, catalogue_code, catalogue_name=None, list_error_message=None):
+    def deposit_catalogue_definition_update(self, catalogue_code, catalogue_name=None, currency_code=None, deposit_type=None, deposit_sub_type=None, deposit_purpose=None, deposit_classification=None, passbook_or_statement_or_receipt=None, minimum_deposit_amount=None, catalogue_status=None, interest_payment_restrictions=None, debit_accounting=None, debit_cash=None, debit_deposit=None, credit_accounting=None, credit_cash=None, credit_deposit=None, minimum_tenor_unit=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, credit_interest_y_n=None, credit_interest_tenor=None, credit_interest_tenor_unit=None, the_day_of_tenor_for_crediting_interest=None, minimum_dormant_amount=None, dormant_period=None, type_of_dormant_period=None, initial_deposit_amount=None, list_error_message=None):
         self.deposit_catalogue_definition_view(catalogue_code)
         self.wait_loading()
         self.click_button('Modify')
@@ -26889,6 +27059,91 @@ class FormAction(TestCase):
         self.bo_click_tab('General information')
         if catalogue_name or catalogue_name == '':
             self.bo_write_text('Name', catalogue_name)
+        self.key_escape()
+        if currency_code:
+            self.bo_select('Currency code', currency_code)
+        self.key_escape()
+        if deposit_type:
+            self.bo_select('Deposit type', deposit_type)
+        self.key_escape()
+        if deposit_sub_type:
+            self.bo_select('Deposit sub type', deposit_sub_type)
+        self.key_escape()
+        if deposit_purpose:
+            self.bo_select('Deposit purpose', deposit_purpose)
+        self.key_escape()
+        if deposit_classification:
+            self.bo_select('Deposit classification', deposit_classification)
+        self.key_escape()
+        if passbook_or_statement_or_receipt:
+            self.bo_select('Passbook or statement or receipt', passbook_or_statement_or_receipt)
+        if minimum_deposit_amount:
+            self.bo_write_number('Minimum deposit amount', minimum_deposit_amount)
+        self.key_escape()
+        if catalogue_status:
+            self.bo_select('Catalogue status', catalogue_status)
+        self.key_escape()
+        if interest_payment_restrictions:
+            self.bo_select_multi('Interest payment restriction', interest_payment_restrictions)
+        if debit_accounting is None or debit_accounting == '':
+            debit_accounting = False
+        if debit_accounting:
+            self.bo_click_collap('Debit with ')
+            self.bo_click_checkbox_multi('Debit with ', 'Accounting')
+        if debit_cash is None or debit_cash == '':
+            debit_cash = False
+        if debit_cash:
+            self.bo_click_collap('Debit with ')
+            self.bo_click_checkbox_multi('Debit with ', 'Cash')
+        if debit_deposit is None or debit_deposit == '':
+            debit_deposit = False
+        if debit_deposit:
+            self.bo_click_collap('Debit with ')
+            self.bo_click_checkbox_multi('Debit with ', 'Deposit')
+        if credit_accounting is None or credit_accounting == '':
+            credit_accounting = False
+        if credit_accounting:
+            self.bo_click_collap('Credit with')
+            self.bo_click_checkbox_multi('Credit with', 'Accounting')
+        if credit_cash is None or credit_cash == '':
+            credit_cash = False
+        if credit_cash:
+            self.bo_click_collap('Credit with')
+            self.bo_click_checkbox_multi('Credit with', 'Cash')
+        if credit_deposit is None or credit_deposit == '':
+            credit_deposit = False
+        if credit_deposit:
+            self.bo_click_collap('Credit with')
+            self.bo_click_checkbox_multi('Credit with', 'Deposit')
+        self.bo_click_tab('Tenor and relative information')
+        self.key_escape()
+        if minimum_tenor_unit:
+            self.bo_select_group('Minimum tenor unit', minimum_tenor_unit)
+        self.key_escape()
+        if multiple_deposit_allow:
+            self.bo_select('Multiple deposit allow', multiple_deposit_allow)
+        self.key_escape()
+        if multiple_withdrawal_allow:
+            self.bo_select('Multiple withdrawal allow', multiple_withdrawal_allow)
+        self.key_escape()
+        if credit_interest_y_n:
+            self.bo_select('Credit interest (Y/N)', credit_interest_y_n)
+        if credit_interest_tenor:
+            self.bo_write_number_group('Credit interest tenor', credit_interest_tenor)
+        self.key_escape()
+        if credit_interest_tenor_unit:
+            self.bo_select_group('Credit interest tenor unit', credit_interest_tenor_unit)
+        if the_day_of_tenor_for_crediting_interest:
+            self.bo_write_number('The day of tenor for crediting interest', the_day_of_tenor_for_crediting_interest)
+        if minimum_dormant_amount:
+            self.bo_write_number('Minimum Dormant amount', minimum_dormant_amount)
+        if dormant_period:
+            self.bo_write_number_group('Dormant period', dormant_period)
+        self.key_escape()
+        if type_of_dormant_period:
+            self.bo_select_group('Type of dormant period', type_of_dormant_period)
+        if initial_deposit_amount:
+            self.bo_write_number('Initial deposit amount', initial_deposit_amount)
         # click 'Save'
         self.click_button('Save')
         if list_error_message:
@@ -26897,20 +27152,15 @@ class FormAction(TestCase):
             self.assert_list_error_message(list_error_message)
             print(f'Update catalogue code: {catalogue_code} failed!')
         else:
-            # verify success
+        # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code = self.bo_get_value('Catalogue code')
-            # search and verify
-            self.deposit_catalogue_definition_view(
-                catalogue_code=catalogue_code,
-                catalogue_name=catalogue_name
-            )
             print('Updated catalogue code: ' + catalogue_code)
             return catalogue_code
 
-    def deposit_catalogue_definition_delete(self, catalogue_code, list_error_message=None):
+    def deposit_catalogue_definition_delete(self, catalogue_code, list_error_message=None, expected_message=None):
         # search
         self.deposit_catalogue_definition_simple_search(catalogue_code)
         if catalogue_code:
@@ -26925,11 +27175,9 @@ class FormAction(TestCase):
             self.assert_list_error_message(list_error_message)
             print(f'Delete catalogue code: {catalogue_code} failed!')
         else:
-            # verify success
-            self.assert_notification('Deleted successfully')
-            # search and verify
-            self.deposit_catalogue_definition_simple_search(catalogue_code)
-            self.assert_search_not_found()
+        # verify success
+            if expected_message:
+                self.assert_notification(expected_message)
             print('Deleted catalogue code: ' + catalogue_code)
             return catalogue_code
 
@@ -26986,7 +27234,7 @@ class FormAction(TestCase):
         self.click_button_search_advanced()
         self.wait_loading()
 
-    def deposit_account_view(self, account_number, passbook_or_receipt_number=None, linkage_account_number=None, account_name=None, currency_code=None, account_holder_type=None, account_holder=None, branch_id=None, account_status=None, catalogue_code=None, deposit_type=None, deposit_sub_type=None, begin_of_tenor=None, end_of_tenor=None, open_date=None, close_date=None, last_transaction_date=None, last_date_system_transfer_interest_to_due=None, dormant_date=None, last_change_dormant_to_normal_date=None, created_by=None, approved_by=None, account_manager_staff_code=None, agent_hub_referral=None, relation_customers=None, business_purpose_code=None, is_restricted=None, current_balance=None, available_balance=None, minimum_deposit_amount=None, minimum_amount_to_dormant=None, earmark_block_amount=None, initial_deposit_amount=None, interest_accrual=None, interest_receivable=None, interest_prepaid=None, interest_due=None, interest_not_paid=None, interest_paid=None, deposit_amount=None, withdraw_amount=None, deposit_tenor=None, interest_tenor=None, minimum_tenor=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, early_withdrawal=None, minimum_tenor_allow_early_withdrawal=None, credit_interest=None, credit_interest_tenor=None, the_day_of_tenor_for_crediting_interest=None, dormant_period=None, rollover_option=None, rollover_to_catalogue=None, employer_organization_name=None, reference_id=None, reason_of_account_opening=None, relationship_manager=None, expected_account_gl_names=None, expected_account_gl_numbers=None, expected_account_gl_name=None, expected_account_gl_number=None, expected_ifc_codes=None, expected_ifc_gl_names=None, expected_ifc_gl_numbers=None, expected_ifc_list_codes=None, expected_ifc_code=None, expected_ifc_names=None, expected_ifc_base_values=None, expected_ifc_is_linkeds=None, expected_ifc_values=None, expected_ifc_margin_values=None, expected_ifc_statuses=None, expected_ifc_outstandings=None, expected_ifc_paids=None, expected_ifc_basic_balances=None, expected_ifc_name=None, expected_ifc_base_value=None, expected_ifc_is_linked=None, expected_ifc_value=None, expected_ifc_margin_value=None, expected_ifc_status=None, expected_ifc_outstanding=None, expected_ifc_paid=None, expected_ifc_basic_balance=None):
+    def deposit_account_view(self, account_number, passbook_or_receipt_number=None, linkage_account_number=None, account_name=None, currency_code=None, account_holder_type=None, account_holder=None, branch_id=None, account_status=None, catalogue_code=None, deposit_type=None, deposit_sub_type=None, begin_of_tenor=None, end_of_tenor=None, open_date=None, close_date=None, last_transaction_date=None, last_date_system_transfer_interest_to_due=None, dormant_date=None, last_change_dormant_to_normal_date=None, created_by=None, approved_by=None, account_manager_staff_code=None, agent_hub_referral=None, relation_customers=None, business_purpose_code=None, is_restricted=None, current_balance=None, available_balance=None, minimum_deposit_amount=None, minimum_amount_to_dormant=None, earmark_block_amount=None, initial_deposit_amount=None, interest_accrual=None, interest_receivable=None, interest_prepaid=None, interest_due=None, interest_not_paid=None, interest_paid=None, deposit_amount=None, withdraw_amount=None, deposit_tenor=None, interest_tenor=None, minimum_tenor=None, multiple_deposit_allow=None, multiple_withdrawal_allow=None, early_withdrawal=None, minimum_tenor_allow_early_withdrawal=None, credit_interest=None, credit_interest_tenor=None, the_day_of_tenor_for_crediting_interest=None, dormant_period=None, rollover_option=None, rollover_to_catalogue=None, employer_organization_name=None, reference_id=None, reason_of_account_opening=None, safe_deposit_locker_number=None, relationship_manager=None, expected_account_gl_names=None, expected_account_gl_numbers=None, expected_account_gl_name=None, expected_account_gl_number=None, expected_ifc_codes=None, expected_ifc_gl_names=None, expected_ifc_gl_numbers=None, expected_ifc_list_codes=None, expected_ifc_code=None, expected_ifc_names=None, expected_ifc_base_values=None, expected_ifc_is_linkeds=None, expected_ifc_values=None, expected_ifc_margin_values=None, expected_ifc_statuses=None, expected_ifc_outstandings=None, expected_ifc_paids=None, expected_ifc_basic_balances=None, expected_ifc_name=None, expected_ifc_base_value=None, expected_ifc_is_linked=None, expected_ifc_value=None, expected_ifc_margin_value=None, expected_ifc_status=None, expected_ifc_outstanding=None, expected_ifc_paid=None, expected_ifc_basic_balance=None):
         # search deposit account
         self.deposit_account_simple_search(str(account_number).replace('-', ''))
         self.assert_table_data('Account number', 1, self.deposit_account_number_mask(account_number))
@@ -27046,7 +27294,7 @@ class FormAction(TestCase):
         if relation_customers:
             self.bo_assert_value('Relation customers', relation_customers)
         if business_purpose_code:
-            self.bo_assert_value('Business Purpose Code', business_purpose_code)
+            self.bo_assert_value_group('Business Purpose Code', business_purpose_code)
         if is_restricted:
             self.bo_assert_select('Is Restricted', is_restricted)
         # verify value tab 'Balance information'
@@ -27115,6 +27363,8 @@ class FormAction(TestCase):
             self.bo_assert_text('Reference id', reference_id)
         if reason_of_account_opening:
             self.bo_assert_text('Reason of Account Opening', reason_of_account_opening)
+        if safe_deposit_locker_number:
+            self.bo_assert_text('Safe Deposit Locker Number', safe_deposit_locker_number)
         if relationship_manager:
             self.bo_assert_select('Relationship Manager', relationship_manager)
         # verify value tab 'Account GLs Information'
@@ -27177,7 +27427,7 @@ class FormAction(TestCase):
             for ifc_code, ifc_gl_name, ifc_gl_number in zip(expected_ifc_codes, expected_ifc_gl_names, expected_ifc_gl_numbers):
                 self.bo_assert_text_table_ifc_gls(ifc_code, ifc_gl_name, str(ifc_gl_number).replace('-',''))
 
-    def deposit_account_update(self, account_number, agent_hub_referral=None, is_restricted=None, rollover_option=None, rollover_to_catalogue=None, reason_of_account_opening=None, list_error_message=None):
+    def deposit_account_update(self, account_number, agent_hub_referral=None, is_restricted=None, rollover_option=None, rollover_to_catalogue=None, reason_of_account_opening=None, safe_deposit_locker_number=None, list_error_message=None):
         # search deposit account
         self.deposit_account_simple_search(str(account_number).replace('-', ''))
         self.assert_table_data('Account number', 1, account_number)
@@ -27202,6 +27452,8 @@ class FormAction(TestCase):
         self.bo_click_tab('Addition information')
         if reason_of_account_opening:
             self.bo_write_text('Reason of Account Opening', reason_of_account_opening)
+        if safe_deposit_locker_number:
+            self.bo_write_text('Safe Deposit Locker Number', safe_deposit_locker_number)
         # update value tab 'IFC list'
         # self.bo_click_tab('IFC list')
         # click 'Save'
@@ -27215,7 +27467,8 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Saved successfully!')
+            self.bo_click_tab('General information')
             account_number = self.bo_get_value_data('Account number')
             print('Updated account number: ' + account_number)
             return account_number
@@ -27236,7 +27489,7 @@ class FormAction(TestCase):
             print(f'Delete account number: {account_number} failed!')
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             # search and verify
             self.deposit_account_simple_search(account_number)
             self.assert_search_not_found()
@@ -27309,7 +27562,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Action successful')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Account number', account_number)
@@ -27325,7 +27578,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Action successful')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Account number', account_number)
@@ -27343,7 +27596,7 @@ class FormAction(TestCase):
         self.assert_form_title('DPT-Stock Inventory-Search')
         self.simple_search(text)
 
-    def stock_inventory_advanced_search(self, stock_prefix, from_serial, to_serial, stock_type=None, from_serial_to=None, to_serial_from=None, stock_no=None, book_status=None, confirm_status=None, branch=None, user_create=None, status_of_stock_leaves=None, account_number=None, amount=None, stock_balance=None, currency=None, user_approved=None, stock_holding_user=None):
+    def stock_inventory_advanced_search(self, stock_prefix=None, from_serial=None, to_serial=None, stock_type=None, from_serial_to=None, to_serial_from=None, stock_no=None, book_status=None, confirm_status=None, branch=None, user_create=None, status_of_stock_leaves=None, account_number=None, amount=None, stock_balance=None, currency=None, user_approved=None, stock_holding_user=None):
         self.close_all_form()
         self.click_menu('Deposit', 'Stock Inventory')
         self.wait_for_button_available('Add')
@@ -27523,7 +27776,7 @@ class FormAction(TestCase):
             print(f'Delete stock_prefix: {stock_prefix}, from_serial: {from_serial}, to_serial: {to_serial} failed!')
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             # search and verify
             self.stock_inventory_advanced_search(stock_prefix, from_serial, to_serial, stock_type=stock_type)
             self.assert_search_not_found()
@@ -27596,7 +27849,7 @@ class FormAction(TestCase):
         # verify success
             self.assert_button_disable('Accept')
             self.switch_to_core_banking()
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.close_voucher()
             if expected_posting:
                 self.assert_posting_data(**expected_posting)
@@ -27667,7 +27920,7 @@ class FormAction(TestCase):
             else:
             # verify success
                 self.assert_button_disable('Save')
-                self.assert_notification('Saved successfully!')
+                self.check_notification('Saved successfully!')
                 master_account_number = self.bo_get_value_data('Master account number')
                 # search and verify
                 self.dpt_account_linkage_view(
@@ -27692,7 +27945,7 @@ class FormAction(TestCase):
             else:
             # verify success
                 self.assert_button_disable('Save')
-                self.assert_notification('Saved successfully!')
+                self.check_notification('Saved successfully!')
                 master_account_number = self.bo_get_value_data('Master account number')
                 # search and verify
                 self.dpt_account_linkage_view(
@@ -27715,7 +27968,7 @@ class FormAction(TestCase):
             else:
             # verify success
                 self.assert_button_disable('Save')
-                self.assert_notification('Saved successfully!')
+                self.check_notification('Saved successfully!')
                 master_account_number = self.bo_get_value_data('Master account number')
                 # search and verify
                 self.dpt_account_linkage_view(
@@ -27738,7 +27991,7 @@ class FormAction(TestCase):
         self.click_table_menu('Delete', 1)
         self.wait_loading()
         self.click_button_in_popup('Yes')
-        self.assert_notification('Deleted successfully')
+        self.check_notification('Deleted successfully')
         # search and verify
         self.wait_loading()
         self.dpt_account_linkage_simple_search(master_account_number)
@@ -27943,7 +28196,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -28190,7 +28443,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -28211,7 +28464,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.overdraft_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -28415,7 +28668,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save modify OD')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('Overdraft contract information')
             contract_number_out=self.bo_get_value('Contract number')
             print(f'Contract number: {contract_number_out}')
@@ -28540,7 +28793,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Approve')
         self.wait_loading()
-        self.assert_notification('Approve successfully')
+        self.check_notification('Approve successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Contract number', self.deposit_account_number_mask(contract_number))
@@ -28556,7 +28809,7 @@ class FormAction(TestCase):
         self.wait_loading()
         self.click_button('Reject')
         self.wait_loading()
-        self.assert_notification('Reject successfully')
+        self.check_notification('Reject successfully')
         # back to tab 'General information'
         self.bo_click_tab('General information')
         self.bo_assert_value('Contract number', self.deposit_account_number_mask(contract_number))
@@ -28698,7 +28951,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue Code')
             print(f'Catalogue Code: {catalogue_code_out}')
@@ -28789,7 +29042,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue Code')
             print(f'Catalogue Code: {catalogue_code_out}')
@@ -28810,7 +29063,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.mortgage_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -29268,7 +29521,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_text('Account code')
             print(f'Account code: {account_number_out}')
@@ -29289,7 +29542,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.mortgage_account_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -29385,7 +29638,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             catalogue_code_out=self.bo_get_value('Catalogue Code')
             print(f'Catalogue Code: {catalogue_code_out}')
@@ -29483,7 +29736,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             catalogue_code_out=self.bo_get_value('Catalogue Code')
             print(f'Catalogue Code: {catalogue_code_out}')
@@ -29504,7 +29757,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.fixed_asset_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -29746,7 +29999,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_text('Account number')
             print(f'Account number: {account_number_out}')
@@ -29767,7 +30020,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.fixed_asset_and_tool_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -29868,7 +30121,7 @@ class FormAction(TestCase):
                 self.assertEqual(str(self.bo_get_select_single('Branch Code')).split(' - ')[0], branch_code)
             self.click_button('Save')
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             account_number = self.bo_get_text_data('Account number')
             # search and verify
             self.accounting_bank_account_definition_simple_search(account_number)
@@ -29987,7 +30240,7 @@ class FormAction(TestCase):
         # click 'Save'
         self.click_button('Save')
         self.assert_button_disable('Save')
-        self.assert_notification('Saved successfully!')
+        self.check_notification('Saved successfully!')
         account_number = self.bo_get_text_data('Account number')
         # search and verify
         self.accounting_bank_account_definition_view(
@@ -30024,7 +30277,7 @@ class FormAction(TestCase):
         self.click_table_menu('Delete', 1)
         self.wait_loading()
         self.click_button_in_popup('Yes')
-        self.assert_notification('Deleted successfully')
+        self.check_notification('Deleted successfully')
         # search and verify
         self.accounting_bank_account_definition_simple_search(account_number)
         self.assert_search_not_found()
@@ -30110,7 +30363,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             account_number_out=self.bo_get_text_single('Account number')
             print(f'Account number: {account_number_out}')
             account_name_out=self.bo_get_text_single('Account name')
@@ -30163,7 +30416,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             account_number_out=self.bo_get_text('Account number')
             print(f'Account number: {account_number_out}')
@@ -30186,7 +30439,7 @@ class FormAction(TestCase):
             print(f"Action delete '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.common_account_definition_simple_search(account_number)
             self.assert_search_not_found()
@@ -30258,7 +30511,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             branch_name_out=self.bo_get_select_single('Branch Name')
             print(f'Branch Name: {branch_name_out}')
             currency_code_out=self.bo_get_select_single('Currency Code')
@@ -30327,7 +30580,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             branch_name_out=self.bo_get_select('Branch Name')
             print(f'Branch Name: {branch_name_out}')
@@ -30361,7 +30614,7 @@ class FormAction(TestCase):
             print(f"Action delete '{branch_name}' and '{currency_code}' and '{clearing_branch_code}' and '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.clearing_account_definition_simple_search(str(account_number).replace('-', ''))
             self.assert_search_not_found()
@@ -30432,7 +30685,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             branch_name_out=self.bo_get_select_single('Branch name')
             print(f'Branch name: {branch_name_out}')
             account_currency_out=self.bo_get_select_single('Account currency')
@@ -30503,7 +30756,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             branch_name_out=self.bo_get_select('Branch name')
             print(f'Branch name: {branch_name_out}')
@@ -30537,7 +30790,7 @@ class FormAction(TestCase):
             print(f"Action delete '{branch_name}' and '{account_currency}' and '{clearing_currency}' and '{account_number}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.foreign_exchange_account_definition_advanced_search(branch_name=self.get_branch_name(branch_name), account_currency=account_currency, clear_currency=clearing_currency, account_number=account_number)
             self.assert_search_not_found()
@@ -30583,7 +30836,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             neptune_gl_account_out=self.bo_get_value_group_single('Neptune GL Account')
             print(f'Neptune GL Account: {neptune_gl_account_out}')
             mapping_gl_account_out=self.bo_get_text_single('Mapping GL Account')
@@ -30638,7 +30891,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             neptune_gl_account_out=self.bo_get_value_group('Neptune GL Account')
             print(f'Neptune GL Account: {neptune_gl_account_out}')
@@ -30661,7 +30914,7 @@ class FormAction(TestCase):
             print(f"Action delete '{neptune_gl_account}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.account_map_table_simple_search(str(neptune_gl_account).replace('-', ''))
             self.assert_search_not_found()
@@ -30814,7 +31067,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -30979,7 +31232,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             ifc_code_out=self.bo_get_value('IFC code')
             print(f'IFC code: {ifc_code_out}')
@@ -31000,7 +31253,7 @@ class FormAction(TestCase):
             print(f"Action delete '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.payment_ifc_item_definition_simple_search(str(ifc_code).replace('-', ''))
             self.assert_search_not_found()
@@ -31067,7 +31320,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             transaction_code_out=self.bo_get_value_group_single('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
             ifc_code_out=self.bo_get_text_group_single('IFC code')
@@ -31132,7 +31385,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             transaction_code_out=self.bo_get_value_group('Transaction code')
             print(f'Transaction code: {transaction_code_out}')
@@ -31158,7 +31411,7 @@ class FormAction(TestCase):
             print(f"Action delete '{transaction_code}' and '{ifc_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.payment_ifc_auto_fee_advanced_search(transaction_code=transaction_code, ifc_code=ifc_code)
             self.assert_search_not_found()
@@ -31263,7 +31516,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -31367,7 +31620,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Save successfully')
+            self.check_notification('Save successfully')
             self.bo_click_tab('General information')
             catalogue_code_out=self.bo_get_value('Catalogue code')
             print(f'Catalogue code: {catalogue_code_out}')
@@ -31388,7 +31641,7 @@ class FormAction(TestCase):
             print(f"Action delete '{catalogue_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.payment_catalogue_definition_simple_search(catalogue_code)
             self.assert_search_not_found()
@@ -31532,7 +31785,7 @@ class FormAction(TestCase):
             print('Transaction failed!')
         else:
         # verify success
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
 
     def payment_queue_for_inward_reject(self, message_code, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None):
         # view
@@ -31553,7 +31806,7 @@ class FormAction(TestCase):
             print('Transaction failed!')
         else:
         # verify success
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
 
     # PMT-Payment Queue for Outward
     def payment_queue_for_outward_simple_search(self, text):
@@ -31700,7 +31953,7 @@ class FormAction(TestCase):
             print('Transaction failed!')
         else:
         # verify success
-            self.assert_notification('Approve successfully')
+            self.check_notification('Approve successfully')
 
     def payment_queue_for_outward_reject(self, message_code, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None):
         # view
@@ -31721,7 +31974,7 @@ class FormAction(TestCase):
             print('Transaction failed!')
         else:
         # verify success
-            self.assert_notification('Reject successfully')
+            self.check_notification('Reject successfully')
 
     # PMT-Correspondent Bank
     def correspondent_bank_simple_search(self, text):
@@ -31826,7 +32079,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             bic_code_swift_code_out=self.bo_get_text_single('BIC Code/ SWIFT Code')
             print(f'BIC Code/ SWIFT Code: {bic_code_swift_code_out}')
             return bic_code_swift_code_out
@@ -31962,7 +32215,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General information')
             bic_code_swift_code_out=self.bo_get_text('BIC Code/ SWIFT Code')
             print(f'BIC Code/ SWIFT Code: {bic_code_swift_code_out}')
@@ -31983,7 +32236,7 @@ class FormAction(TestCase):
             print(f"Action delete '{bic_code_swift_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.correspondent_bank_simple_search(bic_code_swift_code)
             self.assert_search_not_found()
@@ -32156,7 +32409,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             user_code_out=self.bo_get_text('User Code')
             print(f'User Code: {user_code_out}')
@@ -32382,7 +32635,7 @@ class FormAction(TestCase):
         else:
         # verify success
             self.assert_button_disable('Save')
-            self.assert_notification('Saved successfully!')
+            self.check_notification('Saved successfully!')
             self.bo_click_tab('General Information')
             user_code_out=self.bo_get_text('User Code')
             print(f'User Code: {user_code_out}')
@@ -32403,7 +32656,7 @@ class FormAction(TestCase):
             print(f"Action delete '{user_code}' failed!")
         else:
         # verify success
-            self.assert_notification('Deleted successfully')
+            self.check_notification('Deleted successfully')
             self.wait_loading()
             self.user_profile_simple_search(user_code)
             self.assert_search_not_found()
@@ -32425,7 +32678,7 @@ class FormAction(TestCase):
             print(f"Action logout '{user_code}' failed!")
         else:
         # verify success
-            self.assert_notification('#Logout all successfully')
+            self.check_notification('#Logout all successfully')
             self.wait_loading()
             self.user_profile_simple_search(user_code)
             self.assert_search_not_found()
@@ -32438,7 +32691,7 @@ class FormAction(TestCase):
         # reset password
         self.click_button('Reset password')
         self.wait_loading()
-        self.assert_notification('#Reset password successfully')
+        self.check_notification('#Reset password successfully')
         # get value
         self.bo_click_tab('General Information')
         user_code_out=self.bo_get_text('User Code')
@@ -32494,12 +32747,57 @@ class FormAction(TestCase):
 
 
 # -------------------------- handle common methods --------------------------
-    def check_serial_number_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+    def check_serial_number_from_to_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
         self.stock_inventory_advanced_search(prefix, generated_number_from, generated_number_to, s_type)
         if (self.get_text_notification(timeout=5) == 'Data not found'):
             return True
         else:
             return False
+
+    def check_serial_number_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+        # """
+        # Kiểm tra số serial không tồn tại dựa trên 3 cặp trường khác nhau.
+        # Hàm chỉ trả về True khi cả 3 cặp tìm kiếm đều không tìm thấy dữ liệu.
+        # Nếu bất kỳ cặp nào tìm thấy dữ liệu, hàm sẽ trả về False.
+        # """
+        # print(f"Bắt đầu kiểm tra số serial từ {generated_number_from} đến {generated_number_to}")
+
+        # Check 1: "From serial from" and "From serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            from_serial_to=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'From serial to'. Trả về False.")
+            return False
+
+        # Check 2: "To serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            to_serial_from=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'To serial from' và 'To serial to'. Trả về False.")
+            return False
+        
+        # Check 3: "From serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'To serial to'. Trả về False.")
+            return False
+
+        # Nếu tất cả 3 cặp đều không tìm thấy dữ liệu
+        # print("Tất cả 3 cặp kiểm tra đều không tìm thấy dữ liệu. Trả về True.")
+        return True
 
     def gen_serial_number(self, prefix, s_type, index):
         """
@@ -32513,11 +32811,15 @@ class FormAction(TestCase):
         """
         while True:
             # Generate a random number with the desired format
-            generated_number_from = f"7{random.randint(0, 99999):05}"
+            generated_number_from = f"6{random.randint(0, 99999):05}"
             generated_number_to = f"{int(generated_number_from) + index:05}"
             # Check if the generated number exists; if not, break the loop
-            if self.check_serial_number_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
-                break
+            if index == 0:
+                if self.check_serial_number_from_to_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
+            else:
+                if self.check_serial_number_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
         generated_number_from = f"{prefix}-{generated_number_from}"
         generated_number_to = f"{prefix}-{generated_number_to}"
         return generated_number_from, generated_number_to

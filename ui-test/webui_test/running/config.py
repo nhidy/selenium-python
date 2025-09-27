@@ -11,7 +11,7 @@ class BrowserConfig:
     run_file = True
     url_env = None
     is_old = 'N' # N: run on new UI (default); Y: run on old UI
-    on_server = 'N' # Y: run on server; N: run on local
+    on_server = 'Y' # Y: run on server; N: run on local
     app_name = None
 
 # S: view mode is "Status", N: view mode is "Normal"

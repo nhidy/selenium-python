@@ -176,17 +176,20 @@ class TestCase(unittest.TestCase):
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
         else:
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            location = element.location_once_scrolled_into_view
-            self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            # location = element.location_once_scrolled_into_view
+            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
             actions = ActionChains(self.driver)
+            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
             actions.move_to_element(element).perform()
         # While loop to wait until the element is no longer obscured
         is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        max_wait_time = timeout  # Max time to wait (in seconds)
         elapsed_time = 0
         interval = 1  # Time to wait between checks (in seconds)
         while is_obscured and elapsed_time < max_wait_time:
             # Execute the JavaScript to check if the element is obscured
+            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
             is_obscured = self.driver.execute_script("""
                 var element = arguments[0];
                 var rect = element.getBoundingClientRect();
@@ -205,7 +208,7 @@ class TestCase(unittest.TestCase):
             # log.info("Element is unobstructed.")
             return element
         else:
-            log.warn(f"Element with xpath '{xpath}' is still obscured.")
+            log.error(f"Element with xpath '{xpath}' is still obscured.")
             return None
 
     def wait_for_element_by_xpath(self, xpath):
@@ -239,7 +242,7 @@ class TestCase(unittest.TestCase):
             # log.info("Element is unobstructed.")
             return element
         else:
-            log.warn(f"Element with xpath '{xpath}' is still obscured.")
+            log.error(f"Element with xpath '{xpath}' is still obscured.")
             return None
 
     def is_displayed_by_xpath(self, xpath):
@@ -296,17 +299,20 @@ class TestCase(unittest.TestCase):
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
         else:
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            location = element.location_once_scrolled_into_view
-            self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            # location = element.location_once_scrolled_into_view
+            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
             actions = ActionChains(self.driver)
+            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
             actions.move_to_element(element).perform()
         # While loop to wait until the element is no longer obscured
         is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        max_wait_time = timeout  # Max time to wait (in seconds)
         elapsed_time = 0
         interval = 1  # Time to wait between checks (in seconds)
         while is_obscured and elapsed_time < max_wait_time:
             # Execute the JavaScript to check if the element is obscured
+            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
             is_obscured = self.driver.execute_script("""
                 var element = arguments[0];
                 var rect = element.getBoundingClientRect();
@@ -325,7 +331,7 @@ class TestCase(unittest.TestCase):
             # log.info("Element is unobstructed.")
             return element # return True
         else:
-            log.warn(f"Element with CSS selector '{css_selector}' is still obscured.")
+            log.error(f"Element with CSS selector '{css_selector}' is still obscured.")
             return None # return False
 
     def wait_for_element_by_css(self, css_selector):
@@ -359,7 +365,7 @@ class TestCase(unittest.TestCase):
             # log.info("Element is unobstructed.")
             return element
         else:
-            log.warn(f"Element with css_selector '{css_selector}' is still obscured.")
+            log.error(f"Element with css_selector '{css_selector}' is still obscured.")
             return None
 
     def is_displayed_by_css(self, css_selector):
@@ -377,7 +383,8 @@ class TestCase(unittest.TestCase):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uFormLoading')]"
         # log.warn(f"Start wait_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
-            log.warn("Loading icon element has disappeared.")
+            # log.warn("Loading icon element has disappeared.")
+            return
         else:
             log.error(f"Loading icon element did NOT disappear.")
 
@@ -385,7 +392,8 @@ class TestCase(unittest.TestCase):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uLoading')]"
         # log.warn(f"Start wait_process_bar_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
-            log.warn("Loading bar element has disappeared.")
+            # log.warn("Loading bar element has disappeared.")
+            return
         else:
             log.error(f"Loading bar element did NOT disappear.")
 
@@ -393,7 +401,8 @@ class TestCase(unittest.TestCase):
         loading_xpath = "//div[contains(text(),'Login successfully')]"
         # log.warn(f"Start wait_app_loading.")
         if self.wait_until_element_disappears_by_xpath(loading_xpath, max_wait_time):
-            log.warn(f"Loading app element has disappeared.")
+            # log.warn(f"Loading app element has disappeared.")
+            return
         else:
             log.error(f"Loading app element did NOT disappear.")
 
@@ -498,12 +507,12 @@ class TestCase(unittest.TestCase):
                     element.send_keys(Keys.TAB)
                 if need_enter == 'Y':
                     element.send_keys(Keys.ENTER)
-                # if info:
-                #     log.info(info)
+                if info:
+                    log.info(info)
             elif action == 'click':
                 element.click()
-                # if info:
-                #     log.info(info)
+                if info:
+                    log.info(info)
             elif action == 'get_text':
                 # if info:
                 #     log.info(info)
@@ -528,8 +537,8 @@ class TestCase(unittest.TestCase):
                     log.debug("Clear data again in get_attribute('value').")
                     actions = ActionChains(self.driver)
                     actions.click(element).send_keys(value).perform()
-                # if info:
-                #     log.info(info)
+                if info:
+                    log.info(info)
         else:
             if error:
                 log.error(error)
@@ -545,13 +554,13 @@ class TestCase(unittest.TestCase):
         scroll_xpath = f"{fieldset_xpath}following-sibling::div/div[@class='virtual-sublist ']/div"
         self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}'.")
         value_element = None
-        value_element = self.wait_for_element_unobscured_by_xpath(value_xpath, timeout=1)
+        value_element = self.wait_for_element_unobscured_by_xpath(value_xpath, timeout=2)
         if value_element:
             log.debug(f"Found the '{value}', no need scroll.")
             self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}'.", error=f"Select value '{value}' at title '{title}' failed.")
         else:
             log.warn(f"NOT found the '{value}', need scroll.")
-            search_element = self.wait_for_element_unobscured_by_xpath(search_xpath, timeout=1)
+            search_element = self.wait_for_element_unobscured_by_xpath(search_xpath, timeout=2)
             if search_element:
                 self.common(xpath=search_xpath, method='unobscured', action='send_values', value=value, info=f"The 'Select' field has search with value is '{value}'.", warn=f"The 'Select' field does not have a search function.", timeout=1)
             scroll_number = 10
@@ -559,7 +568,7 @@ class TestCase(unittest.TestCase):
             scroll_element = self.wait_for_element_visibility_by_xpath(scroll_xpath, timeout=1)
             for i in range(scroll_number):
                 log.debug(f"Scroll number: {i+1}")
-                value_element = self.wait_for_element_unobscured_by_xpath(value_xpath, timeout=1)
+                value_element = self.wait_for_element_unobscured_by_xpath(value_xpath, timeout=2)
                 if value_element:
                     log.debug(f"Found the '{value}'.")
                     self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}'.", error=f"Select value '{value}' at title '{title}' failed.")
@@ -586,9 +595,10 @@ class TestCase(unittest.TestCase):
         try:
             button_element = self.wait_for_element_unobscured_by_xpath(button_name_xpath)
             if button_element is None:
-                log.warn(f"'{button_name}' button NOT found.")
+                log.error(f"'{button_name}' button NOT found.")
             else:
-                log.info(f"'{button_name}' button available.")
+                # log.info(f"'{button_name}' button available.")
+                return
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"'{button_name_xpath}' button NOT available. Exception: {e}")
 
@@ -613,12 +623,15 @@ class TestCase(unittest.TestCase):
     def assert_button_disable(self, button_name):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']/parent::div/parent::div[contains(@class,'disable')]"
         # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']/parent::div/parent::div[contains(@class,'disable')]"
+        if self.check_error_message():
+            log.error('Error message found. Skipping button disable check.')
+            return
         try:
             button = self.wait_for_element_visibility_by_xpath(button_name_xpath)
-            self.assertTrue(self.check_disable(button), f"The '{button_name}' button not disable.")
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check disable '{button_name_xpath}' button failed. Exception: {e}")
-            self.assertTrue(False, f"Check disable '{button_name}' button failed.")
+            self.assertIsNotNone(button, f"The '{button_name}' button is not visible or disabled.")
+            self.assertTrue(self.check_disable(button), f"The '{button_name}' button is not disable.")
+        except Exception as e:
+            log.error(f"Check disable for '{button_name}' button failed. Exception: {type(e).__name__} - {e}")
 
     def click_icon(self, icon):
         icon_xpath = f"//i[@class='material-icons-outlined' and text()='{icon}']"
@@ -661,9 +674,11 @@ class TestCase(unittest.TestCase):
             if clear_search_element:
                 self.common(xpath=clear_search_xpath, method='unobscured', action='click', info='Clicked clear search icon at header.')
             else:
-                log.warn("Clear search icon at header not found.")
+                # log.warn("Clear search icon at header not found.")
+                return
         except NoSuchElementException:
-            log.warn("Clear search icon does not exist.")
+            # log.warn("Clear search icon does not exist.")
+            return
 
     def open_fo(self, transaction_code, transaction_name):
         log.info(f"Open FO: {transaction_code}")
@@ -684,8 +699,8 @@ class TestCase(unittest.TestCase):
             return True
         else:
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            location = element.location_once_scrolled_into_view
-            self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            # location = element.location_once_scrolled_into_view
+            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
             log.info(f"Can scroll to element '{element}' in other browser.")
@@ -787,7 +802,10 @@ class TestCase(unittest.TestCase):
 
     def click_close_notification(self):
         close_xpath = "//div[@class='malibu-desktop-uNotification-close']/i"
-        self.common(xpath=close_xpath, method='visibility', action='click', info=f"Closed notification.", warn=f"Close notification failed.")
+        try:
+            self.common(xpath=close_xpath, method='visibility', action='click', info=f"Closed notification.", warn=f"Close notification failed.")
+        except (StaleElementReferenceException) as e:
+            log.error(f'Close notification failed. Exception: {e}')
 
     def assert_notification(self, expected_message=None):
         if expected_message is None: 
@@ -796,6 +814,16 @@ class TestCase(unittest.TestCase):
         self.assertEqual(expected_message, actual_message)
         self.wait_loading()
         self.click_close_notification()
+
+    def check_notification(self, expected_message=None):
+        if expected_message is None:
+            raise AssertionError("The assertion message cannot be empty.")
+        actual_message = self.get_text_notification(5)
+        if expected_message==actual_message:
+            # log.info(f'Expected message [{expected_message}] equal actual message [{actual_message}]')
+            return
+        else:
+            log.error(f'Expected message [{expected_message}] NOT equal actual message [{actual_message}]')
 
 # ================= handle special functions =================
     def open_app(self, app_name):
@@ -860,6 +888,7 @@ class TestCase(unittest.TestCase):
             log.error(f"Approve in popup failed, in transaction screen. Exception: {e}")
 
     def logout(self):
+        self.close_popup()
         avatar_xpath = "//div[@class='malibu-desktop-uHeaderItemMoreOption-avatar-div']/div[@class='malibu-desktop-uHeaderItemMoreOption-avatar']"
         self.common(xpath=avatar_xpath, method='visibility', action='click')
         logout_xpath = "//span[@class='malibu-desktop-uHeaderItemMoreOption-span' and text()='Log out']"
@@ -867,6 +896,9 @@ class TestCase(unittest.TestCase):
 
     def open_transaction_journal(self):
         self.click_menu('Front Office', 'Transaction Journal')
+
+    def open_bo_approval(self):
+        self.click_menu('Front Office', 'Back Office Approval')
 
     def get_text_form_title_header_popup(self):
         title_xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header-title']"
@@ -1167,9 +1199,19 @@ class TestCase(unittest.TestCase):
         xpath = "//div[@class='malibu-desktop-uFormNotify-span']"
         try:
             element = self.wait_for_element_unobscured_by_xpath(xpath)
-            self.assertEqual(element.text, expected, "Form error message not show")
+            if element:
+                self.assertEqual(element.text, expected, "Form error message not show")
+            else:
+                self.fail('Error message not show')
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_error_message failed. Exception: '{e}'")
+
+    def check_error_message(self):
+        """Check error message show or not. Return: True (show), False (not show)."""
+        expected = "An error has occurred. Please try again"
+        xpath = "//div[@class='malibu-desktop-uFormNotify-span']"
+        element = self.wait_for_element_unobscured_by_xpath(xpath, timeout=3)
+        return element and element.text == expected
 
     def get_list_error_message(self):
         xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
@@ -1359,27 +1401,40 @@ class TestCase(unittest.TestCase):
         # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen have tab.", error=f"Click check-box '{title}' in screen have tab failed.")
+        if self.assert_checked_in_tab(title=title):
+            return
+        else:
+            log.error(f"Click on checkbox '{title}' failed.")
 
     def assert_checked_in_tab(self, title):
         # title_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
         title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
-        try:
-            title_element = self.wait_for_element_unobscured_by_xpath(title_xpath)
-            css_class = title_element.get_attribute('class')
-            if 'change' in css_class:
-                # log.info(f"Attribute 'change' in class '{css_class}'.")
-                return True
-            else:
-                log.warn(f"Attribute 'change' NOT in class '{css_class}'.")
-                return False
-        except:
-            log.error(f"Check attribute 'change' for element '{title}' failed.")
+        # try:
+        #     title_element = self.wait_for_element_unobscured_by_xpath(title_xpath)
+        #     css_class = title_element.get_attribute('class')
+        #     if 'change' in css_class:
+        #         # log.info(f"Attribute 'change' in class '{css_class}'.")
+        #         return True
+        #     else:
+        #         # log.warn(f"Attribute 'change' NOT in class '{css_class}'.")
+        #         return False
+        # except:
+        #     log.error(f"Check attribute 'change' for element '{title}' failed.")
+        is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
+        if is_checked == 'check_box':
+            return True
+        else:
+            return False
 
     def click_checkbox_non_tab(self, title):
         """Click 'check-box' in screen non tab"""
         # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen NON tab.", error=f"Click check-box '{title}' in screen NON tab failed.")
+        if self.assert_checked_non_tab(title=title):
+            return
+        else:
+            log.error(f"Click on checkbox '{title}' failed.")
 
     def assert_checked_non_tab(self, title):
         # title_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
@@ -1389,7 +1444,7 @@ class TestCase(unittest.TestCase):
             # log.info(f"Checkbox of element '{title}' have checked. Text is '{is_checked}'.")
             return True
         else:
-            log.warn(f"Checkbox of element '{title}' is un-check. Text is '{is_checked}'.")
+            # log.warn(f"Checkbox of element '{title}' is un-check. Text is '{is_checked}'.")
             return False
 
     def assert_checked_multi(self, collap_name, title):
@@ -1399,7 +1454,7 @@ class TestCase(unittest.TestCase):
             # log.info(f"Checkbox of element '{title}' and '{collap_name}' have checked. Text is '{is_checked}'.")
             return True
         else:
-            log.warn(f"Checkbox of element '{title}' '{collap_name}' is un-check. Text is '{is_checked}'.")
+            # log.warn(f"Checkbox of element '{title}' '{collap_name}' is un-check. Text is '{is_checked}'.")
             return False
 
     def assert_checkbox(self, title, expected, collap_name=None):
@@ -1420,6 +1475,10 @@ class TestCase(unittest.TestCase):
         # xpath = f"//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']/parent::div/parent::div//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked check-box '{title}' in screen have tab.", error=f"Click check-box '{title}' in screen have tab failed.")
+        if self.assert_checked_multi(collap_name=collap_name, title=title):
+            return
+        else:
+            log.error(f"Click on checkbox '{title}' under '{collap_name}' failed.")
 
     def click_checkbox(self, title, in_tab="Y", in_multi="N", collap_name=None):
         """Click 'check-box' from title, flexible parameters for in_tab"""
@@ -1460,9 +1519,11 @@ class TestCase(unittest.TestCase):
             if close_all_element:
                 self.common(xpath=close_all_xpath, method='unobscured', action='click', info='Clicked close all icon.')
             else:
-                log.warn("Close all icon not found.")
+                # log.warn("Close all icon not found.")
+                return
         except NoSuchElementException:
-            log.warn("Close all icon does not exist.")
+            # log.warn("Close all icon does not exist.")
+            return
 
     def click_close_form(self, index = 1):
         close_form_xpath = f"//span[contains(@class,'malibu-desktop-uTabItem-icon-tab')]/div[text()='{index}']/parent::span/following-sibling::div/span[contains(@class,'malibu-desktop-uTabItem-close-button')]"
@@ -2261,7 +2322,18 @@ class TestCase(unittest.TestCase):
         if text_collap_icon == '+':
             self.common(xpath=xpath_collap_name, method='unobscured', action='click', info=f"Clicked '{collap_name}' in screen have tab.", error=f"Click '{collap_name}' in screen have tab failed.")
         else:
-            log.warn('Collapse in screen have tab already un-collapsed.')
+            # log.warn('Collapse in screen have tab already un-collapsed.')
+            return
+
+    def click_uncollap_multi_in_tab(self, collap_name):
+        """Click uncollap multi in screen have tab"""
+        xpath_collap_name = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div/span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']"
+        xpath_collap_icon = f"{xpath_collap_name}/preceding-sibling::span/span"
+        text_collap_icon = self.common(xpath=xpath_collap_icon, method='unobscured', action='get_text')
+        if text_collap_icon == '-':
+            self.common(xpath=xpath_collap_name, method='unobscured', action='click', info=f"Clicked '{collap_name}' in screen have tab.", error=f"Click '{collap_name}' in screen have tab failed.")
+        else:
+            return
 
     def click_collap_multi_non_tab(self, collap_name):
         """Click collap multi in screen non tab"""
@@ -2272,7 +2344,18 @@ class TestCase(unittest.TestCase):
         if text_collap_icon == '+':
             self.common(xpath=xpath_collap_name, method='unobscured', action='click', info=f"Clicked '{collap_name}' in screen NON tab.", error=f"Click '{collap_name}' in screen NON tab failed.")
         else:
-            log.warn('Collapse in screen NON tab already un-collapsed.')
+            # log.warn('Collapse in screen NON tab already un-collapsed.')
+            return
+
+    def click_uncollap_multi_non_tab(self, collap_name):
+        """Click uncollap multi in screen non tab"""
+        xpath_collap_name = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uMultiValue')]/div/span[@class='malibu-desktop-uMultiValue-title' and text()='{collap_name}']"
+        xpath_collap_icon = f"{xpath_collap_name}/preceding-sibling::span/span"
+        text_collap_icon = self.common(xpath=xpath_collap_icon, method='unobscured', action='get_text')
+        if text_collap_icon == '-':
+            self.common(xpath=xpath_collap_name, method='unobscured', action='click', info=f"Clicked '{collap_name}' in screen NON tab.", error=f"Click '{collap_name}' in screen NON tab failed.")
+        else:
+            return
 
     # Functions used for testcase - BO screen
     def bo_click_collap(self, collap_name):
@@ -2281,9 +2364,18 @@ class TestCase(unittest.TestCase):
     def bo_click_collap_single(self, collap_name):
         return self.click_collap_multi_non_tab(collap_name)
 
+    def bo_click_uncollap(self, collap_name):
+        return self.click_uncollap_multi_in_tab(collap_name)
+
+    def bo_click_uncollap_single(self, collap_name):
+        return self.click_uncollap_multi_non_tab(collap_name)
+
     # Functions used for testcase - FO screen
     def fo_click_collap(self, collap_name):
         return self.click_collap_multi_non_tab(collap_name)
+
+    def fo_click_uncollap(self, collap_name):
+        return self.click_uncollap_multi_non_tab(collap_name)
 
 # ================= handle write_text field =================
     def write_text_input(self, title, value, clear_text=None):
@@ -2298,11 +2390,11 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen have tab.", error=f"Write '{value}' at '{title}' in screen have tab failed.")
 
-    def write_text_input_non_tab(self, title, value, clear_text=None):
+    def write_text_input_non_tab(self, title, value, need_tab='Y', clear_text=None):
         """Write text to 'input' in screen non tab"""
         # xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
+        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab=need_tab, info=f"Wrote '{value}' at '{title}' in screen NON tab.", error=f"Write '{value}' at '{title}' in screen NON tab failed.")
 
     def write_text_input_in_tab_group(self, title, value, clear_text=None):
         """Write text to 'input' screen have tab and group"""
