@@ -1,41 +1,69 @@
 import os
 
 # CẤU HÌNH
-PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test'  # Thay đổi đường dẫn đến folder dự án của bạn
-OUTPUT_FILE = 'UI_Test_Project_Source_Full.txt'
-EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache'} # Các folder cần bỏ qua
+PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test' # Thay đường dẫn dự án của bạn
+OUTPUT_PREFIX = 'Source_Part'
+MAX_FILE_SIZE_MB = 0.5  # Giới hạn mỗi file khoảng 0.5 MB (an toàn cho NotebookLM)
+EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache', 'reports', 'logs'}
+ALLOWED_EXTENSIONS = {'.py', '.ini', '.yaml', '.json', '.sql'} # Chỉ lấy các file code cần thiết
 
-def merge_project_to_text(root_dir, output_file):
-    with open(output_file, 'w', encoding='utf-8') as outfile:
-        # Ghi phần mở đầu để NotebookLM hiểu ngữ cảnh
-        outfile.write(f"DOCUMENTATION FOR PROJECT: {os.path.basename(root_dir)}\n")
-        outfile.write("="*50 + "\n\n")
+def split_project_to_text(root_dir, output_prefix, max_size_mb):
+    max_bytes = max_size_mb * 1024 * 1024
+    part_num = 1
+    current_content = []
+    current_size = 0
 
-        for root, dirs, files in os.walk(root_dir):
-            # Lọc bỏ các thư mục không cần thiết
-            dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
-            
-            for file in files:
-                if file.endswith('.py'): # Chỉ lấy file Python (hoặc thêm .json, .yaml nếu cần)
-                    file_path = os.path.join(root, file)
-                    # Tạo đường dẫn tương đối để AI hiểu cấu trúc thư mục
-                    relative_path = os.path.relpath(file_path, root_dir)
+    def save_part(content_list, part_n):
+        filename = f"{output_prefix}_{part_n:02d}.txt"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(f"DOCUMENTATION PART {part_n}\n")
+            f.write("="*50 + "\n\n")
+            f.write("".join(content_list))
+        print(f"-> Đã tạo: {filename} ({os.path.getsize(filename)/1024:.2f} KB)")
+
+    for root, dirs, files in os.walk(root_dir):
+        dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
+        
+        for file in files:
+            ext = os.path.splitext(file)[1].lower()
+            if ext in ALLOWED_EXTENSIONS:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, root_dir)
+                
+                try:
+                    # Đọc nội dung file
+                    with open(file_path, 'r', encoding='utf-8') as infile:
+                        file_content = infile.read()
+                        
+                    # Tạo header cho file code đó
+                    formatted_chunk = (
+                        f"\n{'='*20} START OF FILE: {relative_path} {'='*20}\n"
+                        f"{file_content}"
+                        f"\n{'='*20} END OF FILE: {relative_path} {'='*20}\n\n"
+                    )
                     
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as infile:
-                            content = infile.read()
-                            
-                            # ĐÁNH DẤU RÕ RÀNG TÊN FILE (Rất quan trọng để AI định vị code)
-                            outfile.write(f"\n{'='*20} START OF FILE: {relative_path} {'='*20}\n")
-                            outfile.write(content)
-                            outfile.write(f"\n{'='*20} END OF FILE: {relative_path} {'='*20}\n\n")
-                            
-                        print(f"Đã thêm: {relative_path}")
-                    except Exception as e:
-                        print(f"Lỗi đọc file {relative_path}: {e}")
+                    chunk_size = len(formatted_chunk.encode('utf-8'))
 
-    print(f"\nĐã hoàn tất! File kết quả: {output_file}")
+                    # Kiểm tra nếu cộng thêm file này thì có quá giới hạn không
+                    if current_size + chunk_size > max_bytes:
+                        # Lưu file hiện tại
+                        save_part(current_content, part_num)
+                        # Reset cho file mới
+                        part_num += 1
+                        current_content = []
+                        current_size = 0
+                    
+                    current_content.append(formatted_chunk)
+                    current_size += chunk_size
+                    
+                except Exception as e:
+                    print(f"Bỏ qua file {relative_path}: {e}")
 
-# Chạy hàm
+    # Lưu phần còn dư cuối cùng
+    if current_content:
+        save_part(current_content, part_num)
+
+    print("\nHoàn tất! Hãy upload tất cả các file .txt vừa tạo lên NotebookLM.")
+
 if __name__ == "__main__":
-    merge_project_to_text(PROJECT_PATH, OUTPUT_FILE)
+    split_project_to_text(PROJECT_PATH, OUTPUT_PREFIX, MAX_FILE_SIZE_MB)
