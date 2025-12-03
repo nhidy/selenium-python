@@ -2,7 +2,7 @@ import os
 
 # CẤU HÌNH
 PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test'  # Thay đổi đường dẫn đến folder dự án của bạn
-OUTPUT_FILE = 'Selenium_Project_Source_Full.txt'
+OUTPUT_FILE = 'UI_Test_Project_Source_Full.txt'
 EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache'} # Các folder cần bỏ qua
 
 def merge_project_to_text(root_dir, output_file):
