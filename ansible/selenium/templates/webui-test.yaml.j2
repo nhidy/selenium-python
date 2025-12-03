@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: webui-test-pvc
+  namespace: {{ namespace }}
+  annotations:
+    nfs.io/service-name: "webui-test"
+  labels:
+    app: webui-test-pvc
+spec:
+  storageClassName: cbs-autotest-storage
+  accessModes: [ReadWriteMany]
+  resources:
+    requests:
+      storage: 500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webui-test
+  namespace: {{ namespace }}
+  labels:
+    app: webui-test
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: webui-test
+  template:
+    metadata:
+      labels:
+        app: webui-test
+    spec:
+      nodeSelector:
+        purpose: functional-service
+      hostAliases:
+        - ip: "27.3.2.90"
+          hostnames:
+            - "test-cbs.shwesit.jits.digital"
+            - "demo-cbs.finasit.jits.digital"      
+      containers:
+        - name: webui-test
+          image: 27.3.1.180/autotest/test-ui:latest
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1024Mi"
+            limits:
+              cpu: "800m"
+              memory: "1548Mi"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: TEST_HISTORY_PATH
+              value: "/app/tests/run"
+            - name: LOGS_PATH
+              value: "/app/tests/logs"
+            - name: REPORTS_PATH
+              value: "/app/tests/reports"
+            - name: SELENIUM_HUB_URL
+              value: "http://selenium-hub:4444"
+            - name: TZ
+              value: "Asia/Ho_Chi_Minh"
+          volumeMounts:
+            - name: webui-test-pv
+              mountPath: /app/tests/run
+              subPath: test_history
+            - name: webui-test-pv
+              mountPath: /app/tests/logs
+              subPath: logs
+            - name: webui-test-pv
+              mountPath: /app/tests/reports
+              subPath: reports
+      volumes:
+        - name: webui-test-pv
+          persistentVolumeClaim:
+            claimName: webui-test-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webui-test
+  namespace: {{ namespace }}
+spec:
+  selector:
+    app: webui-test
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      nodePort: 32219
+  type: NodePort

@@ -455,6 +455,11 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_ifc_gl_names=expected_ifc_gl_names,
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
+        self.transaction_reject(
+            transaction_references=transaction_references, 
+            username=username_reverse,
+            password=password_reverse
+        )
 
     def test_012_fixed_1m_dpt_blk_block_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -947,6 +952,77 @@ class Deposit1MPrincipalPlusInterestRolloverTest(FormAction):
             expected_transaction_dates=expected_dates
         )
         self.assertEqual(deposit_account_fd_mask, dpt_his_result[1])
+
+    def test_020_fixed_1m_01_check_deposit_account_with_new_fields_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_fixed_1m_new_fields
+        reason_of_account_opening='Enter value reason of account opening'
+        business_purpose_code='A011130'
+        employer_organization_name='Employer Name'
+        safe_deposit_locker_number='0T5633433WQ'
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            safe_deposit_locker_number=safe_deposit_locker_number,
+            mpu_card=True,
+            passbook_cheque_book=True,
+        )
+        deposit_account_fixed_1m_new_fields=dpt_opn_result[1]
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening,
+            safe_deposit_locker_number=safe_deposit_locker_number
+        )
+        reason_of_account_opening_update_1st='Update value reason of account opening'
+        safe_deposit_locker_number_update_1st='Up0T5633433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_fixed_1m_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.dpt_apr(
+            account_number=deposit_account_fixed_1m_new_fields,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        reason_of_account_opening_update_2nd='Update 2nd value reason of acc opening'
+        safe_deposit_locker_number_update_2nd='Up2nd33433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_fixed_1m_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+        self.deposit_account_modify_approve(
+            account_number=deposit_account_fixed_1m_new_fields
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
 
 if __name__ == '__main__':
     webui_test.main()

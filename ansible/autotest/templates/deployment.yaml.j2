@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cbs-autotest
+  namespace: {{ namespace }}
+  labels:
+    app: cbs-autotest
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cbs-autotest
+  template:
+    metadata:
+      labels:
+        app: cbs-autotest
+    spec:
+      nodeSelector:
+        purpose: functional-service
+      containers: 
+        - name: cbs-autotest
+          image: 27.3.1.180/autotestui:latest
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1024Mi"
+            limits:
+              cpu: "500m"
+              memory: "1548Mi"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: TEST_HISTORY_PATH
+              value: "/app/tests/run"
+            - name: LOGS_PATH
+              value: "/app/tests/logs"
+            - name: REPORTS_PATH
+              value: "/app/tests/reports"
+          volumeMounts:
+            - name: cbs-autotest-pv
+              mountPath: /app/tests/run/
+              subPath: test_history
+            - name: cbs-autotest-pv
+              mountPath: /app/tests/logs
+              subPath: logs
+            - name: cbs-autotest-pv
+              mountPath: /app/tests/reports
+              subPath: reports
+      volumes:
+        - name: cbs-autotest-pv
+          persistentVolumeClaim:
+            claimName: cbs-autotest-pvc

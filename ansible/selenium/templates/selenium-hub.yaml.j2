@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-hub
+  namespace: {{ namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-hub
+  template:
+    metadata:
+      labels:
+        app: selenium-hub
+    spec:
+      nodeSelector:
+        purpose: functional-service
+      containers:
+        - name: selenium-hub
+          image: 27.3.1.180/selenium/hub:{{ ver }}
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1200m"
+              memory: "1548Mi"
+          ports:
+            - containerPort: 4442
+            - containerPort: 4443
+            - containerPort: 4444
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-hub
+  namespace: {{ namespace }}
+spec:
+  selector:
+    app: selenium-hub
+  ports:
+    - name: event-bus-publish
+      port: 4442
+      targetPort: 4442
+      nodePort: 32442   # cổng public cho event-bus-publish
+    - name: event-bus-subscribe
+      port: 4443
+      targetPort: 4443
+      nodePort: 32443   # cổng public cho event-bus-subscribe
+    - name: web
+      port: 4444
+      targetPort: 4444
+      nodePort: 32444   # cổng public cho web UI
+  type: NodePort

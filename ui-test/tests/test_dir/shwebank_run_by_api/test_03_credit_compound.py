@@ -33,6 +33,7 @@ credit_limit_test = '5,000,000.65'
 dealer_name_test = 'Dealer name test'
 type_of_commodity_test = 'Type of commodity test'
 purpose_of_loan_test = 'N2'
+purpose_of_loan_name_test = 'Others'
 disbursement_amount_test = '5,000,000.65'
 # deposit_account_number_test = '11-003-097469-6'
 interest_collect_test = '0.00'
@@ -58,6 +59,7 @@ return_amount_in_asset_currency_test = collateral_asset_value_test
 # INTMODE	C	Compound basic of installment
 # INTMODE	U	Interest upfront
 # INTMODE	O	Interest upfront based on OS
+# sub_product_limit_code_mask = ''
 
 class CreditCompoundTest(FormAction):
     def get_url(self):
@@ -1553,7 +1555,123 @@ class CreditCompoundTest(FormAction):
             expected_posting=expected_posting,
         )
 
-    def test_018_crd_splc_close_sub_product_limit_success(self):
+    def test_018_crd_opn_open_new_credit_account_with_lookup_field_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        customer_type = None
+        customer_code = customer_code_personal
+        sub_product_limit_code = sub_product_limit_code_mask
+        catalogue_code = catalogue_code_test
+        company_name = None
+        sub_product = None
+        credit_classification = None
+        account_holder_name = account_holder_name_test
+        sale_price = None
+        down_payment = None
+        down_payment_amount = None
+        dealer_name = dealer_name_test
+        type_of_commodity = type_of_commodity_test
+        credit_limit = credit_limit_test
+        margin = None
+        from_date = None
+        to_date = None
+        first_prin_repayment_date = None
+        first_int_repayment_date = None
+        grace_period_for_principal = None
+        branch_cd = branch_code
+        description = None
+        purpose_of_loan = purpose_of_loan_test
+        purpose_of_loan_name = purpose_of_loan_name_test
+        account_number = None
+        catalogue_name = None
+        credit_sub_type = None
+        credit_facility = None
+        currency_code = None
+        maximum_limit = None
+        interest_rate = None
+        approve_on_form = 'Y'
+        username = username_approve
+        password = password_approve
+        reason = None
+
+        crd_opn_result = self.crd_opn_lookup(
+            customer_type=customer_type,
+            customer_code=customer_code,
+            sub_product_limit_code=sub_product_limit_code,
+            catalogue_code=catalogue_code,
+            company_name=company_name,
+            sub_product=sub_product,
+            credit_classification=credit_classification,
+            account_holder_name=account_holder_name,
+            sale_price=sale_price,
+            down_payment=down_payment,
+            down_payment_amount=down_payment_amount,
+            dealer_name=dealer_name,
+            type_of_commodity=type_of_commodity,
+            credit_limit=credit_limit,
+            margin=margin,
+            from_date=from_date,
+            to_date=to_date,
+            first_prin_repayment_date=first_prin_repayment_date,
+            first_int_repayment_date=first_int_repayment_date,
+            grace_period_for_principal=grace_period_for_principal,
+            branch_cd=branch_cd,
+            description=description,
+            purpose_of_loan_name=purpose_of_loan_name,
+            account_number=account_number,
+            catalogue_name=catalogue_name,
+            credit_sub_type=credit_sub_type,
+            credit_facility=credit_facility,
+            currency_code=currency_code,
+            maximum_limit=maximum_limit,
+            interest_rate=interest_rate,
+            approve_on_form=approve_on_form,
+            username=username,
+            password=password,
+            reason=reason
+        )
+        transaction_references=crd_opn_result[0]
+        credit_account_number=crd_opn_result[1]
+        self.crd_opn_view(
+            transaction_references=transaction_references,
+            customer_type=customer_type,
+            customer_code=customer_code,
+            sub_product_limit_code=sub_product_limit_code,
+            catalogue_code=catalogue_code,
+            company_name=company_name,
+            sub_product=sub_product,
+            credit_classification=credit_classification,
+            account_holder_name=account_holder_name,
+            sale_price=sale_price,
+            down_payment=down_payment,
+            down_payment_amount=down_payment_amount,
+            dealer_name=dealer_name,
+            type_of_commodity=type_of_commodity,
+            credit_limit=credit_limit,
+            margin=margin,
+            from_date=from_date,
+            to_date=to_date,
+            first_prin_repayment_date=first_prin_repayment_date,
+            first_int_repayment_date=first_int_repayment_date,
+            grace_period_for_principal=grace_period_for_principal,
+            branch_cd=branch_cd,
+            description=description,
+            purpose_of_loan=purpose_of_loan,
+            account_number=credit_account_number,
+            catalogue_name=catalogue_name,
+            credit_sub_type=credit_sub_type,
+            credit_facility=credit_facility,
+            currency_code=currency_code,
+            maximum_limit=maximum_limit,
+            interest_rate=interest_rate,
+        )
+        self.crd_rej(
+            account_number=credit_account_number,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve,
+        )
+
+    def test_019_crd_splc_close_sub_product_limit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         sub_product_limit_code = sub_product_limit_code_mask
         description = None
@@ -1598,7 +1716,7 @@ class CreditCompoundTest(FormAction):
             expected_posting=expected_posting,
         )
 
-    def test_019_crd_plc_close_product_limit_success(self):
+    def test_020_crd_plc_close_product_limit_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         product_limit_code = product_limit_code_mask
         description = None
@@ -1641,6 +1759,122 @@ class CreditCompoundTest(FormAction):
             product_limit=product_limit,
             avaiable_limit=avaiable_limit,
             expected_posting=expected_posting,
+        )
+
+    def test_021_crd_opn_open_new_credit_account_with_lookup_field_error(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        customer_type = None
+        customer_code = customer_code_personal
+        sub_product_limit_code = sub_product_limit_code_mask
+        catalogue_code = catalogue_code_test
+        company_name = None
+        sub_product = None
+        credit_classification = None
+        account_holder_name = account_holder_name_test
+        sale_price = None
+        down_payment = None
+        down_payment_amount = None
+        dealer_name = dealer_name_test
+        type_of_commodity = type_of_commodity_test
+        credit_limit = credit_limit_test
+        margin = None
+        from_date = None
+        to_date = None
+        first_prin_repayment_date = None
+        first_int_repayment_date = None
+        grace_period_for_principal = None
+        branch_cd = branch_code
+        description = None
+        purpose_of_loan = purpose_of_loan_test
+        purpose_of_loan_name = purpose_of_loan_name_test
+        account_number = None
+        catalogue_name = None
+        credit_sub_type = None
+        credit_facility = None
+        currency_code = None
+        maximum_limit = None
+        interest_rate = None
+        approve_on_form = 'Y'
+        username = username_approve
+        password = password_approve
+        reason = None
+
+        crd_opn_result = self.crd_opn_lookup(
+            customer_type=customer_type,
+            customer_code=customer_code,
+            sub_product_limit_code=sub_product_limit_code,
+            catalogue_code=catalogue_code,
+            company_name=company_name,
+            sub_product=sub_product,
+            credit_classification=credit_classification,
+            account_holder_name=account_holder_name,
+            sale_price=sale_price,
+            down_payment=down_payment,
+            down_payment_amount=down_payment_amount,
+            dealer_name=dealer_name,
+            type_of_commodity=type_of_commodity,
+            credit_limit=credit_limit,
+            margin=margin,
+            from_date=from_date,
+            to_date=to_date,
+            first_prin_repayment_date=first_prin_repayment_date,
+            first_int_repayment_date=first_int_repayment_date,
+            grace_period_for_principal=grace_period_for_principal,
+            branch_cd=branch_cd,
+            description=description,
+            purpose_of_loan_name=purpose_of_loan_name,
+            account_number=account_number,
+            catalogue_name=catalogue_name,
+            credit_sub_type=credit_sub_type,
+            credit_facility=credit_facility,
+            currency_code=currency_code,
+            maximum_limit=maximum_limit,
+            interest_rate=interest_rate,
+            approve_on_form=approve_on_form,
+            username=username,
+            password=password,
+            reason=reason
+        )
+        transaction_references=crd_opn_result[0]
+        credit_account_number=crd_opn_result[1]
+        self.crd_opn_view(
+            transaction_references=transaction_references,
+            customer_type=customer_type,
+            customer_code=customer_code,
+            sub_product_limit_code=sub_product_limit_code,
+            catalogue_code=catalogue_code,
+            company_name=company_name,
+            sub_product=sub_product,
+            credit_classification=credit_classification,
+            account_holder_name=account_holder_name,
+            sale_price=sale_price,
+            down_payment=down_payment,
+            down_payment_amount=down_payment_amount,
+            dealer_name=dealer_name,
+            type_of_commodity=type_of_commodity,
+            credit_limit=credit_limit,
+            margin=margin,
+            from_date=from_date,
+            to_date=to_date,
+            first_prin_repayment_date=first_prin_repayment_date,
+            first_int_repayment_date=first_int_repayment_date,
+            grace_period_for_principal=grace_period_for_principal,
+            branch_cd=branch_cd,
+            description=description,
+            purpose_of_loan=purpose_of_loan,
+            account_number=credit_account_number,
+            catalogue_name=catalogue_name,
+            credit_sub_type=credit_sub_type,
+            credit_facility=credit_facility,
+            currency_code=currency_code,
+            maximum_limit=maximum_limit,
+            interest_rate=interest_rate,
+        )
+        self.crd_rej(
+            account_number=credit_account_number,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve,
         )
 
 if __name__ == '__main__': 

@@ -1,40 +1,87 @@
 stages:
-  - build
-  - cleanup
+  - prepare
+  - buildenv
+  - buildtest
+  - deploy
+
+
 
 variables:
   IMAGE_REGISTRY: 27.3.1.180
-  IMAGE_NAME: autotestui
+  IMAGE_NAME: autotest
+  SELENIUM_VERSION: "4.34.0"
 
-build_app_image:
-  stage: build
+prepare_selenium:
+  stage: prepare
+  variables:
+    GIT_STRATEGY: none
   script:
-  - docker login $IMAGE_REGISTRY -u admin -p admin
-  - docker build -f ./ui-test/Dockerfile --no-cache -t $IMAGE_NAME:latest ./ui-test/
-  - docker tag $IMAGE_NAME:latest $IMAGE_REGISTRY/$IMAGE_NAME:latest
-  - docker push $IMAGE_REGISTRY/$IMAGE_NAME:latest
-  - docker info
-  - echo "Start Deploying"
-  - cd ansible
-  # - sh play.sh
+    - echo "Start Pull & Push Selenium images"
+    - docker login $IMAGE_REGISTRY -u admin -p admin
+    - |
+      # Node images
+      for browser in chrome firefox edge; do
+        image="selenium/node-$browser:$SELENIUM_VERSION"
+        target="$IMAGE_REGISTRY/selenium/node-$browser:$SELENIUM_VERSION"
+        docker pull $image
+        docker tag $image $target
+        docker push $target
+      done
+      # Hub image
+      hub_image="selenium/hub:$SELENIUM_VERSION"
+      hub_target="$IMAGE_REGISTRY/selenium/hub:$SELENIUM_VERSION"
+      docker pull $hub_image
+      docker tag $hub_image $hub_target
+      docker push $hub_target
+  tags:
+    - linux-97
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ />>prepare_selenium/'
 
+# ------------------------
+# Job build ENV
+build_env:
+  stage: buildenv
+  script:
+    - echo "Đang đăng nhập vào Docker Registry..."
+    - docker login $IMAGE_REGISTRY -u admin -p admin
+
+    - echo "Đang xây dựng image Docker..."
+    - docker build --no-cache -t "$IMAGE_REGISTRY/$IMAGE_NAME/test-env:latest" -f ./ui-test/DockerfileENV ./ui-test/
+    - docker push "$IMAGE_REGISTRY/$IMAGE_NAME/test-env:latest"
+
+  tags:
+    - linux-97
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ />>build_env/'
+
+
+# Job build 
+build_test:
+  stage: buildtest
+  script:
+    - docker login $IMAGE_REGISTRY -u admin -p admin
+    # Building with the full registry tag
+    - docker build -f ./ui-test/Dockerfile --no-cache -t $IMAGE_REGISTRY/$IMAGE_NAME/test-ui:latest ./ui-test/
+    - docker push $IMAGE_REGISTRY/$IMAGE_NAME/test-ui:latest
   tags:
     - linux-97
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ />>build_test/'
 
 
-# Job cleanup
-cleanup_docker_resources:
-  stage: cleanup
+# Job deploy
+deploy_test:
+  stage: deploy
   script:
-    - echo "Cleanup Docker resources..."
-    - docker image prune -f # chỉ xóa hình ảnh dangling
-    - docker volume prune -f # chỉ xóa volume không sử dụng
-    - docker builder prune -f #chỉ xóa build cache
-
+    - echo "Start Deploying"
+    - cd ansible/selenium
+    - VER=$SELENIUM_VERSION sh play.sh
   tags:
     - linux-97
   rules:
-    - if: '$CI_COMMIT_MESSAGE =~ />>cleanup_docker/'
-      allow_failure: true
+    - if: '$CI_COMMIT_MESSAGE =~ />>deploy_test/'
+
+
+# ----------------------------------------------------------
+# >>prepare_selenium >>build_env >>build_test >>deploy_test

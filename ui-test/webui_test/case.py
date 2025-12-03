@@ -1,12 +1,16 @@
-from inspect import cleandoc
 import os
 import unittest
 import sys
+import random
+
+from inspect import cleandoc
 from time import sleep
 from webui_test.jwebui_action import *
 from webui_test.logging import log
+# from webui_test.wrapper import DriverWrapper
+from webui_test.wrapper import *
 
-from webui_test.running.config import BrowserConfig, WaitConfig
+from webui_test.running.config import BrowserConfig, WaitConfig, F8Config
 from webui_test.jweb_excel import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -26,7 +30,7 @@ def tearDownModule():
     log.info("--- Tearing down Module ---")
     pass
 
-class TestCase(unittest.TestCase):
+class TestCase(DriverWrapper, unittest.TestCase):
     def start_class(self):
         self.driver = get_driver()
         pass
@@ -44,22 +48,28 @@ class TestCase(unittest.TestCase):
             _TEST_BROWSER = cls.driver
         else: 
             cls.driver = _TEST_BROWSER
-        cls().go_to(cls().get_url())
-        cls().wait_page_login()
-        cls().start_class()
+        # cls().go_to(cls().get_url())
+        # cls().wait_page_login()
+        # cls().start_class()
+        instance = cls(driver=cls.driver, methodName='run')
+        instance.go_to(instance.get_url())
+        instance.wait_page_login()
+        instance.start_class()
 
     @classmethod
     def tearDownClass(cls):
-        cls().end_class()
+        # cls().end_class()
+        instance = cls(driver=cls.driver, methodName='run')
+        instance.end_class()
 
     def start(self):
         self.driver = get_driver()
-        # log.debug("2. Go to 'start' method")
+        log.debug("2. Go to 'start' method")
         pass
 
     def end(self):
         self.driver = get_driver()
-        # log.debug("4. Go to 'end' method")
+        log.debug("4. Go to 'end' method")
         pass
 
     def stop(self):
@@ -80,16 +90,26 @@ class TestCase(unittest.TestCase):
     def get_url(self):
         return
 
-    def go_to(self, url):
-        log.info("Go to 'go_to'")
-        BrowserConfig.url_env = url
-        if self.driver:
-            self.driver.maximize_window()
-            self.driver.get(url)
-            log.debug(f"Go to 'go_to' method, url: {url}")
-
-    def wait(self, seconds=1):
-        sleep(seconds)
+    # def go_to(self, url):
+    #     log.debug("1. Go to 'go_to'")
+    #     # self.driver = get_driver()
+    #     # log.debug(f'1.2 Set value fo self.driver: {self.driver}')
+    #     BrowserConfig.url_env = url
+    #     if self.driver:
+    #         log.debug('2. vao if self.driver')
+    #         if BrowserConfig.headless:
+    #             log.debug(f'Headless: [{BrowserConfig.headless}]')
+    #             self.driver.set_window_size(1920, 1080)
+    #         else:
+    #             log.debug(f'NO Headless: [{BrowserConfig.headless}]')
+    #             # self.driver.maximize_window()
+    #             self.driver.set_window_size(1920, 1080)
+    #         size = self.driver.get_window_size()
+    #         log.debug(f'3. window size: {size}')
+    #         self.driver.get(url)
+    #         log.debug(f"4. Go to 'go_to' method, url: {url}")
+    #     else:
+    #         log.error("self.driver is NULL.")
 
     def restart_browser(self):
         global _TEST_BROWSER
@@ -99,25 +119,18 @@ class TestCase(unittest.TestCase):
         self.go_to(BrowserConfig.url_env)
         self.wait_page_login()
 
-    def screen_size(self):
-        width = self.driver.get_window_size()['width']
-        if width > 996:
-            return 'desktop'
-        elif width > 768:
-            return 'desktop_small'
-        elif width > 575:
-            return 'tablet'
-        elif width > 350:
-            return 'mobile'
-        else:
-            return 'mobile_small'
-
-    def take_screenshot(self, path):
-        result = self.driver.get_screenshot_as_file(path)
-        if result:
-            log.info(f"Take screenshot '{path}'.")
-        else:
-            log.error('Take screenshot failed.')
+    # def screen_size(self):
+    #     width = self.driver.get_window_size()['width']
+    #     if width > 996:
+    #         return 'desktop'
+    #     elif width > 768:
+    #         return 'desktop_small'
+    #     elif width > 575:
+    #         return 'tablet'
+    #     elif width > 350:
+    #         return 'mobile'
+    #     else:
+    #         return 'mobile_small'
 
     def get_value_excel(self, sheet, column, row, filename=None):
         return get_value_from_excel(sheet, column, row, filename)
@@ -131,253 +144,850 @@ class TestCase(unittest.TestCase):
     def write_value_to_excel(self, new_value, sheet_name, column, row, url_file_name=None):
         return write_value_to_excel(new_value, sheet_name, column, row, url_file_name=url_file_name)
 
+# ================================= handle TRANSACTION JOURNAL =================================
+    # FOF-Transaction Journal
+    def transaction_search(self, transaction_references):
+        # search f8
+        self.close_all_form()
+        self.open_transaction_journal()
+        self.wait_for_button_available('Search')
+        self.assert_form_title('FOF-Transaction Journal')
+        self.simple_search_f8(transaction_references)
+        self.wait_loading()
+        self.assert_table_data('Tran Number', 1, transaction_references)
+
+    def transaction_search_advanced(self, transaction_references):
+        # search f8
+        self.close_all_form()
+        self.open_transaction_journal()
+        self.assert_form_title('FOF-Transaction Journal')
+        self.advanced_search_f8('Tran number', transaction_references, field_type='A')
+        self.click_button_search_advanced_f8()
+        self.wait_loading()
+        self.assert_table_data('Tran Number', 1, transaction_references)
+
+    def transaction_mode_simple(self, transaction_references, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.transaction_search_advanced(transaction_references)
+        if mode=='N':
+            self.transaction_search(transaction_references)
+
+    def transaction_view(self, transaction_references, form_title=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        #  view f8
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_button_available('Accept')
+        if form_title:
+            self.assert_form_title(form_title)
+        self.fo_assert_text('Transaction references', transaction_references)
+
+    def transaction_view_no_return_transaction_references(self, transaction_references, form_title=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        #  view f8
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_button_available('Accept')
+        if form_title:
+            self.assert_form_title(form_title)
+
+    def transaction_reverse(self, transaction_references, username, password, reason=None, allow_reverse=None, list_error_message=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Delete', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # reversed transaction: N: not allow
+        if list_error_message:
+            self.assert_notification('Deleted error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Completed')
+            print(f'Transaction references is NOT reversed: {transaction_references}')
+        else:
+            self.check_notification('Deleted successfully')
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Reversed')
+            print(f'Transaction references has been reversed: {transaction_references}')
+
+    def transaction_approve(self, transaction_references, username, password, reason=None, allow_approve=None, list_error_message=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Approve', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # approve transaction: N: not allow
+        if list_error_message:
+            self.assert_notification('Approve error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Pending to approve')
+        else:
+            self.check_notification('Approve successfully')
+            self.check_error_message()
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Completed')
+
+    def transaction_reject(self, transaction_references, username, password, reason=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Reject', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        self.check_notification('Reject successfully')
+        self.check_error_message()
+        # search and compare status
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.assert_status_table_data('Status', 1, 'Rejected')
+        print(f'Transaction references has been rejected: {transaction_references}')
+
+    def check_transaction(self, transaction_references, transaction_status=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        if transaction_status:
+            transaction_status_actual = self.get_status_table_data('Status', 1)
+            if transaction_status==transaction_status_actual:
+                return True
+            else:
+                return False
+
+# ================================= handle BACK OFFICE APPROVAL =================================
+    # FOF-Back Office Approval
+    def bo_approval_search(self, text):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.wait_for_button_available('Search')
+        self.assert_form_title('FOF-Back Office Approval')
+        self.simple_search_f8(text)
+        self.wait_loading()
+
+    def bo_approval_search_advanced_status(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.assert_form_title('FOF-Back Office Approval')
+        if transaction_number:
+            self.advanced_search_f8('Tran number', transaction_number, field_type='A')
+        if master_code:
+            self.advanced_search_f8('Master Code', master_code, field_type='A')
+        if tran_name:
+            self.advanced_search_f8('Tran name', tran_name, field_type='A')
+        self.key_escape()
+        if status:
+            self.advanced_search_f8('Status', status, field_type='S')
+        if user_name:
+            self.advanced_search_f8('User name', user_name, field_type='A')
+        self.click_button_search_advanced_f8()
+        self.wait_loading()
+
+    def bo_approval_search_advanced_normal(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.assert_form_title('FOF-Back Office Approval')
+        self.bo_click_collap('Advanced search')
+        if transaction_number:
+            self.advanced_search('Tran number', transaction_number, field_type='A')
+        if master_code:
+            self.advanced_search('Master code', master_code, field_type='A')
+        if tran_name:
+            self.advanced_search('Tran name', tran_name, field_type='A')
+        self.key_escape()
+        if status:
+            self.advanced_search('Status', status, field_type='S')
+        if user_name:
+            self.advanced_search('User name', user_name, field_type='A')
+        self.click_button_search_advanced()
+        self.wait_loading()
+        self.bo_click_uncollap('Advanced search')
+
+    def bo_approval_mode_simple(self, transaction_number, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.bo_approval_search_advanced_status(transaction_number=transaction_number)
+        if mode=='N':
+            self.bo_approval_search(transaction_number)
+
+    def bo_approval_mode_advanced(self, transaction_number=None, master_code=None, tran_name=None, mode=None, status=None, user_name=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.bo_approval_search_advanced_status(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, status=status, user_name=user_name)
+        if mode=='N':
+            self.bo_approval_search_advanced_normal(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, status=status, user_name=user_name)
+
+    def bo_approval_view(self, transaction_number, form_title=None, mode=None):
+        self.bo_approval_mode_simple(transaction_number=transaction_number, mode=mode)
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_label_available('This change requires approval to be affected.')
+        if form_title:
+            self.assert_form_title(form_title)
+        self.fo_assert_text('Transaction number', transaction_number)
+
+    def bo_approval_approve(self, username, password, reason=None, list_error_message=None, mode=None, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.click_table_menu('Approve', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # approve transaction not allow
+        if list_error_message:
+            self.assert_notification('Approve error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+            self.assert_status_table_data('Status', 1, 'Pending to approve')
+        else:
+            # self.check_notification('Approve successfully')
+            self.assert_notification('Approve successfully')
+            # search and compare status
+            self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+            self.assert_status_table_data('Status', 1, 'Completed')
+
+    def bo_approval_reject(self, username, password, reason=None, mode=None, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.click_table_menu('Reject', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # self.check_notification('Reject successfully')
+        self.assert_notification('Reject successfully')
+        # search and compare status
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+        self.assert_status_table_data('Status', 1, 'Rejected')
+        print(f'Transaction number has been rejected: {transaction_number}')
+
+    def check_bo_approval(self, transaction_number=None, master_code=None, tran_name=None, transaction_status=None, mode=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        if transaction_status:
+            transaction_status_actual = self.get_status_table_data('Status', 1)
+            if transaction_status==transaction_status_actual:
+                return True
+            else:
+                return False
+
+    def bo_approval_search_verify(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        if transaction_number:
+            self.assert_table_data('Tran Number', 1, transaction_number)
+        if master_code:
+            self.assert_table_data('Master Code', 1, master_code)
+        if tran_name:
+            self.assert_table_data('Tran Name', 1, tran_name)
+        if status:
+            self.assert_status_table_data('Status', 1, status)
+        if user_name:
+            self.assert_table_data('Tran Name', 1, user_name)
+
+    def get_transaction_number(self):
+        transaction_number = self.bo_get_text_single('Transaction number')
+        print(f'Transaction number: {transaction_number}')
+        return transaction_number
+
+    def bo_approval_verify_actions(self, mode=None, transaction_number=None, master_code=None, tran_name=None, expected_actions=None, row=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.assert_actions(expected_actions=expected_actions, row=row)
+
+# ================================= handle common methods =================================
+    def check_serial_number_from_to_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+        self.stock_inventory_advanced_search(prefix, generated_number_from, generated_number_to, s_type)
+        if (self.get_text_notification(timeout=5) == 'Data not found'):
+            return True
+        else:
+            return False
+
+    def check_serial_number_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+        # """
+        # Kiểm tra số serial không tồn tại dựa trên 3 cặp trường khác nhau.
+        # Hàm chỉ trả về True khi cả 3 cặp tìm kiếm đều không tìm thấy dữ liệu.
+        # Nếu bất kỳ cặp nào tìm thấy dữ liệu, hàm sẽ trả về False.
+        # """
+        # print(f"Bắt đầu kiểm tra số serial từ {generated_number_from} đến {generated_number_to}")
+
+        # Check 1: "From serial from" and "From serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            from_serial_to=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'From serial to'. Trả về False.")
+            return False
+
+        # Check 2: "To serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            to_serial_from=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'To serial from' và 'To serial to'. Trả về False.")
+            return False
+        
+        # Check 3: "From serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'To serial to'. Trả về False.")
+            return False
+
+        # Nếu tất cả 3 cặp đều không tìm thấy dữ liệu
+        # print("Tất cả 3 cặp kiểm tra đều không tìm thấy dữ liệu. Trả về True.")
+        return True
+
+    def gen_serial_number(self, prefix, s_type, index):
+        """
+        Gen serial number use for stock
+        Args:
+            prefix (str): prefix of stock.
+            s_type (str): stock type.
+            index (int): the number of next serial number, 0 means gen one number only, 9: means gen 10 numbers, 24: means gen 25 numbers.
+        Returns:
+            Tuple ([str, str]): from number, to number. include prefix and format of stock number XX-000000.
+        """
+        while True:
+            # Generate a random number with the desired format
+            generated_number_from = f"6{random.randint(0, 99999):05}"
+            generated_number_to = f"{int(generated_number_from) + index:05}"
+            # Check if the generated number exists; if not, break the loop
+            if index == 0:
+                if self.check_serial_number_from_to_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
+            else:
+                if self.check_serial_number_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
+        generated_number_from = f"{prefix}-{generated_number_from}"
+        generated_number_to = f"{prefix}-{generated_number_to}"
+        return generated_number_from, generated_number_to
+
+    def get_list_serial_number(self, prefix, number_from, number_to):
+        start = int(str(number_from).split('-')[1])
+        end = int(str(number_to).split('-')[1])
+        list_serial_numbers = [f"{prefix}-{num:06}" for num in range(start, end + 1)] # because the range() function in Python generates numbers up to but not including the end value
+        return list_serial_numbers
+
+    def get_next_serial_number(self, prefix, stock_number, index):
+        serial_number = str(stock_number).replace(prefix+'-', '')
+        next_serial_number = f"{int(serial_number) + index}"
+        next_stock_number = f"{prefix}-{next_serial_number}"
+        return next_stock_number
+
+    def get_serial_number_no_refix(self, serial_number):
+        """
+        format: 'XX000000' or 'XX-000000'.
+
+        Args:
+            serial_number: input serial number have prefix.
+
+        Returns:
+            serial_number have no prefix: 000000 or None if serial_number have format incorrect.
+        """
+        serial_number = str(serial_number).replace('-', '')
+        if len(serial_number) == 8:
+            return serial_number[2:]
+        elif len(serial_number) == 6:
+            return serial_number
+        else:
+            return None
+
+    def stock_number_mask(self, stock_number):
+        stock_number = str(stock_number).replace('-', '')
+        if len(stock_number) < 8:
+            log.warn("Stock number must be at least 8 digits long")
+            return ''
+        # Format the string as XX-XXXXXX
+        stock_number_mask = f"{stock_number[:2]}-{stock_number[2:]}"
+        return stock_number_mask
+
+    def stock_number_no_mask(self, stock_number):
+        stock_number_no_mask = str(stock_number).replace('-', '')
+        if len(stock_number_no_mask) < 8:
+            log.warn("Stock number must be at least 8 digits long")
+            return ''
+        return stock_number_no_mask
+
+    def no_mask(self, value_mask):
+        value_no_mask = str(value_mask).replace('-', '')
+        return value_no_mask
+
+    def no_thousands_separator(self, number):
+        value_no_thousands_separator = str(number).replace(',', '')
+        return value_no_thousands_separator
+
+    def deposit_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XX-XXX-XXXXXX-X
+        account_number_mask = f"{account_number[:2]}-{account_number[2:5]}-{account_number[5:11]}-{account_number[11:]}"
+        return account_number_mask
+
+    def treasury_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XXX-XX-XXXXXXX
+        account_number_mask = f"{account_number[:3]}-{account_number[3:5]}-{account_number[5:]}"
+        return account_number_mask
+
+    def trade_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = (
+            f"{account_number[:3]}-{account_number[3:4]}-"
+            f"{account_number[4:6]}-{account_number[6:8]}-"
+            f"{account_number[8:14]}-{account_number[14:]}"
+        )
+        return account_number_mask
+
+    def customer_code_mask(self, customer_code):
+        customer_code = str(customer_code).replace('-', '')
+        if len(customer_code) < 8:
+            log.warn("Customer code must be at least 8 digits long")
+            return ''
+        # Format the string as X-X-XXXXXX
+        customer_code_mask = f"{customer_code[:1]}-{customer_code[1:2]}-{customer_code[2:]}"
+        return customer_code_mask
+
+    def gl_account_number_mask(self, gl_account_number):
+        gl_account_number = str(gl_account_number).replace('-', '')
+        if len(gl_account_number) < 18:
+            log.warn("GL account number must be at least 18 digits long")
+            return ''
+        # Format the string as XXX-XXXXXXXXXXXXX-XX
+        gl_account_number_mask = f"{gl_account_number[:3]}-{gl_account_number[3:16]}-{gl_account_number[16:]}"
+        return gl_account_number_mask
+
+    def credit_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XX-XXX-XXXXXX-X
+        account_number_mask = f"{account_number[:2]}-{account_number[2:5]}-{account_number[5:11]}-{account_number[11:]}"
+        return account_number_mask
+
+    def product_limit_code_mask(self, product_limit_code):
+        product_limit_code = str(product_limit_code).replace('-', '')
+        if len(product_limit_code) < 13:
+            log.warn("Product limit code must be at least 13 digits long")
+            return ''
+        # Format the string as xxxx-xxxxxx-x-xx
+        product_limit_code_mask = f"{product_limit_code[:4]}-{product_limit_code[4:10]}-{product_limit_code[10:11]}-{product_limit_code[11:]}"
+        return product_limit_code_mask
+
+    def sub_product_limit_code_mask(self, sub_product_limit_code):
+        sub_product_limit_code = str(sub_product_limit_code).replace('-', '')
+        if len(sub_product_limit_code) < 15:
+            log.warn("Sub product limit code must be at least 15 digits long")
+            return ''
+        # Format the string as XXXX-XXXXXX-X-XX-XX
+        sub_product_limit_code_mask = f"{sub_product_limit_code[:4]}-{sub_product_limit_code[4:10]}-{sub_product_limit_code[10:11]}-{sub_product_limit_code[11:13]}-{sub_product_limit_code[13:]}"
+        return sub_product_limit_code_mask
+
+    def mortgage_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = f"{account_number[:3]}-{account_number[3:4]}-{account_number[4:6]}-{account_number[6:8]}-{account_number[8:14]}-{account_number[14:]}"
+        return account_number_mask
+
+    def fixed_asset_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = f"{account_number[:3]}-{account_number[3:4]}-{account_number[4:6]}-{account_number[6:8]}-{account_number[8:14]}-{account_number[14:]}"
+        return account_number_mask
+
+    def add_fees(self, ifc_codes, values, total_fee=None, index=None):
+        """
+        Adds multiple fees based on lists of fee codes and corresponding values.
+
+        Args:
+            ifc_codes (list): A list of fee codes. Ex: ['101', '102', '103']
+            values (list): A list of corresponding fee values. Ex: ['100.00', '0.1', '1,000.54']
+            total_fee (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(ifc_codes) != len(values):
+            print('Error: The number of fee codes and values do not match.')
+            return
+        for ifc_code, value in zip(ifc_codes, values):
+            self.click_button('Add', index)
+            self.wait_loading()
+            self.fo_write_text_group('Interest/fee/charge code', ifc_code)
+            self.wait_loading()
+            self.fo_write_number('Value', value)
+            self.wait_loading()
+            self.click_button('Apply', index)
+            self.wait_loading()
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def add_fees_lookup(self, ifc_codes, values, total_fee=None, index=None):
+        """
+        Adds multiple fees based on lists of fee codes and corresponding values.
+
+        Args:
+            ifc_codes (list): A list of fee codes. Ex: ['101', '102', '103']
+            values (list): A list of corresponding fee values. Ex: ['100.00', '0.1', '1,000.54']
+            total_fee (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(ifc_codes) != len(values):
+            print('Error: The number of fee codes and values do not match.')
+            return
+        for ifc_code, value in zip(ifc_codes, values):
+            self.click_button('Add', index)
+            self.wait_loading()
+            self.lookup_data_text(
+                title='Interest/fee/charge code',
+                value_search_code=ifc_code,
+                value_code=ifc_code,
+            )
+            self.wait_loading()
+            self.fo_write_number('Value', value)
+            self.wait_loading()
+            self.click_button('Apply', index)
+            self.wait_loading()
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def add_gl_entries(self, posting_types=None, gl_accounts=None, currencies=None, debit_amounts=None, credit_amounts=None, descs=None, section_names=None, total_credit_amount=None, list_error_message_under_group=None):
+        """
+        Adds multiple gl account number based on lists of gl accounts and corresponding amounts.
+
+        Args:
+            posting_types (list): ['Debit', 'Credit', 'Debit', 'Credit']
+            gl_accounts (list): A list of gl accounts. Ex: ['003-1100601000000-01', '003-1100601000000-01', '003-1100601000000-01', '003-1100601000000-01']
+            currencies (list): ['MMK', 'MMK', 'MMK', 'MMK']
+            debit_amounts (list): A list of corresponding fee amounts. Ex: ['100.00', '0.1', None, None]
+            credit_amounts (list): A list of corresponding fee amounts. Ex: [None, None, '0.1', '100.00']
+            descs (list): ['Descs 1', 'Descs 2', 'Descs 3', 'Descs 4']
+            section_names (list): ['Section names 1', 'Section names 2', 'Section names 3', 'Section names 4']
+            total_credit_amount (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(posting_types) != len(gl_accounts):
+            print('Error: The number of Posting types and GL accounts do not match.')
+            return
+        if len(currencies) != len(gl_accounts):
+            print('Error: The number of Currencies and GL accounts do not match.')
+            return
+        if len(debit_amounts) != len(gl_accounts):
+            print('Error: The number of Debit amounts and GL accounts do not match.')
+            return
+        if len(credit_amounts) != len(gl_accounts):
+            print('Error: The number of Credit amounts and GL accounts do not match.')
+            return
+        if len(descs) != len(gl_accounts):
+            print('Error: The number of Descs and GL accounts do not match.')
+            return
+        if len(section_names) != len(gl_accounts):
+            print('Error: The number of Section names and GL accounts do not match.')
+            return
+        for posting_type, gl_account, currency, debit_amount, credit_amount, desc, section_name in zip(posting_types, gl_accounts, currencies, debit_amounts, credit_amounts, descs, section_names):
+            self.click_button('Add')
+            self.wait_loading()
+            if posting_type:
+                self.select('Type', posting_type)
+            if gl_account:
+                self.write_input('Account number', self.no_mask(gl_account), need_tab='Y')
+                self.wait_loading()
+            if currency:
+                self.fo_assert_value_data('Currency', currency)
+            if posting_type == 'Debit':
+                if debit_amount:
+                    self.write_input_act_man('Debit amount', debit_amount, is_decimal='Y')
+                    self.wait_loading()
+            if posting_type == 'Credit':
+                if credit_amount:
+                    self.write_input_act_man('Credit amount', credit_amount, is_decimal='Y')
+                    self.wait_loading()
+            if desc:
+                self.write_textarea_act_man('Description', desc)
+            if section_name:
+                self.write_textarea('Section name', section_name)
+            self.click_button('Apply')
+            self.wait_loading()
+            if list_error_message_under_group:
+            # verify error
+                self.assert_error_message()
+                self.assert_list_error_message_under_group(list_error_message_under_group)
+                print('Transaction failed!')
+        if total_credit_amount:
+            self.assert_total_fee_table_data(total_credit_amount)
+
+    def add_extension_group_entry(self, i, replace_bys, system_account_names, business_lines, customer_sectors=None, customer_resident_statuss=None, sub_products=None, bank_identifications=None, replace_code=None):
+        self.click_button_in_tab('Add')
+        self.wait_loading()
+        self.write_textarea('Replace by', replace_bys[i])
+        self.write_textarea('System account name', system_account_names[i])
+        if replace_code:
+            self.select('Replace code', replace_code)
+        # Lấy từng giá trị tương ứng nếu có
+        conditions = [
+            ('Customer sector', customer_sectors[i] if customer_sectors else None),
+            ('Customer resident status', customer_resident_statuss[i] if customer_resident_statuss else None),
+            ('Business line', business_lines[i]),
+            ('Sub product', sub_products[i] if sub_products else None),
+            ('Bank Identification', bank_identifications[i] if bank_identifications else None)
+        ]
+        if any(value is not None for _, value in conditions):
+            self.bo_click_collap('Condition account of group')
+            for label, value in conditions:
+                if value is not None:
+                    self.select(label, value)
+        self.click_button_in_tab('Apply')
+        self.wait_loading()
+
+    def add_gls_entry(self, i, sys_account_names, account_aliass, coa_accounts=None):
+        self.wait_loading()
+        self.click_button_in_tab('Add')
+        self.wait_loading()
+        self.write_textarea('Sys Account Name', sys_account_names[i])
+        if coa_accounts:
+            self.write_textarea('COA Account', coa_accounts[i])
+        self.write_textarea('Account Alias', account_aliass[i])
+        self.click_button_in_tab('Apply')
+        self.wait_loading()
+
+    def format_number(self, number):
+        number = str(number).replace(',', '')
+        number = float(number)
+        if number.is_integer():
+            return str(int(number))
+        else:
+            return str(number)
+
+    def assert_fees(self, ifc_codes, values=None, total_fee=None, ifc_names=None, value_types=None, fees=None, floors=None, ceilings=None, currencies=None):
+        if ifc_names:
+            for ifc_code, ifc_name in zip(ifc_codes, ifc_names):
+                self.bo_assert_text_table('IFC code', ifc_code, 'IFC Name', ifc_name)
+        if value_types:
+            for ifc_code, value_type in zip(ifc_codes, value_types):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Value type', value_type)
+        if values:
+            for ifc_code, value in zip(ifc_codes, values):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Value', value)
+        if fees:
+            for ifc_code, fee in zip(ifc_codes, fees):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Fee', fee)
+        if floors:
+            for ifc_code, floor in zip(ifc_codes, floors):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Floor', floor)
+        if ceilings:
+            for ifc_code, ceiling in zip(ifc_codes, ceilings):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Ceiling', ceiling)
+        if currencies:
+            for ifc_code, currency in zip(ifc_codes, currencies):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Currency', currency)
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def assert_posting_debit_account_number(self, index, expected):
+        self.assert_table_data_posting('Debit', 'Account number', index=index, expected=expected)
+
+    def assert_posting_debit_amount(self, index, expected):
+        self.assert_table_data_posting('Debit', 'Amount', index=index, expected=expected)
+
+    def assert_posting_credit_account_number(self, index, expected):
+        self.assert_table_data_posting('Credit', 'Account number', index=index, expected=expected)
+
+    def assert_posting_credit_amount(self, index, expected):
+        self.assert_table_data_posting('Credit', 'Amount', index=index, expected=expected)
+
+    def assert_posting_data(self, expected_debits=None, expected_credits=None):
+        """
+        Hàm tổng quát để kiểm tra dữ liệu trong bảng Posting cho cả Debit và Credit theo thứ tự nhóm của cặp Posting.
+
+        Args:
+            self: Tham chiếu đến đối tượng chứa các hàm assert.
+            expected_debits (list, optional): Danh sách các dictionary hoặc tuple chứa dữ liệu mong đợi cho Debit.
+                Mỗi phần tử trong danh sách đại diện cho một dòng và chứa thông tin cho 'Account number' và 'Amount'.
+                Ví dụ: [{'Account number': '002-1101001010404-01', 'Amount': '1,000.00'}, ...]
+                Hoặc: [('002-1101001010404-01', '1,000.00'), ...]
+                Defaults to None.
+            expected_credits (list, optional): Danh sách tương tự như expected_debits nhưng dành cho Credit.
+                Defaults to None.
+        """
+        if expected_debits:
+            for index, expected_data in enumerate(expected_debits, start=1):
+                if isinstance(expected_data, dict):
+                    expected_account = expected_data.get('Account number')
+                    expected_amount = expected_data.get('Amount')
+                elif isinstance(expected_data, (tuple, list)) and len(expected_data) == 2:
+                    expected_account, expected_amount = expected_data
+                else:
+                    raise ValueError(f"Invalid format for expected debit data at index {index}: {expected_data}")
+
+                if expected_account is not None:
+                    self.assert_posting_debit_account_number(str(index), self.gl_account_number_mask(expected_account))
+                if expected_amount is not None:
+                    self.assert_posting_debit_amount(str(index), str(expected_amount))
+
+        if expected_credits:
+            for index, expected_data in enumerate(expected_credits, start=1):
+                if isinstance(expected_data, dict):
+                    expected_account = expected_data.get('Account number')
+                    expected_amount = expected_data.get('Amount')
+                elif isinstance(expected_data, (tuple, list)) and len(expected_data) == 2:
+                    expected_account, expected_amount = expected_data
+                else:
+                    raise ValueError(f"Invalid format for expected credit data at index {index}: {expected_data}")
+
+                if expected_account is not None:
+                    self.assert_posting_credit_account_number(str(index), self.gl_account_number_mask(expected_account))
+                if expected_amount is not None:
+                    self.assert_posting_credit_amount(str(index), str(expected_amount))
+
+        # # Cách sử dụng hàm mới:
+        # def test_posting_with_variable_rows(self):
+        #     trade_gl_number = "002-1101001010404-01"
+        #     sg_bg_amount = "1,000.00"
+        #     liability_gl_number = "002-2020301010202-01"
+        #     cash_gl_number = "003-1010301000101-01"
+        #     total_fee_amount = "1,000.00"
+        #     ifcc_gl_number = "003-1101001010202-01"
+
+        #     # Ví dụ với 2 dòng Debit và 2 dòng Credit
+        #     expected_data_1 = {
+        #         'expected_debits': [
+        #             {'Account number': trade_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': cash_gl_number, 'Amount': total_fee_amount},
+        #         ],
+        #         'expected_credits': [
+        #             {'Account number': liability_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': ifcc_gl_number, 'Amount': total_fee_amount},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_1)
+
+        #     # Ví dụ với 3 dòng Debit và 1 dòng Credit
+        #     expected_data_2 = {
+        #         'expected_debits': [
+        #             (trade_gl_number, sg_bg_amount),
+        #             (cash_gl_number, total_fee_amount),
+        #             ('Debit Account 3', 'Debit Amount 3'),
+        #         ],
+        #         'expected_credits': [
+        #             ('Credit Account 1', 'Credit Amount 1'),
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_2)
+
+        #     # Ví dụ chỉ có Debit
+        #     expected_data_3 = {
+        #         'expected_debits': [
+        #             {'Account number': trade_gl_number, 'Amount': sg_bg_amount},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_3)
+
+        #     # Ví dụ chỉ có Credit
+        #     expected_data_4 = {
+        #         'expected_credits': [
+        #             {'Account number': liability_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': ifcc_gl_number, 'Amount': total_fee_amount},
+        #             {'Account number': 'Credit Account 3', 'Amount': 'Credit Amount 3'},
+        #             {'Account number': 'Credit Account 4', 'Amount': 'Credit Amount 4'},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_4)
+
+    def assert_transaction_number_not_null(self, title_transaction_references='Transaction references'):
+        if self.check_error_message():
+            log.error('Found error message in case of success.')
+        transaction_references=self.fo_get_text(title_transaction_references)
+        self.assertNotEqual(transaction_references, None)
+        return transaction_references
+
+    def add_sheet(self, denominations, type_of_notes, sheets):
+        if (len(denominations) != len(type_of_notes)) | (len(denominations) != len(sheets)) | (len(type_of_notes) != len(sheets)):
+            print("Error: The number of 'denomination' and 'type of note' and 'sheet' do not match.")
+            return
+        for denomination, type_of_note, sheet in zip(denominations, type_of_notes, sheets):
+            self.write_table(
+                column_01='Denomination',
+                value_column_01=denomination,
+                column_02='Type of Notes',
+                value_column_02=type_of_note,
+                column_expected='Sheet',
+                value_expected=sheet
+            )
+            self.wait_loading()
+
+    def get_branch_name(self, branch_code_and_name):
+        branch_name=None
+        if branch_code_and_name:
+            parts = str(branch_code_and_name).split('-', 1)
+            if len(parts) > 1:
+                branch_name = str(branch_code_and_name).split('-', 1)[1].strip()
+            else:
+                branch_name = str(branch_code_and_name).strip()
+        return branch_name
+
+    def add_reminders(self, reminder_codes, orders, reminder_names=None):
+        """
+        Adds multiple collection reminder based on lists of reminder codes and corresponding orders.
+
+        Args:
+            reminder_codes (list): A list of reminder codes. Ex: ['AAA', 'CCC', 'BBB']
+            orders (list): A list of corresponding reminder orders. Ex: ['1', '3', '2']
+            reminder_names (list): A list of corresponding reminder orders. Ex: ['1', '3', '2']
+        """
+        if len(reminder_codes) != len(orders):
+            print('Error: The number of reminder codes and orders do not match.')
+            return
+        for reminder_code, order, reminder_name in zip(reminder_codes, orders, reminder_names):
+            self.click_button('Add')
+            self.wait_loading()
+            self.lookup_data('Reminder code', 'Reminder code', reminder_code)
+            self.wait_loading()
+            self.write_input('Order', order)
+            self.wait_loading()
+            self.bo_assert_text_data('Reminder name', reminder_name)
+            self.click_button('Apply')
+            self.wait_loading()
+
 # ================================= Using Selenium 4.x =================================
-# ================= xpath =================
-    def wait_for_element_visibility_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.visibility_of_element_located((By.XPATH, xpath))
-            )
-            # log.info(f"Element with xpath '{xpath}' visible.")
-            return element  # The element is visible
-        except TimeoutException:
-            log.warn(f"The element with xpath '{xpath}' was NOT visible.")
-            return None
-
-    def wait_for_element_enabled_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.element_to_be_clickable((By.XPATH, xpath))
-            )
-            # log.info(f"Element with xpath '{xpath}' enabled.")
-            return element  # The element is enabled
-        except TimeoutException:
-            log.warn(f"The element with xpath '{xpath}' was NOT enabled.")
-            return None
-
-    def wait_until_element_disappears_by_xpath(self, xpath, max_wait_time=WaitConfig.timeout_explicit):
-        try:
-            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
-                EC.invisibility_of_element_located((By.XPATH, xpath))
-            )
-            if is_invisible:
-                # log.info(f"Element with xpath '{xpath}' disappeared.")
-                return True  # Return True if the element disappears
-        except TimeoutException:
-            log.warn(f"Element with xpath '{xpath}' did NOT disappear.")
-            return False
-
-    def wait_for_element_unobscured_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        # Get the element you want to interact with
-        element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-        if element is None:
-            return None
-        if BrowserConfig.name in ['firefox', 'ff']:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        else:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            # location = element.location_once_scrolled_into_view
-            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
-            actions = ActionChains(self.driver)
-            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-            actions.move_to_element(element).perform()
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        max_wait_time = timeout  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with xpath '{xpath}' is still obscured.")
-            return None
-
-    def wait_for_element_by_xpath(self, xpath):
-        # Get the element you want to interact with
-        element = self.driver.find_element(By.XPATH, xpath)
-        if element is None:
-            return None
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with xpath '{xpath}' is still obscured.")
-            return None
-
-    def is_displayed_by_xpath(self, xpath):
-        try:
-            is_displayed = self.driver.find_element(By.XPATH, xpath).is_displayed()
-            if is_displayed:
-                return True
-            else:
-                return False
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check element displayed by xpath failed. Exception: {e}")
-
-# ================= css =================
-    def wait_for_element_visibility_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector))
-            )
-            # log.info(f"Element with CSS selector '{css_selector}' visible.")
-            return element  # The element is visible
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' was NOT visible.")
-            return None
-
-    def wait_for_element_enabled_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
-            )
-            # log.info(f"Element with CSS selector '{css_selector}' enabled.")
-            return element  # The element is enabled
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' was NOT enabled.")
-            return None
-
-    def wait_until_element_disappears_by_css(self, css_selector, max_wait_time=WaitConfig.timeout_explicit):
-        try:
-            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
-                EC.invisibility_of_element_located((By.CSS_SELECTOR, css_selector))
-            )
-            if is_invisible:
-                # log.info(f"Element with CSS selector '{css_selector}' disappeared.")
-                return True  # Return True if the element disappears
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' did NOT disappear.")
-            return False
-
-    def wait_for_element_unobscured_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        # Get the element you want to interact with
-        element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-        if element is None:
-            return None
-        if BrowserConfig.name in ['firefox', 'ff']:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        else:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            # location = element.location_once_scrolled_into_view
-            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
-            actions = ActionChains(self.driver)
-            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-            actions.move_to_element(element).perform()
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        max_wait_time = timeout  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with CSS selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with CSS selector '{css_selector}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element # return True
-        else:
-            log.error(f"Element with CSS selector '{css_selector}' is still obscured.")
-            return None # return False
-
-    def wait_for_element_by_css(self, css_selector):
-        # Get the element you want to interact with
-        element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
-        if element is None:
-            return None
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with css_selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with css_selector '{css_selector}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with css_selector '{css_selector}' is still obscured.")
-            return None
-
-    def is_displayed_by_css(self, css_selector):
-        try:
-            is_displayed = self.driver.find_element(By.CSS_SELECTOR, css_selector).is_displayed()
-            if is_displayed:
-                return True
-            else:
-                return False
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check element displayed by css failed. Exception: {e}")
-
 # ================= other =================
     def wait_loading(self, max_wait_time=60):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uFormLoading')]"
@@ -442,109 +1052,25 @@ class TestCase(unittest.TestCase):
             else:
                 log.warn(f"App page did NOT load within {max_wait_time} seconds.")
 
-    def key_escape(self):
-        actions = ActionChains(self.driver)
-        actions.send_keys(Keys.ESCAPE).perform()
+    def wait_for_label_available(self, label_name):
+        label_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//label[@title='{label_name}']"
+        try:
+            label_element = self.wait_for_element_unobscured_by_xpath(label_name_xpath)
+            if label_element is None:
+                log.error(f"'{label_name}' NOT found.")
+            else:
+                # log.info(f"'{label_name}' available.")
+                return
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"'{label_name}' NOT available. Exception: {e}")
 
-    def key_tab(self):
-        actions = ActionChains(self.driver)
-        actions.send_keys(Keys.TAB).perform()
+    # def key_escape(self):
+    #     actions = ActionChains(self.driver)
+    #     actions.send_keys(Keys.ESCAPE).perform()
 
-    def common(self, xpath=None, css=None, method=None, action=None, value=None, clear_text=None, need_tab=None, need_enter=None, info=None, error=None, warn=None, timeout=WaitConfig.timeout_explicit):
-        """
-        Performs a common interaction with a web element based on provided locators and actions.
-
-        Args:
-            xpath (str, optional): XPath locator for the element.
-            css (str, optional): CSS selector for the element.
-            method (str, optional): Waiting method for the element.
-                Possible values: 'unobscured', 'visibility', 'enabled'.
-            action (str, optional): Action to perform on the element.
-                Possible values: 'send_keys', 'click', 'get_text', 'get_value', 'send_values'.
-            value (str, optional): Value to send to the element when action is 'send_keys'.
-            clear_text (str, optional): Flag to clear the text of the element before sending keys.
-                Possible value: 'Y'.
-            need_tab (str, optional): Flag to send a TAB key press after sending keys.
-                Possible value: 'Y'.
-            need_enter (str, optional): Flag to send an ENTER key press after sending keys.
-                Possible value: 'Y'.
-            info (str, optional): Information message to log upon successful interaction.
-            error (str, optional): Error message to log if the element is not found.
-            warn (str, optional): Warning message to log if the element is not found.
-            timeout (int, optional): Explicit wait timeout in seconds.
-                Defaults to WaitConfig.timeout_explicit.
-
-        Returns:
-            Returns the text or value of the element if action is 'get_text' or 'get_value', otherwise returns None.
-        """
-        def get_element():
-            if xpath:
-                if method == 'unobscured':
-                    return self.wait_for_element_unobscured_by_xpath(xpath, timeout)
-                if method == 'visibility':
-                    return self.wait_for_element_visibility_by_xpath(xpath, timeout)
-                if method == 'enabled':
-                    return self.wait_for_element_enabled_by_xpath(xpath, timeout)
-                if method == 'find':
-                    return self.wait_for_element_by_xpath(xpath)
-            elif css:
-                if method == 'unobscured':
-                    return self.wait_for_element_unobscured_by_css(css, timeout)
-                if method == 'visibility':
-                    return self.wait_for_element_visibility_by_css(css, timeout)
-                if method == 'enabled':
-                    return self.wait_for_element_enabled_by_css(css, timeout)
-                if method == 'find':
-                    return self.wait_for_element_by_css(css)
-            return None
-        element = get_element()
-        if element is not None:
-            if action == 'send_keys':
-                if clear_text == 'Y':
-                    self.clear_text(element)
-                element.send_keys(value)
-                if need_tab == 'Y':
-                    element.send_keys(Keys.TAB)
-                if need_enter == 'Y':
-                    element.send_keys(Keys.ENTER)
-                if info:
-                    log.info(info)
-            elif action == 'click':
-                element.click()
-                if info:
-                    log.info(info)
-            elif action == 'get_text':
-                # if info:
-                #     log.info(info)
-                return element.text
-            elif action == 'get_value':
-                # if info:
-                #     log.info(info)
-                return element.get_attribute('value')
-            if action == 'send_values':
-                # clear data
-                self.driver.execute_script("arguments[0].value = '';", element)
-                self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
-                self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
-                log.debug('Clear data.')
-                actions = ActionChains(self.driver)
-                actions.click(element).send_keys(value).perform()
-                log.debug(f"element.get_attribute('value') is: {element.get_attribute('value')}")
-                if element.get_attribute('value') != value:
-                    self.driver.execute_script("arguments[0].value = '';", element)
-                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
-                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
-                    log.debug("Clear data again in get_attribute('value').")
-                    actions = ActionChains(self.driver)
-                    actions.click(element).send_keys(value).perform()
-                if info:
-                    log.info(info)
-        else:
-            if error:
-                log.error(error)
-            if warn:
-                log.warn(warn)
-            return None
+    # def key_tab(self):
+    #     actions = ActionChains(self.driver)
+    #     actions.send_keys(Keys.TAB).perform()
 
     def choose_item(self, title, value, fieldset_xpath):
         title_xpath = f"{fieldset_xpath}preceding-sibling::input"
@@ -589,6 +1115,17 @@ class TestCase(unittest.TestCase):
                         break
 
 # ================= handle button =================
+    def button_exists(self, button_name, timeout=5):
+        button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        try:
+            button_element = self.wait_for_element_unobscured_by_xpath(button_name_xpath, timeout)
+            if button_element is None:
+                return False
+            else:
+                return True
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"'{button_name_xpath}' button NOT available. Exception: {e}")
+
     def wait_for_button_available(self, button_name):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
         # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
@@ -602,9 +1139,11 @@ class TestCase(unittest.TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"'{button_name_xpath}' button NOT available. Exception: {e}")
 
-    def click_button(self, button_name):
+    def click_button(self, button_name, index=None):
         button_name_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
         # button_name_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}']"
+        if index:
+            button_name_xpath = f"(//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='{button_name}'])[{index}]"
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info=f"Clicked on '{button_name}' button.", error=f"Click on '{button_name_xpath}' button failed.")
 
     def click_button_in_popup(self, button_name):
@@ -639,31 +1178,31 @@ class TestCase(unittest.TestCase):
             icon_xpath = f"//div[@class='malibu-desktop-uInput-icon']/i[@class='material-icons-outlined' and text()='{icon}']"
         self.common(xpath=icon_xpath, method='visibility', action='click', info="Clicked icon.", error=f"Click icon '{icon}' failed.")
 
-    def scroll_down(self, pixels=1000):
-        self.driver.execute_script(f"window.scrollBy(0, {pixels});")
+    # def scroll_down(self, pixels=1000):
+    #     self.driver.execute_script(f"window.scrollBy(0, {pixels});")
 
-    def scroll_up(self, pixels=1000):
-        self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
+    # def scroll_up(self, pixels=1000):
+    #     self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
 
-    def switch_to_core_banking(self):
-        for handle in self.driver.window_handles: # Iterate over all open windows
-            self.driver.switch_to.window(handle)
-            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-                return  # Stop once we've switched to 'Core Banking'
-        # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
-        raise Exception("No window with title 'Core Banking' found")
+    # def switch_to_core_banking(self):
+    #     for handle in self.driver.window_handles: # Iterate over all open windows
+    #         self.driver.switch_to.window(handle)
+    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+    #             return  # Stop once we've switched to 'Core Banking'
+    #     # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
+    #     raise Exception("No window with title 'Core Banking' found")
 
-    def close_voucher(self):
-        core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
-        # Iterate over all open windows
-        for handle in self.driver.window_handles:
-            self.driver.switch_to.window(handle)
-            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-                core_banking_window = handle  # Save this handle to avoid closing it
-            else:
-                self.driver.close() # Close all windows that are not 'Core Banking'
-        if core_banking_window: # Switch back to 'Core Banking' window if it's found
-            self.driver.switch_to.window(core_banking_window)
+    # def close_voucher(self):
+    #     core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
+    #     # Iterate over all open windows
+    #     for handle in self.driver.window_handles:
+    #         self.driver.switch_to.window(handle)
+    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+    #             core_banking_window = handle  # Save this handle to avoid closing it
+    #         else:
+    #             self.driver.close() # Close all windows that are not 'Core Banking'
+    #     if core_banking_window: # Switch back to 'Core Banking' window if it's found
+    #         self.driver.switch_to.window(core_banking_window)
 
     def click_clear_search(self):
         clear_search_xpath = "//div[@class='malibu-desktop-uHeaderMoreOption-search-clear']/i"
@@ -741,8 +1280,10 @@ class TestCase(unittest.TestCase):
             return True
 
 # ================= handle lookup =================
-    def lookup_data(self, title, column_name, value, use_search="Y"):
+    def lookup_data(self, title, column_name, value, use_search="Y", border_name=None):
         icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        if border_name:
+            icon_xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/following-sibling::i"
         if BrowserConfig.is_old == 'Y':
             icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::div[@class='malibu-desktop-uInput-icon']/i"
         self.common(xpath=icon_xpath, method='unobscured', action='click')
@@ -758,8 +1299,81 @@ class TestCase(unittest.TestCase):
             self.common(xpath=input_search_xpath, method='unobscured', action='send_keys', value=value)
         # 3. click choose value
         action_xpath = f"{table_xpath}/tbody/tr/td[@data-title='{column_name}']/div[text()='{value}']/parent::td/preceding-sibling::td/div/i"
-        self.common(xpath=action_xpath, method='unobscured', action='click', error='Lookup data failed.')
+        self.common(xpath=action_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value} failed.')
         self.wait_loading()
+        self.close_popup()
+
+    def lookup_data_text(self, title, value_search_code=None, value_search_name=None, value_code=None, value_name=None, use_search="Y", border_name=None):
+        # 1. click icon lookup
+        icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        if border_name:
+            icon_xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        self.common(xpath=icon_xpath, method='unobscured', action='click')
+        self.wait_loading()
+        popup_xpath ="//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-uModal-content-content']"
+        table_xpath =f"{popup_xpath}//table[@class='malibu-desktop-uTable-info']"
+        if use_search == "Y":
+            # 2. enter value search
+            # by 'Code'
+            if value_search_code:
+                code_xpath = f"{popup_xpath}//legend[@title='Code']/parent::fieldset/preceding-sibling::textarea"
+                self.common(xpath=code_xpath, method='unobscured', action='send_keys', value=value_search_code, need_tab='Y', error=f"Write '{value_search_code}' at 'Code' in popup lookup failed.")
+            # by 'Name'
+            if value_search_name:
+                name_xpath = f"{popup_xpath}//legend[@title='Name']/parent::fieldset/preceding-sibling::textarea"
+                self.common(xpath=name_xpath, method='unobscured', action='send_keys', value=value_search_name, need_tab='Y', error=f"Write '{value_search_name}' at 'Name' in popup lookup failed.")
+            # 3. click on search button
+            search_button_xpath = f"{popup_xpath}//span[@class='malibu-desktop-uButton-title' and text()='Search']"
+            self.common(xpath=search_button_xpath, method='unobscured', action='click')
+            self.wait_loading()
+        # 4. click choose value
+        # value_code at column 'Code'
+        if value_code:
+            value_code_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Code']/div[text()='{value_code}']/parent::td/preceding-sibling::td/div/i"
+            self.common(xpath=value_code_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_code} failed.')
+            self.wait_loading()
+        # value_name at column 'Name'
+        if value_name:
+            value_name_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Name']/div[text()='{value_name}']/parent::td/preceding-sibling::td/div/i"
+            self.common(xpath=value_name_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_name} failed.')
+            self.wait_loading()
+        self.close_popup()
+
+    def lookup_data_value(self, title, value_search_code=None, value_search_name=None, value_code=None, value_name=None, use_search="Y", border_name=None):
+        # 1. click icon lookup
+        icon_xpath = f"//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        if border_name:
+            icon_xpath = f"//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/following-sibling::i"
+        self.common(xpath=icon_xpath, method='unobscured', action='click')
+        self.wait_loading()
+        popup_xpath ="//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-uModal-content-content']"
+        table_xpath =f"{popup_xpath}//table[@class='malibu-desktop-uTable-info']"
+        if use_search == "Y":
+            # 2. enter value search
+            # by 'Code'
+            if value_search_code:
+                code_xpath = f"{popup_xpath}//input[@placeholder='Code']"
+                self.common(xpath=code_xpath, method='unobscured', action='send_keys', value=value_search_code, need_tab='Y', error=f"Write '{value_search_code}' at 'Code' in popup lookup failed.")
+            # by 'Name'
+            if value_search_name:
+                name_xpath = f"{popup_xpath}//input[@placeholder=''Name']"
+                self.common(xpath=name_xpath, method='unobscured', action='send_keys', value=value_search_name, need_tab='Y', error=f"Write '{value_search_name}' at 'Name' in popup lookup failed.")
+            # 3. click on search button
+            search_button_xpath = f"{popup_xpath}//span[@class='malibu-desktop-uButton-title' and text()='Search']"
+            self.common(xpath=search_button_xpath, method='unobscured', action='click')
+            self.wait_loading()
+        # 4. click choose value
+        # value_code at column 'Code'
+        if value_code:
+            value_code_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Code']/div[text()='{value_code}']/parent::td/preceding-sibling::td/div/i"
+            self.common(xpath=value_code_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_code} failed.')
+            self.wait_loading()
+        # value_name at column 'Name'
+        if value_name:
+            value_name_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Name']/div[text()='{value_name}']/parent::td/preceding-sibling::td/div/i"
+            self.common(xpath=value_name_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_name} failed.')
+            self.wait_loading()
+        self.close_popup()
 
     def write_search_table_column(self, text, into, index=0, css='malibu-desktop-uTable-info', press_right=0):
         # screen_type = screen_size()
@@ -798,7 +1412,7 @@ class TestCase(unittest.TestCase):
         if timeout is None:
             timeout=WaitConfig.timeout_explicit
         message_xpath = "//div[@class='malibu-desktop-uNotification-title']"
-        return self.common(xpath=message_xpath, method='visibility', action='get_text', info=f"Get text from notification success.", error=f"Get text from notification failed.", timeout=timeout)
+        return self.common(xpath=message_xpath, method='visibility', action='get_text', info=f"Get text from notification success.", warn=f"Get text from notification failed.", timeout=timeout)
 
     def click_close_notification(self):
         close_xpath = "//div[@class='malibu-desktop-uNotification-close']/i"
@@ -823,6 +1437,7 @@ class TestCase(unittest.TestCase):
             # log.info(f'Expected message [{expected_message}] equal actual message [{actual_message}]')
             return
         else:
+            print(f'Check notification: Expected [{expected_message}]. Actual [{actual_message}].')
             log.error(f'Expected message [{expected_message}] NOT equal actual message [{actual_message}]')
 
 # ================= handle special functions =================
@@ -894,6 +1509,19 @@ class TestCase(unittest.TestCase):
         logout_xpath = "//span[@class='malibu-desktop-uHeaderItemMoreOption-span' and text()='Log out']"
         self.common(xpath=logout_xpath, method='visibility', action='click', info="Logout successful.", error="Logout failed.")
 
+    def get_username(self):
+        avatar_xpath = "//div[@class='malibu-desktop-uHeaderItemMoreOption-avatar-div']/div[@class='malibu-desktop-uHeaderItemMoreOption-avatar']"
+        self.common(xpath=avatar_xpath, method='visibility', action='click')
+        username_xpath = "//div[@class='malibu-desktop-uHeaderItemMoreOption-email']"
+        return self.common(xpath=username_xpath, method='visibility', action='get_text', error="Get text username login failed.")
+
+    def assert_activity(self, transaction_number, maker, action):
+        self.bo_click_tab('Activity')
+        activity_xpath = f"//div[@class='malibu-desktop-uListActivityItem']/div/span[@class='malibu-desktop-uListActivityItem-content-title-color' and text()='{transaction_number}']/following-sibling::span/span"
+        activity_text = self.common(xpath=activity_xpath, method='visibility', action='get_text', error="Get text maker failed.")
+        log.info(f'activity_text: {activity_text}')
+        self.assertEqual(f'{maker}executed {action}', activity_text)
+
     def open_transaction_journal(self):
         self.click_menu('Front Office', 'Transaction Journal')
 
@@ -902,7 +1530,7 @@ class TestCase(unittest.TestCase):
 
     def get_text_form_title_header_popup(self):
         title_xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header-title']"
-        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title header of popup failed.")
+        return self.common(xpath=title_xpath, method='visibility', action='get_text', warn=f"Get text title header of popup failed.")
 
     def assert_form_title_header_popup(self, expected_title=None):
         if expected_title is None: 
@@ -912,7 +1540,7 @@ class TestCase(unittest.TestCase):
 
     def get_text_form_title_popup(self, timeout=5):
         title_xpath = "//div[@class='malibu-desktop-uModal-content-content']/div/div[contains(@class,'malibu-desktop-uForm')]/div[@class='malibu-desktop-uForm-title']"
-        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title popup failed.", timeout=timeout)
+        return self.common(xpath=title_xpath, method='visibility', action='get_text', warn=f"Get text title popup failed.", timeout=timeout)
 
     def assert_form_title_popup(self, expected_title=None):
         if expected_title is None: 
@@ -1004,6 +1632,31 @@ class TestCase(unittest.TestCase):
         element = self.wait_for_element_visibility_by_xpath(xpath)
         return element.text.split('|')[1].strip()
 
+    def choose_page(self, value=50):
+        title_xpath = "//div[@class='malibu-desktop-uPagination-result']"
+        page_xpath = f"{title_xpath}/input"
+        value_xpath = f"{title_xpath}/ul/li[text()='{value}']"
+        self.common(xpath=page_xpath, method='unobscured', action='click', info=f"Clicked choose page.")
+        value_element = None
+        value_element = self.wait_for_element_unobscured_by_xpath(value_xpath, timeout=2)
+        if value_element:
+            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}'.", error=f"Select value '{value}' at choose page failed.")
+
+    def is_online(self, branch_code):
+        is_online_xpath = f"//table[@class='malibu-desktop-uTable-info']/tbody/tr/td[@data-title='Branch Code']/div[text()='{branch_code}']/parent::td/preceding-sibling::td[@data-title='Is Online']/img"
+        element = self.wait_for_element_unobscured_by_xpath(is_online_xpath, timeout=2)
+        try:
+            css_title = element.get_attribute('title')
+            if 'Y' in css_title:
+                log.info(f"Attribute 'Y' in title '{css_title}'.")
+                return True
+            else:
+                log.warn(f"Attribute 'Y' NOT in title '{css_title}'.")
+                return False
+        except:
+            log.error(f"Check attribute 'title' for element '{element}' failed.")
+
+
     def assert_search_not_found(self):
         not_found_text = "Data not found"
         self.assert_notification(not_found_text)
@@ -1027,12 +1680,6 @@ class TestCase(unittest.TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_element_enable for element '{element}' failed. Exception: '{e}'")
     
-    def assert_field_disable(self, element):
-        try:
-            self.assertTrue(element.get_attribute('disabled'), "Element '{}' is not disabled".format(element))
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check assert_field_disable for element '{element}' failed. Exception: '{e}'")
-
     def assert_checkbox_enable(self, element):
         try:
             css_class = element.get_attribute('class')
@@ -1211,7 +1858,25 @@ class TestCase(unittest.TestCase):
         expected = "An error has occurred. Please try again"
         xpath = "//div[@class='malibu-desktop-uFormNotify-span']"
         element = self.wait_for_element_unobscured_by_xpath(xpath, timeout=3)
+        if element is not None:
+            self.get_error_message_content()
         return element and element.text == expected
+
+    def get_error_message_content(self):
+        xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
+        try:
+            elements = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, xpath))
+            )
+            list_actual = []
+            for element in elements:
+                actual = element.get_attribute('innerText').split('\n')[0].strip()
+                list_actual.append(actual)
+            print(f"Error messages content: '{list_actual}'")
+            log.warn(f"get_error_message_content: '{list_actual}'")
+            return list_actual
+        except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+            return None
 
     def get_list_error_message(self):
         xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
@@ -1219,9 +1884,15 @@ class TestCase(unittest.TestCase):
             elements = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, xpath))
             )
+            # list_actual = []
+            # for element in elements:
+            #     actual = element.get_attribute('innerText').split('\n')[0].strip()
+            #     list_actual.append(actual)
+            # print(f"List error messages: '{list_actual}'")
+            # log.warn(f"get_list_error_message: '{list_actual}'")
             return elements
         except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check assert_error_message failed. Exception: '{e}'")
+            log.error(f"Check get_list_error_message failed. Exception: '{e}'")
 
     def assert_list_error_message(self, list_expected):
         try:
@@ -1243,7 +1914,7 @@ class TestCase(unittest.TestCase):
             )
             return elements
         except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check assert_error_message failed. Exception: '{e}'")
+            log.error(f"Check get_list_error_message_multi failed. Exception: '{e}'")
 
     def assert_list_error_message_multi(self, level_1, list_expected):
         try:
@@ -1257,6 +1928,28 @@ class TestCase(unittest.TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_list_error_message_multi failed. Exception: '{e}'")
 
+    def get_list_error_message_under_group(self):
+        xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div//div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
+        try:
+            elements = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, xpath))
+            )
+            return elements
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"Check get_list_error_message_under_group failed. Exception: '{e}'")
+
+    def assert_list_error_message_under_group(self, list_expected):
+        try:
+            elements = self.get_list_error_message_under_group()
+            list_actual = []
+            for element in elements:
+                actual = element.get_attribute('innerText').split('\n')[0].strip()
+                list_actual.append(actual)
+            for expected in list_expected:
+                self.assertIn(expected, list_actual, f"Missing message: {expected}.")
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"Check assert_list_error_message_under_group failed. Exception: '{e}'")
+
     def assert_fee_grid_exist(self):
         xpath = "//div[@class='col-sm-12 col-md-12']//div[@class='malibu-desktop-uForm-title']"
         actual = self.common(xpath=xpath, method='unobscured', action='get_text')
@@ -1269,6 +1962,56 @@ class TestCase(unittest.TestCase):
             self.assertIsNone(element, "Fee grid exist.")
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_fee_grid_not_exist failed. Exception: '{e}'")
+
+    def assert_disabled_field(self, field_name):
+        title_xpath = f"//fieldset/legend[text()='{field_name}']/parent::fieldset"
+        field_element = self.wait_for_element_visibility_by_xpath(title_xpath)
+        self.assertIsNotNone(field_element, f"The '{field_element}' field is not visible or disabled.")
+        self.assertTrue(self.check_disabled_field(field_element), f"The '{field_name}' field is not disable.")
+
+    def verify_disabled_fields(self, field_names: list):
+        """
+        Checks a list of fields and returns all fields that are not disabled. The test will only fail once at the end with a summary error message.
+
+        :param field_names: list of field names to check.
+        """
+        failed_fields = []
+        not_found_fields = []
+        for field_name in field_names:
+                title_xpath = f"//fieldset/legend[text()='{field_name}']/parent::fieldset"
+                field_element = self.wait_for_element_visibility_by_xpath(title_xpath, timeout=1)
+                if field_element is None:
+                    not_found_fields.append(field_name)
+                else:
+                    if not self.check_disabled_field(field_element):
+                        failed_fields.append(field_name)
+        if failed_fields:
+            error_message = f"Fields are not disabled: ['{"', '".join(failed_fields)}']. Fields not found: ['{"', '".join(not_found_fields)}']"
+            self.fail(error_message)
+        else:
+            print('All checked fields are disabled.')
+
+    def verify_enabled_fields(self, field_names: list):
+        """
+        Checks a list of fields and returns all fields that are not enabled. The test will only fail once at the end with a summary error message.
+
+        :param field_names: list of field names to check.
+        """
+        failed_fields = []
+        not_found_fields = []
+        for field_name in field_names:
+                title_xpath = f"//fieldset/legend[text()='{field_name}']/parent::fieldset"
+                field_element = self.wait_for_element_visibility_by_xpath(title_xpath, timeout=1)
+                if field_element is None:
+                    not_found_fields.append(field_name)
+                else:
+                    if self.check_disabled_field(field_element):
+                        failed_fields.append(field_name)
+        if failed_fields:
+            error_message = f"Fields are not enabled: ['{"', '".join(failed_fields)}']. Fields not found: ['{"', '".join(not_found_fields)}']"
+            self.fail(error_message)
+        else:
+            print('All checked fields are enabled.')
 
 # ================= handle table =================
     def click_menu(self, level_01, level_02=None, level_03=None):
@@ -1315,6 +2058,18 @@ class TestCase(unittest.TestCase):
                 self.common(xpath=action_xpath, method='visibility', action='click', error=f"Click action in BO search screen failed.")
         else:
             self.common(xpath=row_xpath, method='visibility', action='click', error=f"Click action in BO search screen failed.")
+
+    def assert_actions(self, expected_actions=None, row=None):
+        if row is None:
+            row=1
+        is_more_option = self.wait_for_element_visibility_by_xpath(f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//tr[{row}]//div[@class='malibu-desktop-uTableColumnButtonHover-button']/i[text()='more_vert']", timeout=3)
+        row_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//tr[{row}]//div[@class='malibu-desktop-uTableColumnButtonHover-button']"
+        if is_more_option:
+            self.common(xpath=row_xpath, method='visibility', action='click', error=f"Click action in BO search screen failed.")
+            actions_locator = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//tr[{row}]//p"
+            actions_elements = self.driver.find_elements(By.XPATH, actions_locator)
+            actual_actions = [element.text for element in actions_elements]
+            self.assertEqual(set(expected_actions), set(actual_actions), f"actual_actions: '{set(actual_actions)}', expected_actions: '{set(expected_actions)}'")
 
 # ================= handle search F8 =================
     def simple_search_f8(self, text):
@@ -1375,7 +2130,7 @@ class TestCase(unittest.TestCase):
 
     def advanced_search_f8_textarea_group(self, title, value):
         """Write text to 'textarea' in advanced search F8 screen and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
     def advanced_search_f8_select(self, title, value):
@@ -1392,7 +2147,7 @@ class TestCase(unittest.TestCase):
 
     def advanced_search_f8_select_group(self, title, value):
         """Select field in advanced search F8 screen and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
 # ================= handle other methods =================
@@ -1404,23 +2159,13 @@ class TestCase(unittest.TestCase):
         if self.assert_checked_in_tab(title=title):
             return
         else:
-            log.error(f"Click on checkbox '{title}' failed.")
+            log.warn(f"The '{title}' checkbox in screen have tab is unchecked.")
 
     def assert_checked_in_tab(self, title):
         # title_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
-        title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/parent::div"
-        # try:
-        #     title_element = self.wait_for_element_unobscured_by_xpath(title_xpath)
-        #     css_class = title_element.get_attribute('class')
-        #     if 'change' in css_class:
-        #         # log.info(f"Attribute 'change' in class '{css_class}'.")
-        #         return True
-        #     else:
-        #         # log.warn(f"Attribute 'change' NOT in class '{css_class}'.")
-        #         return False
-        # except:
-        #     log.error(f"Check attribute 'change' for element '{title}' failed.")
+        title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]/div/div[text()='{title}']/preceding-sibling::i"
         is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
+        # log.debug(f"Value of is_checked at assert_checked_in_tab: '{is_checked}'")
         if is_checked == 'check_box':
             return True
         else:
@@ -1434,12 +2179,13 @@ class TestCase(unittest.TestCase):
         if self.assert_checked_non_tab(title=title):
             return
         else:
-            log.error(f"Click on checkbox '{title}' failed.")
+            log.warn(f"The '{title}' checkbox in screen non tab is unchecked.")
 
     def assert_checked_non_tab(self, title):
         # title_xpath = f"//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
         title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uCheckBox-haveClass')]//div[text()='{title}']/preceding-sibling::i"
         is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
+        # log.debug(f"Value of is_checked at assert_checked_non_tab: '{is_checked}'")
         if is_checked == 'check_box':
             # log.info(f"Checkbox of element '{title}' have checked. Text is '{is_checked}'.")
             return True
@@ -1455,6 +2201,16 @@ class TestCase(unittest.TestCase):
             return True
         else:
             # log.warn(f"Checkbox of element '{title}' '{collap_name}' is un-check. Text is '{is_checked}'.")
+            return False
+
+    def assert_checked_select_multi(self, title, value):
+        title_xpath=f"//div[contains(@class,'malibu-desktop-uSelectMulti')]//legend[text()='{title}']/parent::fieldset/following-sibling::div//ul/li/label[@title='{value}']/preceding-sibling::div/div/i"
+        is_checked = self.common(xpath=title_xpath, method='unobscured', action='get_text')
+        if is_checked == 'check_box':
+            log.info(f"Checkbox of element '{title}' and '{value}' have checked. Text is '{is_checked}'.")
+            return True
+        else:
+            log.warn(f"Checkbox of element '{title}' '{value}' is un-check. Text is '{is_checked}'.")
             return False
 
     def assert_checkbox(self, title, expected, collap_name=None):
@@ -1478,7 +2234,7 @@ class TestCase(unittest.TestCase):
         if self.assert_checked_multi(collap_name=collap_name, title=title):
             return
         else:
-            log.error(f"Click on checkbox '{title}' under '{collap_name}' failed.")
+            log.warn(f"The '{title}' checkbox under '{collap_name}' is unchecked.")
 
     def click_checkbox(self, title, in_tab="Y", in_multi="N", collap_name=None):
         """Click 'check-box' from title, flexible parameters for in_tab"""
@@ -1575,6 +2331,13 @@ class TestCase(unittest.TestCase):
         else:
             return self.click_checkbox(title, in_tab="Y")
 
+    def bo_click_uncheckbox(self, title):
+        if self.assert_checked_in_tab(title):
+            return self.click_checkbox(title, in_tab="Y")
+        else:
+            log.warn(f"Checkbox '{title}' in bo_click_uncheckbox unchecked")
+            return ''
+
     def bo_click_checkbox_single(self, title):
         if self.assert_checked_non_tab(title):
             log.warn(f"Checkbox '{title}' in bo_click_checkbox_single checked")
@@ -1582,12 +2345,26 @@ class TestCase(unittest.TestCase):
         else:
             return self.click_checkbox(title, in_tab="N")
 
+    def bo_click_uncheckbox_single(self, title):
+        if self.assert_checked_non_tab(title):
+            return self.click_checkbox(title, in_tab="N")
+        else:
+            log.warn(f"Checkbox '{title}' in bo_click_uncheckbox_single unchecked")
+            return ''
+
     def bo_click_checkbox_multi(self, collap_name, title):
         if self.assert_checked_multi(collap_name, title):
             log.warn(f"Checkbox '{title}' in bo_click_checkbox_multi checked")
             return ''
         else:
             return self.click_checkbox(title=title, in_tab="Y", in_multi="Y", collap_name=collap_name)
+
+    def bo_click_uncheckbox_multi(self, collap_name, title):
+        if self.assert_checked_multi(collap_name, title):
+            return self.click_checkbox(title=title, in_tab="Y", in_multi="Y", collap_name=collap_name)
+        else:
+            log.warn(f"Checkbox '{title}' in bo_click_uncheckbox_multi unchecked")
+            return ''
 
     def bo_click_signature(self):
         self.click_signature(form_type="bo")
@@ -1609,15 +2386,17 @@ class TestCase(unittest.TestCase):
         button_name_xpath="//div[contains(@class,'malibu-desktop-uMultiValue')]//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[contains(@class,'malibu-desktop-uForm-content')]//div[contains(@class,'malibu-desktop-uButton-conten')]/span[@class='malibu-desktop-uButton-title' and text()='Search']"
         self.common(xpath=button_name_xpath, method='unobscured', action='click', info="Clicked on 'Search' button in advanced search screen.", error=f"Click on '{button_name_xpath}' button failed.")
 
-    def advanced_search(self, title, value, click_collap="Y", field_type="I", in_group="N"):
+    def advanced_search(self, title, value, click_collap="Y", field_type="I", in_group="N", collap_name=None):
         """
         Write value to title in advanced search screen, flexible parameters for click_collap, field_type, in_group. field_type: str, default is 'I'. Valid options are:
             - I: tagname is 'input'. Enter text, date or number to input field (default).
             - A: Textarea, multi-line text input.
             - S: Select, dropdown select field.
         """
+        if collap_name is None:
+            collap_name='Advanced search'
         if click_collap=="Y":
-            self.click_collap_multi_non_tab('Advanced search')
+            self.click_collap_multi_non_tab(collap_name)
         # Validate 'field_type' to be one of 'input', 'textarea' or 'select' (default is 'input')
         valid_field_types = ['I', 'A', 'S']
         if field_type not in valid_field_types:
@@ -1641,26 +2420,37 @@ class TestCase(unittest.TestCase):
         # Call the corresponding method with title and value as the argument
         return method_map[key](title, value)
 
-    def adv_search(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='I', in_group='N')
+    def adv_search(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='I', in_group='N', collap_name=collap_name)
 
-    def adv_search_group(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='I', in_group='Y')
+    def adv_search_group(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='I', in_group='Y', collap_name=collap_name)
 
-    def adv_search_text(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='A', in_group='N')
+    def adv_search_text(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='A', in_group='N', collap_name=collap_name)
 
-    def adv_search_text_group(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='A', in_group='Y')
+    def adv_search_text_group(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='A', in_group='Y', collap_name=collap_name)
 
-    def adv_search_select(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='S', in_group='N')
+    def adv_search_select(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='S', in_group='N', collap_name=collap_name)
 
-    def adv_search_select_group(self, title, value):
-        return self.advanced_search(title=title, value=value, field_type='S', in_group='Y')
+    def adv_search_select_group(self, title, value, collap_name=None):
+        return self.advanced_search(title=title, value=value, field_type='S', in_group='Y', collap_name=collap_name)
 
     def adv_click_checkbox(self, title, collap_name='Advanced search'):
-        return self.click_checkbox(title=title, in_multi="Y", collap_name=collap_name)
+        if self.assert_checked_multi(collap_name, title):
+            log.warn(f"Checkbox '{title}' in adv_click_checkbox checked")
+            return ''
+        else:
+            return self.click_checkbox(title=title, in_multi="Y", collap_name=collap_name)
+
+    def adv_click_uncheckbox(self, title, collap_name='Advanced search'):
+        if self.assert_checked_multi(collap_name, title):
+            return self.click_checkbox(title=title, in_multi="Y", collap_name=collap_name)
+        else:
+            log.warn(f"Checkbox '{title}' in adv_click_uncheckbox unchecked")
+            return ''
 
     def advanced_search_input(self, title, value):
         """Write text or number or date to 'input' in advanced search screen"""
@@ -1679,7 +2469,7 @@ class TestCase(unittest.TestCase):
 
     def advanced_search_textarea_group(self, title, value):
         """Write text to textarea in advanced search screen and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
     def advanced_search_select(self, title, value):
@@ -1696,7 +2486,7 @@ class TestCase(unittest.TestCase):
 
     def advanced_search_select_group(self, title, value):
         """Select field in advanced search screen and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
 # ================= handle get text field =================
@@ -1771,7 +2561,7 @@ class TestCase(unittest.TestCase):
 
     def get_date_input_non_tab_group(self, title):
         """Get date from 'input' in screen non tab and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
     def get_text_select_in_tab(self, title):
@@ -1786,15 +2576,14 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title}' in screen NON tab.", error=f"Get text from field select '{title}' in screen NON tab failed.")
 
-    def get_text_select_in_tab_group(self, title_front_select, title_select):
+    def get_text_select_in_tab_group(self, title):
         """Get text from field 'select' in screen have tab and group"""
-        # xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]//legend[@title='{title_front_select}']/parent::fieldset/parent::div/parent::div/parent::div/parent::div/following-sibling::div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title_select}']/parent::fieldset/preceding-sibling::input"
-        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]//legend[@title='{title_front_select}']/parent::fieldset/parent::div/parent::div/parent::div/parent::div/following-sibling::div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title_select}']/parent::fieldset/preceding-sibling::input"
-        return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title_select}' group with '{title_front_select}' in screen have tab.", error=f"Get text from field select '{title_select}' group with '{title_front_select}' in screen have tab failed.")
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uFormTab-content')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        return self.common(xpath=xpath, method='unobscured', action='get_value', info=f"Get text from field select '{title}' group in screen have tab.", error=f"Get text from field select '{title}' group in screen have tab failed.")
 
-    def get_text_select_non_tab_group(self, title_front_select, title_select):
+    def get_text_select_non_tab_group(self, title):
         """Get text from field 'select' in screen non tab and group"""
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
     def get_text_select_multi(self, title):
@@ -1835,7 +2624,7 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uOfGroup')]/div/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         return self.common(xpath=xpath, method='unobscured', action='get_text', info=f"Get text from title '{title}' in screen NON tab.", error=f"Get text from title '{title}' in screen NON tab failed.")
 
-    def get_text(self, title, field_type="I", in_tab="Y", in_group="N", in_multi="N", title_front_select=None):
+    def get_text(self, title, field_type="I", in_tab="Y", in_group="N", in_multi="N"):
         """
         Get text from title, flexible parameters for field_type, in_tab, in_group. field_type: str, default is 'I'. Valid options are:
             - I: Input, tagname is 'input' and field type is text (default).
@@ -1872,8 +2661,8 @@ class TestCase(unittest.TestCase):
             ('D', 'N', 'Y', 'N'): self.get_date_input_non_tab_group,
             ('S', 'Y', 'N', 'N'): self.get_text_select_in_tab,
             ('S', 'N', 'N', 'N'): self.get_text_select_non_tab,
-            ('S', 'Y', 'Y', 'N'): lambda title: self.get_text_select_in_tab_group(title_front_select, title),
-            ('S', 'N', 'Y', 'N'): lambda title: self.get_text_select_non_tab_group(title_front_select, title),
+            ('S', 'Y', 'Y', 'N'): self.get_text_select_in_tab_group,
+            ('S', 'N', 'Y', 'N'): self.get_text_select_non_tab_group,
             ('A', 'Y', 'N', 'N'): self.get_text_textarea_in_tab,
             ('A', 'N', 'N', 'N'): self.get_text_textarea_non_tab,
             ('A', 'Y', 'Y', 'N'): self.get_text_textarea_in_tab_group,
@@ -1995,11 +2784,11 @@ class TestCase(unittest.TestCase):
     def bo_get_select_single(self, title):
         return self.get_text(title, field_type="S", in_tab="N", in_group="N", in_multi="N")
 
-    def bo_get_select_group(self, title, title_front_select):
-        return self.get_text(title, field_type="S", in_tab="Y", in_group="Y", in_multi="N", title_front_select=title_front_select)
+    def bo_get_select_group(self, title):
+        return self.get_text(title, field_type="S", in_tab="Y", in_group="Y", in_multi="N")
 
-    def bo_get_select_group_single(self, title, title_front_select):
-        return self.get_text(title, field_type="S", in_tab="N", in_group="Y", in_multi="N", title_front_select=title_front_select)
+    def bo_get_select_group_single(self, title):
+        return self.get_text(title, field_type="S", in_tab="N", in_group="Y", in_multi="N")
 
     def bo_get_select_multi(self, title):
         return self.get_text_select_multi(title)
@@ -2180,8 +2969,8 @@ class TestCase(unittest.TestCase):
     def fo_get_select(self, title):
         return self.get_text(title, field_type="S", in_tab="N", in_group="N", in_multi="N")
 
-    def fo_get_select_group(self, title, title_front_select):
-        return self.get_text(title, field_type="S", in_tab="N", in_group="Y", in_multi="N", title_front_select=title_front_select)
+    def fo_get_select_group(self, title):
+        return self.get_text(title, field_type="S", in_tab="N", in_group="Y", in_multi="N")
 
     def fo_get_select_multi(self, title):
         return self.get_text_select_multi(title)
@@ -2231,8 +3020,8 @@ class TestCase(unittest.TestCase):
     def fo_assert_select(self, title, expected):
         self.assertEqual(self.fo_get_select(title), expected)
 
-    def fo_assert_select_group(self, title, title_front_select, expected):
-        self.assertEqual(self.fo_get_select_group(title, title_front_select), expected)
+    def fo_assert_select_group(self, title, expected):
+        self.assertEqual(self.fo_get_select_group(title), expected)
 
     def fo_assert_select_multi(self, title, expected):
         self.assertEqual(sorted(self.fo_get_select_multi(title)), sorted(expected))
@@ -2270,11 +3059,11 @@ class TestCase(unittest.TestCase):
                 'preceding': The target column is to the left of the reference column.
         Example:
             To assert text of the "Status" column with "Normal" where the "IFC code" column is "101":
-                bo_assert_text_table('IFC code', '101', 'Status', 'Normal')
+                fo_assert_text_table('IFC code', '101', 'Status', 'Normal')
             To assert text of the "Replace by" column with "2020302031111" where "System account name" is "DEPOSIT" and "Customer Condition" is "C1":
-                bo_assert_text_table('System account name', 'DEPOSIT', 'Replace by', '2020302031111', colunm_02='Customer Condition', value_colunm_02='C1', xpath_type='preceding')
+                fo_assert_text_table('System account name', 'DEPOSIT', 'Replace by', '2020302031111', colunm_02='Customer Condition', value_colunm_02='C1', xpath_type='preceding')
         """
-        self.assertEqual(self.fo_get_text_table(colunm_01=colunm_01, value_colunm_01=value_colunm_01, colunm_expected=colunm_expected, colunm_02=colunm_02, value_colunm_02=value_colunm_02, xpath_type=xpath_type), value_colunm_expected, f"{colunm_01}: {value_colunm_01} and {colunm_02}: {value_colunm_02}")
+        self.assertEqual(self.fo_get_text_table(colunm_01=colunm_01, value_colunm_01=value_colunm_01, colunm_expected=colunm_expected, colunm_02=colunm_02, value_colunm_02=value_colunm_02, xpath_type=xpath_type), value_colunm_expected, f"{colunm_01}: {value_colunm_01} and {colunm_expected}: {value_colunm_expected}")
 
     def fo_assert_text_table_index(self, colunm_01, value_colunm_01, colunm_expected, index, value_colunm_expected, colunm_02=None, value_colunm_02=None, xpath_type='following'):
         """
@@ -2292,11 +3081,11 @@ class TestCase(unittest.TestCase):
                 'preceding': The target column is to the left of the reference column.
         Example:
             To assert text of the "Status" column row 1 with "Normal" where the "IFC code" column is "101":
-                bo_assert_text_table('IFC code', '101', 'Status', 1, 'Normal')
+                fo_assert_text_table_index('IFC code', '101', 'Status', 1, 'Normal')
             To assert text of the "Replace by" column row 2 with "2020302031111" where "System account name" is "DEPOSIT" and "Customer Condition" is "C1":
-                bo_assert_text_table('System account name', 'DEPOSIT', 'Replace by', 2, '2020302031111', colunm_02='Customer Condition', value_colunm_02='C1', xpath_type='preceding')
+                fo_assert_text_table_index('System account name', 'DEPOSIT', 'Replace by', 2, '2020302031111', colunm_02='Customer Condition', value_colunm_02='C1', xpath_type='preceding')
         """
-        self.assertEqual(self.fo_get_text_table_index(colunm_01=colunm_01, value_colunm_01=value_colunm_01, colunm_expected=colunm_expected, index=index, colunm_02=colunm_02, value_colunm_02=value_colunm_02, xpath_type=xpath_type), value_colunm_expected, f"{colunm_01}: {value_colunm_01} and {colunm_02}: {value_colunm_02}")
+        self.assertEqual(self.fo_get_text_table_index(colunm_01=colunm_01, value_colunm_01=value_colunm_01, colunm_expected=colunm_expected, index=index, colunm_02=colunm_02, value_colunm_02=value_colunm_02, xpath_type=xpath_type), value_colunm_expected, f"{colunm_01}: {value_colunm_01} and {colunm_expected}: {value_colunm_expected}")
 
     def fo_assert_text_multi_line(self, title, expected):
         self.assertEqual(self.fo_get_text_multi_line(title), expected, title)
@@ -2378,11 +3167,11 @@ class TestCase(unittest.TestCase):
         return self.click_uncollap_multi_non_tab(collap_name)
 
 # ================= handle write_text field =================
-    def write_text_input(self, title, value, clear_text=None):
+    def write_text_input(self, title, value, clear_text=None, need_tab=None):
         """Write text to 'input' any screen"""
         # xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
+        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab=need_tab, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
 
     def write_text_input_in_tab(self, title, value, clear_text=None):
         """Write text to 'input' screen have tab"""
@@ -2427,11 +3216,11 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//span[text()='{border_name}']/following-sibling::div[contains(@class,'malibu-desktop-uView-content-main')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab='Y', info=f"Wrote '{value}' at '{title}' below border in screen.", error=f"Write '{value}' at '{title}' below border in screen failed.")
 
-    def write_text_textarea(self, title, value, clear_text=None):
+    def write_text_textarea(self, title, value, clear_text=None, need_tab=None):
         """Write text to 'textarea' any screen"""
         # xpath = f"//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
         xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::textarea"
-        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
+        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab=need_tab, info=f"Wrote '{value}' at '{title}' in any screen.", error=f"Write '{value}' at '{title}' in any screen failed.")
 
     def write_text_textarea_in_tab(self, title, value, clear_text=None):
         """Write text to 'textarea' in screen have tab"""
@@ -2575,6 +3364,18 @@ class TestCase(unittest.TestCase):
             value_xpath = f"{fieldset_xpath}following-sibling::div/ul/li/label[@title='{value}']"
             self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in any screen.", error=f"Select value '{value}' at title '{title}' in any screen failed.")
 
+    def select_table(self, title, value):
+        """Select have table field in any screen"""
+        fieldset_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
+        title_xpath = f"{fieldset_xpath}preceding-sibling::input"
+        self.common(xpath=title_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in any screen.")
+        search_xpath = f"{fieldset_xpath}following-sibling::div//input[@class='malibu-desktop-uSelectItem-menu-search-input']"
+        search_element = self.wait_for_element_unobscured_by_xpath(search_xpath, timeout=2)
+        if search_element:
+            self.common(xpath=search_xpath, method='unobscured', action='send_values', value=value, info=f"The 'Select table' field has search with value is '{value}'.", warn=f"The 'Select table' field does not have a search function.", timeout=1)
+        value_xpath = f"{fieldset_xpath}following-sibling::div/table/tbody/tr/td[text()='{value}']"
+        self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in any screen.", error=f"Select value '{value}' at title '{title}' in any screen failed.")
+
     def select_in_tab_child(self, title, value):
         """Select field in screen have tab under tab"""
         fieldset_xpath = f"//div[contains(@class,'malibu-desktop-uForm') and contains(@class,'col-12') and not(@style='display: none;')]/div[@class='malibu-desktop-uForm-title']/parent::div//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]/div[@class='malibu-role_profile-div']//div[contains(@class,'malibu-desktop-uFormTab-content') and (@style='opacity: 1;')]//div[contains(@class,'malibu-desktop-uSelectItem')]//legend[@title='{title}']/parent::fieldset/"
@@ -2587,7 +3388,8 @@ class TestCase(unittest.TestCase):
         self.common(xpath=icon_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in select multi.")
         for value in values:
             value_xpath = f"{fieldset_xpath}following-sibling::div//ul/li/label[@title='{value}']"
-            self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in select multi.")
+            if not self.assert_checked_select_multi(title, value):
+                self.common(xpath=value_xpath, method='unobscured', action='click', info=f"Clicked value '{value}' in select multi.")
         self.common(xpath=icon_xpath, method='unobscured', action='click', info=f"Clicked title '{title}' in select multi again.")
 
     def select_in_tab(self, title, value):
@@ -2629,7 +3431,7 @@ class TestCase(unittest.TestCase):
     def select_non_tab_group(self, title, value):
         """Select field in screen non tab and group"""
         # self.key_escape()
-        print("The method has not yet been implemented. Please contact NhiDY to do it.")
+        print("The method has not yet been implemented. Please contact TESTER to do it.")
         return ''
 
     def select_below_border(self, border_name, title, value):
@@ -2682,7 +3484,7 @@ class TestCase(unittest.TestCase):
         xpath = f"//div[contains(@class,'malibu-desktop-form-003005-key') and text()='{title}']/following-sibling::div[contains(@class,'malibu-desktop-form-003005-value')]"
         return self.get_text_by_xpath_div(xpath)
 
-    def write_all_type(self, title, value, clear_text=None, field_type=None):
+    def write_all_type(self, title, value, clear_text=None, field_type=None, need_tab=None):
         """
         Writes text into an input or textarea field based on the given title.
         Args:
@@ -2690,20 +3492,102 @@ class TestCase(unittest.TestCase):
             value (str): Text to be written in the field.
             clear_text (str, optinal): If "Y", clears existing text before writing.
             field_type (str, optinal): The type of the field ('input' or 'textarea').
+            need_tab (str, optional): If "Y", Flag to send a TAB key press after sending keys.
         """
         if field_type not in ['input', 'textarea']:
             log.error(f"Invalid field_type: {field_type}. Must be 'input' or 'textarea'.")
             return
         title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::{field_type}"
-        self.common(xpath=title_xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen.", error=f"Write '{value}' at '{title}' in screen failed.")
+        self.common(xpath=title_xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, need_tab=need_tab, info=f"Wrote '{value}' at '{title}' in screen.", error=f"Write '{value}' at '{title}' in screen failed.")
 
-    def write_input(self, title, value, clear_text='Y'):
-        self.write_all_type(title=title, value=value, clear_text=clear_text, field_type='input')
+    def write_input(self, title, value, clear_text='Y', need_tab=None):
+        """
+        Writes text into input field based on the given title.
+        Args:
+            title (str): Title of the field (legend text).
+            value (str): Text to be written in the field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+            need_tab (str, optional): If "Y", Flag to send a TAB key press after sending keys.
+        """
+        self.write_all_type(title=title, value=value, clear_text=clear_text, field_type='input', need_tab=need_tab)
 
-    def write_textarea(self, title, value, clear_text='Y'):
-        self.write_all_type(title=title, value=value, clear_text=clear_text, field_type='textarea')
+    def write_textarea(self, title, value, clear_text='Y', need_tab=None):
+        """
+        Writes text into textarea field based on the given title.
+        Args:
+            title (str): Title of the field (legend text).
+            value (str): Text to be written in the field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+            need_tab (str, optional): If "Y", Flag to send a TAB key press after sending keys.
+        """
+        self.write_all_type(title=title, value=value, clear_text=clear_text, field_type='textarea', need_tab=need_tab)
 
-    def write_text(self, title, value, field_type="T", in_tab="Y", in_group="N", in_multi="N", below_border="N", clear_text=None, collap_name=None, border_name=None):
+    def write_all_type_act_man(self, title, value, clear_text=None, field_type=None, is_decimal=None):
+        """
+        Writes text into an input or textarea field based on the given title at "Internal Transaction" screen.
+        Args:
+            title (str): Title of the field (legend text).
+            value (str): Text to be written in the field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+            field_type (str, optinal): The type of the field ('input' or 'textarea').
+            is_decimal (str, optinal): If "Y", is decimal.
+        """
+        if field_type not in ['input', 'textarea']:
+            log.error(f"Invalid field_type: {field_type}. Must be 'input' or 'textarea'.")
+            return
+        title_xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div/div//div[@class='malibu-desktop-uView col-12']//div[@class='malibu-desktop-uSameForm-content']//legend[@title='{title}']/parent::fieldset/preceding-sibling::{field_type}"
+        if is_decimal=='Y':
+            value_amount=str(value).replace(',', '')
+            self.common(xpath=title_xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen first time.", error=f"Write '{value}' at '{title}' in screen failed.")
+            actual_value = self.common(xpath=title_xpath, method='unobscured', action='get_value')
+            if actual_value != value:
+                self.common(xpath=title_xpath, method='unobscured', action='send_keys', value=value_amount, clear_text='Y', need_tab='Y', info=f"Wrote '{value}' at '{title}' in screen.", error=f"Write '{value}' at '{title}' in screen failed.")
+        else:
+            self.common(xpath=title_xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at '{title}' in screen.", error=f"Write '{value}' at '{title}' in screen failed.")
+
+    def write_input_act_man(self, title, value, clear_text='Y', is_decimal=None):
+        """
+        Writes text into input field based on the given title at "Internal Transaction" screen.
+        Args:
+            title (str): Title of the field (legend text).
+            value (str): Text to be written in the field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+            is_decimal (str, optinal): If "Y", is decimal.
+        """
+        self.write_all_type_act_man(title=title, value=value, clear_text=clear_text, field_type='input', is_decimal=is_decimal)
+
+    def write_textarea_act_man(self, title, value, clear_text='Y', is_decimal=None):
+        """
+        Writes text into textarea field based on the given title at "Internal Transaction" screen.
+        Args:
+            title (str): Title of the field (legend text).
+            value (str): Text to be written in the field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+            is_decimal (str, optinal): If "Y", is decimal.
+        """
+        self.write_all_type_act_man(title=title, value=value, clear_text=clear_text, field_type='textarea', is_decimal=is_decimal)
+
+    def write_description_act_man(self, value, clear_text=None):
+        """
+        Writes text into "Description" field at "Internal Transaction" screen.
+        Args:
+            value (str): Text to be written in the "Description" field.
+            clear_text (str, optinal): If "Y", clears existing text before writing.
+        """
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div/div/div/div[@class='malibu-desktop-uView col-12']/div/div[@class='row malibu-desktop-uView-content-main']/div[contains(@class,'malibu-desktop-uInput')]/div[contains(@class,'malibu-desktop-uInput-info')]//legend[@title='Description']/parent::fieldset/preceding-sibling::textarea"
+        self.common(xpath=xpath, method='unobscured', action='send_keys', value=value, clear_text=clear_text, info=f"Wrote '{value}' at 'Description' in screen.", error=f"Write '{value}' at 'Description' in screen failed.")
+
+    def get_description_act_man(self):
+        """
+        Get text from "Description" field at "Internal Transaction" screen.
+        """
+        xpath = f"//div[@id='content']/div/div[contains(@class,'malibu-desktop-uForm') and not(@style='display: none;')]/div/div/div/div[@class='malibu-desktop-uView col-12']/div/div[@class='row malibu-desktop-uView-content-main']/div[contains(@class,'malibu-desktop-uInput')]/div[contains(@class,'malibu-desktop-uInput-info')]//legend[@title='Description']/parent::fieldset/preceding-sibling::textarea"
+        return self.get_text_by_xpath_textarea(xpath)
+    
+    def assert_description_act_man(self, expected):
+        self.assertEqual(self.get_description_act_man(), expected)
+
+    def write_text(self, title, value, field_type="T", in_tab="Y", in_group="N", in_multi="N", below_border="N", clear_text=None, collap_name=None, border_name=None, need_tab=None):
         """
         write value to title, flexible parameters for field_type, in_tab, in_group, in_multi. field_type: str, default is 'T'. Valid options are:
             - T: Text, plain text input field (default).
@@ -2734,7 +3618,7 @@ class TestCase(unittest.TestCase):
             raise ValueError(f"Invalid below_border: Expected 'Y' or 'N', got '{below_border}'")
         # Create a dictionary of conditions to corresponding methods
         method_map = {
-            ('T', 'A', 'N', 'N', 'N'): lambda title, value: self.write_text_input(title, value, clear_text),
+            ('T', 'A', 'N', 'N', 'N'): lambda title, value: self.write_text_input(title, value, clear_text, need_tab),
             ('T', 'Y', 'N', 'N', 'N'): lambda title, value: self.write_text_input_in_tab(title, value, clear_text),
             ('T', 'N', 'N', 'N', 'N'): lambda title, value: self.write_text_input_non_tab(title, value, clear_text),
             ('T', 'Y', 'Y', 'N', 'N'): lambda title, value: self.write_text_input_in_tab_group(title, value, clear_text),
@@ -2742,7 +3626,7 @@ class TestCase(unittest.TestCase):
             ('T', 'Y', 'N', 'Y', 'N'): lambda title, value: self.write_text_input_multi_in_tab(collap_name, title, value, clear_text),
             ('T', 'N', 'N', 'Y', 'N'): lambda title, value: self.write_text_input_multi_non_tab(collap_name, title, value, clear_text),
             ('T', 'N', 'N', 'N', 'Y'): lambda title, value: self.write_text_input_below_border(border_name, title, value, clear_text),
-            ('A', 'A', 'N', 'N', 'N'): lambda title, value: self.write_text_textarea(title, value, clear_text),
+            ('A', 'A', 'N', 'N', 'N'): lambda title, value: self.write_text_textarea(title, value, clear_text, need_tab),
             ('A', 'Y', 'N', 'N', 'N'): lambda title, value: self.write_text_textarea_in_tab(title, value, clear_text),
             ('A', 'N', 'N', 'N', 'N'): lambda title, value: self.write_text_textarea_non_tab(title, value, clear_text),
             ('A', 'Y', 'Y', 'N', 'N'): lambda title, value: self.write_text_textarea_in_tab_group(title, value, clear_text),
@@ -2797,6 +3681,7 @@ class TestCase(unittest.TestCase):
         return self.write_text(title, value, field_type="A", in_tab="Y", in_group="N", in_multi="N", below_border="N", clear_text=clear_text)
 
     def bo_write_text_data(self, title, value, clear_text="Y"):
+        """Write text to 'textarea' based on 'title' at any BO screen, 'title' must exist only once."""
         return self.write_text(title, value, field_type="A", in_tab="A", in_group="N", in_multi="N", below_border="N", clear_text=clear_text)
 
     def bo_write_text_single(self, title, value, clear_text="Y"):
@@ -2893,6 +3778,10 @@ class TestCase(unittest.TestCase):
     def fo_write(self, title, value, clear_text="Y"):
         return self.write_text(title, value, field_type="T", in_tab="N", in_group="N", in_multi="N", below_border="N", clear_text=clear_text)
 
+    def fo_write_data(self, title, value, clear_text="Y", need_tab=None):
+        """Write text to 'input' based on 'title' at any FO screen, 'title' must exist only once."""
+        return self.write_text(title, value, field_type="T", in_tab="A", in_group="N", in_multi="N", below_border="N", clear_text=clear_text, need_tab=need_tab)
+
     def fo_write_group(self, title, value, clear_text="Y"):
         return self.write_text(title, value, field_type="T", in_tab="N", in_group="Y", in_multi="N", below_border="N", clear_text=clear_text)
 
@@ -2901,6 +3790,10 @@ class TestCase(unittest.TestCase):
 
     def fo_write_text(self, title, value, clear_text="Y"):
         return self.write_text(title, value, field_type="A", in_tab="N", in_group="N", in_multi="N", below_border="N", clear_text=clear_text)
+
+    def fo_write_text_data(self, title, value, clear_text="Y", need_tab=None):
+        """Write text to 'textarea' based on 'title' at any FO screen, 'title' must exist only once."""
+        return self.write_text(title, value, field_type="A", in_tab="A", in_group="N", in_multi="N", below_border="N", clear_text=clear_text, need_tab=need_tab)
 
     def fo_write_text_group(self, title, value, clear_text="Y"):
         return self.write_text(title, value, field_type="A", in_tab="N", in_group="Y", in_multi="N", below_border="N", clear_text=clear_text)
@@ -2957,34 +3850,48 @@ class TestCase(unittest.TestCase):
         return self.write_text_textarea_multi_line(title, value, clear_text=clear_text)
 
 # ================= handle clear_text field =================
-    def clear_text(self, element_input):
-        """Clear text for element 'input'"""
-        self.key_escape()
-        self.switch_to_core_banking()
-        self.driver.execute_script("arguments[0].focus();", element_input)
-        self.wait(0.1)
-        try:
-            actions = ActionChains(self.driver)
-            actions.click(element_input).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
-            # log.warn(f"Cleared value.")
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Clear value failed. Exception: {e}")
+    # def clear_text(self, element_input):
+    #     """Clear text for element 'input'"""
+    #     self.key_escape()
+    #     self.switch_to_core_banking()
+    #     self.driver.execute_script("arguments[0].focus();", element_input)
+    #     self.wait(0.1)
+    #     try:
+    #         actions = ActionChains(self.driver)
+    #         actions.click(element_input).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
+    #         # log.warn(f"Cleared value.")
+    #     except (NoSuchElementException, ElementNotInteractableException) as e:
+    #         log.error(f"Clear value failed. Exception: {e}")
 
 # ================= handle check attribute =================
-    def check_disable(self, element):
-        """Check attribute disable for 'element'"""
-        try:
-            css_class = element.get_attribute('class')
-            if 'disable' in css_class:
-                # log.info(f"Attribute 'disable' in class '{css_class}'.")
-                return True
-            else:
-                # log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
-                return False
-        except:
-            log.error(f"Check attribute 'disable' for element '{element}' failed.")
+    # def check_disable(self, element):
+    #     """Check attribute disable for 'element'"""
+    #     try:
+    #         css_class = element.get_attribute('class')
+    #         if 'disable' in css_class:
+    #             # log.info(f"Attribute 'disable' in class '{css_class}'.")
+    #             return True
+    #         else:
+    #             # log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
+    #             return False
+    #     except:
+    #         log.error(f"Check attribute 'disable' for element '{element}' failed.")
+
+    # def check_disabled_field(self, element):
+    #     """Check attribute disabled for 'element' is field"""
+    #     try:
+    #         css_class = element.get_attribute('class')
+    #         if 'disabled' in css_class:
+    #             # log.info(f"Attribute 'disabled' in class '{css_class}'.")
+    #             return True
+    #         else:
+    #             # log.warn(f"Attribute 'disabled' NOT in class '{css_class}'.")
+    #             return False
+    #     except:
+    #         log.error(f"Check attribute 'disabled' for element '{element}' failed.")
 
     def click_input_non_tab(self, title):
         """Click of 'input' in screen non tab"""
         xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
         self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked at '{title}' in screen NON tab.", error=f"Click at '{title}' in screen NON tab failed.")
+

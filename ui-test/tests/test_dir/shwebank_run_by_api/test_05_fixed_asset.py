@@ -111,7 +111,7 @@ class FixedAssetTest(FormAction):
         original_currency = None
         original_price = original_price_test
         booking_value = booking_value_test
-        salvage_value_of_the_asset = salvage_value_of_the_asset_test
+        salvage_value_of_the_asset = '0.00'
         branch_name = branch_name_test
         department_name = department_name_test
         description = None
@@ -861,6 +861,14 @@ class FixedAssetTest(FormAction):
             customer_description=customer_description,
             expected_posting=expected_posting,
         )
+
+    def test_011_fac_opn_check_field_disabled(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.fac_opn_fields()
+
+    def test_012_fac_opn_check_field_enabled(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.fac_opn_fields('N')
 
 if __name__ == '__main__': 
     webui_test.main()

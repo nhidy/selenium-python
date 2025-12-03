@@ -1,0 +1,41 @@
+- name: Deploy Selenium Grid and WebUI Test App
+  hosts: localhost
+  connection: local
+  vars:
+    namespace: "jits-autotest-{{ code }}"
+  tasks:
+    - name: Ensure namespace exists
+      kubernetes.core.k8s:
+        name: "{{ namespace }}"
+        state: present
+        kind: Namespace
+
+    - name: Deploy Selenium Hub
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'selenium-hub.yaml.j2') }}"
+
+    - name: Deploy Chrome Node
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'chrome-node.yaml.j2') }}"
+
+    - name: Deploy Firefox Node
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'firefox-node.yaml.j2') }}"
+
+    - name: Deploy Edge Node 
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'edge-node.yaml.j2') }}"
+
+    - name: Deploy WebUI Test app
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'webui-test.yaml.j2') }}"
+
+    - name: Force restart WebUI Test app to pull latest image
+      ansible.builtin.command: kubectl rollout restart deployment/webui-test -n {{ namespace }}
+
+

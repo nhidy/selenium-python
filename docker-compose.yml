@@ -1,0 +1,100 @@
+version: "3.7"
+services:
+  # Hub của Selenium Grid - trung tâm điều khiển
+  selenium-hub:
+    image: selenium/hub:4.34.0
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+
+  # Node Chrome - Trình duyệt để chạy kiểm thử
+  chrome-node:
+    image: selenium/node-chrome:4.34.0
+    container_name: chrome-node
+    shm_size: '2gb'
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_VNC_NO_PASSWORD=1
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "7902:7900"
+
+  firefox-node:
+    image: selenium/node-firefox:4.34.0
+    container_name: firefox-node
+    shm_size: '2gb'
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_VNC_NO_PASSWORD=1
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "7903:7900"
+
+  # edge-node:
+  #   image: selenium/node-edge:4.34.0
+  #   shm_size: '2gb'
+  #   depends_on:
+  #     - selenium-hub
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium-hub
+  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #     - SE_VNC_NO_PASSWORD=1
+  #     - TZ=Asia/Ho_Chi_Minh
+
+  edge-node1:
+    image: selenium/node-edge:4.34.0
+    container_name: edge-node-1
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_VNC_NO_PASSWORD=1
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "7900:7900" # Cổng VNC cho node 1
+
+  edge-node2:
+    image: selenium/node-edge:4.34.0
+    container_name: edge-node-2
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_VNC_NO_PASSWORD=1
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "7901:7900" # Cổng VNC cho node 2
+
+  # Dịch vụ ứng dụng kiểm thử FastAPI của bạn
+  webui-test:
+    # Docker sẽ build image từ Dockerfile trong thư mục 'ui-test'
+    build:
+      context: ./ui-test
+      dockerfile: Dockerfile
+    container_name: webui-test
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ui-test:/app
+    depends_on:
+      - selenium-hub
+    environment:
+      # URL của Hub, sử dụng tên service trong Docker Network
+      - SELENIUM_HUB_URL=http://selenium-hub:4444

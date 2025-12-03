@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firefox-node
+  namespace: {{ namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firefox-node
+  template:
+    metadata:
+      labels:
+        app: firefox-node
+    spec:
+      nodeSelector:
+        purpose: functional-service
+      hostAliases:
+        - ip: "27.3.2.90"
+          hostnames:
+            - "test-cbs.shwesit.jits.digital"
+            - "demo-cbs.finasit.jits.digital"    
+      containers:
+        - name: firefox-node
+          image: 27.3.1.180/selenium/node-firefox:{{ ver }}
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2548Mi"
+          ports:
+            - containerPort: 7900
+          env:
+            - name: SE_EVENT_BUS_HOST
+              value: selenium-hub
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "4442"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "4443"
+            - name: SE_VNC_NO_PASSWORD
+              value: "1"
+            - name: TZ
+              value: "Asia/Ho_Chi_Minh"
+          resources:
+            limits:
+              memory: "2Gi"

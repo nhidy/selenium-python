@@ -1,0 +1,14 @@
+FROM 27.3.1.180/selenium/node-chrome:4.34.0
+
+# Chuyển sang user root để có quyền cài đặt các gói
+USER root
+
+RUN apt-get update && apt-get install -y python3-pip
+
+# Đặt thư mục làm việc là /app
+WORKDIR /app
+
+# Sao chép và cài đặt các thư viện phụ thuộc 
+COPY requirements.txt .
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+

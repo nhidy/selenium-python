@@ -51,10 +51,11 @@ class TestRunRequest(BaseModel):
     run_on_url: str = ""
     username_login: str = ""
     password_login: str = ""
-    one_app: str = ""
-    browser: str = ""
-    headless: str = ""
+    one_app: Optional[str] = None
+    browser: Optional[str] = None
+    headless: Optional[str] = None
     customer_code: str = ""
+    customer_code_corporate: str = ""
     username_approve: str = ""
     password_approve: str = ""
     username_reverse: str = ""
@@ -70,6 +71,8 @@ class TestRunRequest(BaseModel):
     password_approve_other_branch: Optional[str] = None
     username_reverse_other_branch: Optional[str] = None
     password_reverse_other_branch: Optional[str] = None
+    app_name: Optional[str] = None
+    folder_name: Optional[str] = None
 
 @app.get("/")
 def read_root():
@@ -119,10 +122,14 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     command.extend(["--run-on-url", request_data.run_on_url])
     command.extend(["--username-login", request_data.username_login])
     command.extend(["--password-login", request_data.password_login])
-    command.extend(["--one-app", request_data.one_app])
-    command.extend(["--browser", request_data.browser])
-    command.extend(["--headless", str(request_data.headless).lower()])
+    if request_data.one_app is not None:
+        command.extend(["--one-app", request_data.one_app])
+    if request_data.browser is not None:
+        command.extend(["--browser", request_data.browser])
+    if request_data.headless is not None:
+        command.extend(["--headless", str(request_data.headless).lower()])
     command.extend(["--customer-code", request_data.customer_code])
+    command.extend(["--customer-code-corporate", request_data.customer_code_corporate])
     command.extend(["--username-approve", request_data.username_approve])
     command.extend(["--password-approve", request_data.password_approve])
     command.extend(["--username-reverse", request_data.username_reverse])
@@ -148,10 +155,17 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
         command.extend(["--username-reverse-other-branch", request_data.username_reverse_other_branch])
     if request_data.password_reverse_other_branch is not None:
         command.extend(["--password-reverse-other-branch", request_data.password_reverse_other_branch])
+    if request_data.f8_config is not None:
+        command.extend(["--f8-config", request_data.f8_config])
+    if request_data.app_name is not None:
+        command.extend(["--app-name", request_data.app_name])
+    if request_data.folder_name is not None:
+        command.extend(["--folder-name", request_data.folder_name])
 
     try:
         process = subprocess.run(command, capture_output=True, text=True, check=False)
-        output_log = process.stdout + "\n" + process.stderr
+        # output_log = process.stdout + "\n" + process.stderr
+        output_log = process.stderr
         # output_log = ""
         
         parsed_result = {}
@@ -163,8 +177,8 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
             print(f"[{run_id}] Warning: Could not decode JSON from subprocess output. Output: {process.stdout}", file=sys.stderr)
             pass
 
-        # status = "completed" if process.returncode == 0 else "failed"
-        status = "completed"
+        status = "completed" if process.returncode == 0 else "failed"
+        # status = "completed"
         passed = parsed_result.get("passed", False)
 
         test_run_results[run_id] = {

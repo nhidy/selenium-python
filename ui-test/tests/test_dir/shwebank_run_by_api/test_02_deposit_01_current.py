@@ -12,12 +12,15 @@ USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
 PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
 ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
 CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+CUSTOMER_CODE_CORPORATE = os.getenv("TEST_CONFIG_CUSTOMER_CODE_CORPORATE", "")
 USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
 PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
 USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
 PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
 
 customer_code_personal = CUSTOMER_CODE
+customer_code_corporate = CUSTOMER_CODE_CORPORATE
+other_branch_code = '005'
 
 # data test for 'Cheque'
 stock_type_cq = 'Cheque'
@@ -40,6 +43,19 @@ status_change_of_cheque='Damage'
 expected_current_balance='4,969,998.87'
 expected_interest_accrual='0.00'
 
+# data test for reverse
+current_balance_1st=amount_deposit_mask
+current_balance_2nd='10,000,000.98'
+current_balance_3rd='15,000,001.47'
+# data test deposit status
+status_pending='Pending to approve'
+status_new='New'
+status_normal='Normal'
+status_dormant='Dormant'
+status_block='Block'
+status_closed='Closed'
+status_reject='Reject'
+
 class DepositCurrentTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
@@ -56,8 +72,9 @@ class DepositCurrentTest(FormAction):
         global working_date, branch_code
         working_date = self.get_working_date()
         branch_code = self.get_logged_branch_code()
-        global gl_account_number
+        global gl_account_number, gl_account_number_other_branch
         gl_account_number = f'{branch_code}-1100601000000-01'
+        gl_account_number_other_branch = f'{other_branch_code}-1100601000000-01'
 
     def start_class(self):
         self.data_begin()
@@ -77,6 +94,11 @@ class DepositCurrentTest(FormAction):
             branch_code=branch_code,
             currency_code='MMK',
             account_number=gl_account_number
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=other_branch_code,
+            currency_code='MMK',
+            account_number=gl_account_number_other_branch
         )
         if self.check_customer_profile_not_exist(customer_code_personal):
             self.stop()
@@ -109,7 +131,7 @@ class DepositCurrentTest(FormAction):
         account_number_actual_mask=dpt_apr_result[1]
         self.assertEqual(account_number_actual_mask, deposit_account_current_mask)
         self.transaction_approve(
-            transaction_references=transaction_references, 
+            transaction_references=transaction_references,
             username=username_approve,
             password=password_approve
         )
@@ -545,5 +567,336 @@ class DepositCurrentTest(FormAction):
         )
         self.assertEqual(deposit_account_current_mask, dpt_his_result[1])
 
-if __name__ == '__main__': 
+# Check invalid case
+    def test_017_current_01_dpt_opn_check_open_personal_account_invalid_at_alert(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        catalogue_code_usd='CAUSD0001'
+        catalogue_code_eur='CAEUR0001'
+        catalogue_code_sgd='CASGD0001'
+        customer_type_single='Single customer'
+        customer_type_linkage='Customer linkage'
+        error_message_single_usd=f'Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_usd}]'
+        error_message_single_eur=f'Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_eur}]'
+        error_message_single_sgd=f'Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_sgd}]'
+        error_message_linkage_usd=f'Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_usd}]'
+        error_message_linkage_eur=f'Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_eur}]'
+        error_message_linkage_sgd=f'Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_sgd}]'
+        # Not allow Catalog code are CAUSD0001/ CAEUR0001/ CASGD0001 and 'Single customer'/ 'Customer linkage'
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_usd,
+            error_message=error_message_single_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_eur,
+            error_message=error_message_single_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_sgd,
+            error_message=error_message_single_sgd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_usd,
+            error_message=error_message_linkage_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_eur,
+            error_message=error_message_linkage_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_sgd,
+            error_message=error_message_linkage_sgd,
+        )
+
+    def test_017_current_02_dpt_opn_check_open_personal_account_invalid_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        reason_of_account_opening='Enter value reason of account opening'
+        catalogue_code_usd='CAUSD0001'
+        catalogue_code_eur='CAEUR0001'
+        catalogue_code_sgd='CASGD0001'
+        customer_type_single='Single customer'
+        customer_type_linkage='Customer linkage'
+        # Not allow Catalog code are CAUSD0001/ CAEUR0001/ CASGD0001 and 'Single customer'/ 'Customer linkage'
+        list_error_message_single_usd=[f'ValidateCustomerType: Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_usd}]']
+        list_error_message_single_eur=[f'ValidateCustomerType: Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_eur}]']
+        list_error_message_single_sgd=[f'ValidateCustomerType: Can not use customer type [{customer_type_single}] with catalog [{catalogue_code_sgd}]']
+        list_error_message_linkage_usd=[f'ValidateCustomerType: Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_usd}]']
+        list_error_message_linkage_eur=[f'ValidateCustomerType: Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_eur}]']
+        list_error_message_linkage_sgd=[f'ValidateCustomerType: Can not use customer type [{customer_type_linkage}] with catalog [{catalogue_code_sgd}]']
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_usd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_single_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_eur,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_single_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_single,
+            catalogue_code=catalogue_code_sgd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_single_sgd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_usd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_linkage_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_eur,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_linkage_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_personal,
+            customer_type=customer_type_linkage,
+            catalogue_code=catalogue_code_sgd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_linkage_sgd,
+        )
+
+    def test_017_current_03_dpt_opn_check_open_corporate_account_invalid_at_alert(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        catalogue_code_usd='CAUSD0000'
+        catalogue_code_eur='CAEUR0000'
+        catalogue_code_sgd='CASGD0000'
+        customer_type_group='Customer group'
+        error_message_group_usd=f'Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_usd}]'
+        error_message_group_eur=f'Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_eur}]'
+        error_message_group_sgd=f'Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_sgd}]'
+        # Not allow Catalog code are CAUSD0000/ CAEUR0000/ CASGD0000 and 'Customer group'
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_usd,
+            error_message=error_message_group_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_eur,
+            error_message=error_message_group_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_sgd,
+            error_message=error_message_group_sgd,
+        )
+
+    def test_017_current_04_dpt_opn_check_open_corporate_account_invalid_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        reason_of_account_opening='Enter value reason of account opening'
+        catalogue_code_usd='CAUSD0000'
+        catalogue_code_eur='CAEUR0000'
+        catalogue_code_sgd='CASGD0000'
+        customer_type_group='Customer group'
+        list_error_message_group_usd=[f'ValidateCustomerType: Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_usd}]']
+        list_error_message_group_eur=[f'ValidateCustomerType: Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_eur}]']
+        list_error_message_group_sgd=[f'ValidateCustomerType: Can not use customer type [{customer_type_group}] with catalog [{catalogue_code_sgd}]']
+        # Not allow Catalog code are CAUSD0000/ CAEUR0000/ CASGD0000 and 'Customer group'
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_usd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_group_usd,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_eur,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_group_eur,
+        )
+        self.dpt_opn_error(
+            customer_code=customer_code_corporate,
+            customer_type=customer_type_group,
+            catalogue_code=catalogue_code_sgd,
+            reason_of_account_opening=reason_of_account_opening,
+            list_error_message=list_error_message_group_sgd,
+        )
+
+    def test_018_current_01_check_deposit_account_with_new_fields_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_current_new_fields
+        catalogue_code_current='CAMMK0000'
+        reason_of_account_opening='Enter value reason of account opening'
+        business_purpose_code='A011130'
+        employer_organization_name='Employer Name'
+        safe_deposit_locker_number='0T5633433WQ'
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code_current,
+            reason_of_account_opening=reason_of_account_opening,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            safe_deposit_locker_number=safe_deposit_locker_number,
+            mpu_card=True,
+            passbook_cheque_book=True,
+        )
+        deposit_account_current_new_fields=dpt_opn_result[1]
+        self.deposit_account_view(
+            account_number=deposit_account_current_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening,
+            safe_deposit_locker_number=safe_deposit_locker_number
+        )
+        reason_of_account_opening_update_1st='Update value reason of account opening'
+        safe_deposit_locker_number_update_1st='Up0T5633433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_current_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_current_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.dpt_apr(
+            account_number=deposit_account_current_new_fields,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_current_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        reason_of_account_opening_update_2nd='Update 2nd value reason of acc opening'
+        safe_deposit_locker_number_update_2nd='Up2nd33433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_current_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+        self.deposit_account_modify_approve(
+            account_number=deposit_account_current_new_fields
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_current_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+
+    def test_019_current_01_create_data_for_case_reverse_approve_fail(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        catalogue_code_current='CAMMK0000'
+        reason_of_account_opening='Enter value reason of account opening'
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code_current,
+            reason_of_account_opening=reason_of_account_opening,
+        )
+        deposit_account_reverse_mask=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=deposit_account_reverse_mask,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        dpt_mdp_result = self.dpt_mdp(
+            account_number=deposit_account_reverse_mask,
+            amount_deposit=amount_deposit_mask,
+            debit_accounting=gl_account_number,
+            approve_later='Y'
+        )
+        transaction_references=dpt_mdp_result[0]
+        self.transaction_approve(
+            transaction_references=transaction_references, 
+            username=username_approve,
+            password=password_approve
+        )
+        print('Verify deposit account before approve fail')
+        self.deposit_account_view(
+            account_number=deposit_account_reverse_mask,
+            account_status=status_normal,
+            current_balance=current_balance_1st,
+        )
+        print('Make transaction DPT_MDP with GL have branch not same with maker')
+        dpt_mdp_result = self.dpt_mdp(
+            account_number=deposit_account_reverse_mask,
+            amount_deposit=amount_deposit_mask,
+            debit_accounting=gl_account_number_other_branch,
+            approve_later='Y'
+        )
+        transaction_references=dpt_mdp_result[0]
+        print('Approve transaction')
+        self.transaction_approve(
+            transaction_references=transaction_references, 
+            username=username_approve,
+            password=password_approve,
+            list_error_message=[f"AccountInvalid: Accounting account is invalid - en[{branch_code} - {other_branch_code}]"]
+        )
+        print('Verify deposit account after approve fail')
+        self.deposit_account_view(
+            account_number=deposit_account_reverse_mask,
+            account_status=status_normal,
+            current_balance=current_balance_1st,
+        )
+        print('Reject transaction')
+        self.transaction_reject(
+            transaction_references=transaction_references, 
+            username=username_approve,
+            password=password_approve
+        )
+
+# Make transaction with lookup field
+    def test_020_current_01_dpt_opn_open_account_with_lookup_field_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        catalogue_code_current='CAMMK0000'
+        reason_of_account_opening='Enter value reason of account opening'
+        business_purpose_code='A011690'
+        agent_hub_referral='MON-THN-AH'
+        dpt_opn_result = self.dpt_opn_lookup(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code_current,
+            reason_of_account_opening=reason_of_account_opening,
+            business_purpose_code=business_purpose_code,
+            agent_hub_referral=agent_hub_referral,
+        )
+        deposit_account=dpt_opn_result[1]
+        dpt_rej_result = self.dpt_rej(
+            account_number=deposit_account,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve,
+        )
+        deposit_account=dpt_rej_result[1]
+
+if __name__ == '__main__':
     webui_test.main()

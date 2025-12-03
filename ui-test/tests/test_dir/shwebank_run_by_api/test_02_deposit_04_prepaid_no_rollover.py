@@ -12,12 +12,14 @@ USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
 PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
 ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
 CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+CUSTOMER_CODE_CORPORATE = os.getenv("TEST_CONFIG_CUSTOMER_CODE_CORPORATE", "")
 USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
 PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
 USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
 PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
 
 customer_code_personal = CUSTOMER_CODE
+customer_code_corporate = CUSTOMER_CODE_CORPORATE
 
 # data test for 'Receipt'
 stock_type_fr = 'Receipt'
@@ -86,10 +88,12 @@ class DepositPrepaidNoRolloverTest(FormAction):
         expected_ifc_gl_prepaid_interest=f'{branch_code}-1100701001212-01'
         expected_ifc_gl_paid_interest=f'{branch_code}-4010201011414-01'
         expected_ifc_gl_numbers=[expected_ifc_gl_prepaid_interest, expected_ifc_gl_paid_interest]
-        global gl_account_number, gl_cash
+        global gl_account_number, gl_cash, ifcc_gl_number_346, ifcc_gl_number_302
         gl_account_number=f'{branch_code}-1100601000000-01'
         gl_cash=f'{branch_code}-1010301000101-01'
         expected_other_account_gl_number=f'{branch_code}-2020301010202-01'
+        ifcc_gl_number_346=f'{branch_code}-2070501000101-01'
+        ifcc_gl_number_302=f'{branch_code}-3030301000101-01'
 
     def start_class(self):
         self.data_begin()
@@ -407,7 +411,7 @@ class DepositPrepaidNoRolloverTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers,
             early_withdrawal='No',
         )
-    
+
     def test_010_prepaid_7d_dpt_trf_transfer_money_to_other_deposit_account_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         deposit_account_fd = str(deposit_account_fd_mask).replace('-','')
@@ -622,25 +626,40 @@ class DepositPrepaidNoRolloverTest(FormAction):
             early_withdrawal='No',
         )
 
-    def test_016_prepaid_7d_dpt_dls_close_deposit_account_by_deposit_error(self):
+    def test_016_prepaid_7d_dpt_dls_close_deposit_account_is_linked_by_deposit_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_dls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
         )
+        self.dpt_dls_error(
+            account_number=deposit_account_fd_mask,
+            another_deposit_account=other_deposit_account_mask,
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
+        )
 
-    def test_017_prepaid_7d_dpt_mls_close_deposit_account_by_gl_error(self):
+    def test_017_prepaid_7d_dpt_mls_close_deposit_account_is_linked_by_gl_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_mls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
         )
+        self.dpt_mls_error(
+            account_number=deposit_account_fd_mask,
+            accounting_number=gl_account_number,
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
+        )
 
-    def test_018_prepaid_7d_dpt_cls_close_deposit_account_by_cash_error(self):
+    def test_018_prepaid_7d_dpt_cls_close_deposit_account_is_linked_by_cash_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_cls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+        self.dpt_cls_error(
+            account_number=deposit_account_fd_mask,
+            gross_paid_interest_amount='0.00',
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
         )
 
 # DELETE ACCOUNT LINKAGE
@@ -843,6 +862,319 @@ class DepositPrepaidNoRolloverTest(FormAction):
             earmark_block_amount='0.00',
             expected_account_gl_name=expected_account_gl_name,
             expected_account_gl_number=expected_other_account_gl_number
+        )
+
+# Check invalid case
+    def test_024_prepaid_7d_dpt_opn_check_open_account_with_to_account_number_not_same_customer_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_corporate,
+            customer_type='Single customer',
+            catalogue_code='CAMMK0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        other_deposit_account=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=other_deposit_account,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        list_error_message = [
+            f'ERROR: Invalid account number [{self.no_mask(other_deposit_account)}]'
+        ]
+        self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account,
+            list_error_message=list_error_message,
+        )
+
+    def test_025_prepaid_7d_dpt_opn_check_open_account_with_to_account_number_not_same_currency_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code='CAUSD0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        other_deposit_account_usd=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=other_deposit_account_usd,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        list_error_message = [
+            f'InvalidCurrency: Invalid currency code [USD-MMK]'
+        ]
+        self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account_usd,
+            list_error_message=list_error_message,
+        )
+
+    def test_026_prepaid_01_check_deposit_account_with_new_fields_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_prepaid_new_fields
+        reason_of_account_opening='Enter value reason of account opening'
+        business_purpose_code='A011130'
+        employer_organization_name='Employer Name'
+        safe_deposit_locker_number='0T5633433WQ'
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account_mask,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            safe_deposit_locker_number=safe_deposit_locker_number,
+            mpu_card=True,
+            passbook_cheque_book=True,
+        )
+        deposit_account_prepaid_new_fields=dpt_opn_result[1]
+        self.deposit_account_view(
+            account_number=deposit_account_prepaid_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening,
+            safe_deposit_locker_number=safe_deposit_locker_number
+        )
+        reason_of_account_opening_update_1st='Update value reason of account opening'
+        safe_deposit_locker_number_update_1st='Up0T5633433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_prepaid_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_prepaid_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.dpt_apr(
+            account_number=deposit_account_prepaid_new_fields,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_prepaid_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        reason_of_account_opening_update_2nd='Update 2nd value reason of acc opening'
+        safe_deposit_locker_number_update_2nd='Up2nd33433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_prepaid_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+        self.deposit_account_modify_approve(
+            account_number=deposit_account_prepaid_new_fields
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_prepaid_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+
+    def test_027_dpt_account_linkage_add_with_lookup_field_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        master_module_name = 'DEPOSIT'
+        master_account_code = deposit_account_fd_mask
+        currency_for_fee = 'MMK'
+        linkage_module_name = 'DEPOSIT'
+        linkage_account_code = other_deposit_account_mask
+        linkage_account_name = None
+        linkage_type = 'Linkage Deposit - Deposit'
+        linkage_classification = 'Auto collection(transfer) for both P and I'
+        linkage_description = 'Linkage description auto test'
+        amount_for_fee_calculation = '1,000,000.00'
+        ifc_codes = ['346', '302']
+        values = ['1,500.00000', '0.05500']
+        fee_amount = '2,050.00'
+        total_fee = f'Total Amount = {fee_amount}' # 1,500.00000 + (0.05500 / 100 * 1,000,000.00) = 2,050.00
+        fee_amount_346 = '1,500.00'
+        fee_amount_302 = '550.00'
+        expected_posting = {
+            'expected_debits': [
+                (expected_other_account_gl_number, fee_amount),
+            ],
+            'expected_credits': [
+                (ifcc_gl_number_346, fee_amount_346),
+                (ifcc_gl_number_302, fee_amount_302),
+            ],
+        }
+        dpt_opal_result = self.dpt_opal_lookup(
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Deposit',
+            account_number_for_fee=linkage_account_code,
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+            approve_later='Y',
+        )
+        transaction_references=dpt_opal_result
+        print('View transaction before approve')
+        self.dpt_opal_view(
+            transaction_references=transaction_references,
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_account_name=linkage_account_name,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Deposit',
+            account_number_for_fee=linkage_account_code,
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+        )
+        # approve
+        self.transaction_approve(
+            transaction_references=transaction_references, 
+            username=username_approve,
+            password=password_approve
+        )
+        print('View transaction after approve')
+        self.dpt_opal_view(
+            transaction_references=transaction_references,
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_account_name=linkage_account_name,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Deposit',
+            account_number_for_fee=linkage_account_code,
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+            expected_posting=expected_posting,
+        )
+
+    def test_028_dpt_account_linkage_delete_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        dpt_account_linkage_delete_result = self.dpt_account_linkage_delete(
+            master_account_number=deposit_account_fd_mask
+        )
+        self.assertEqual(self.no_mask(deposit_account_fd_mask), dpt_account_linkage_delete_result)
+
+    def test_029_dpt_account_linkage_add_with_enter_data_field_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        master_module_name = 'DEPOSIT'
+        master_account_code = deposit_account_fd_mask
+        currency_for_fee = 'MMK'
+        linkage_module_name = 'DEPOSIT'
+        linkage_account_code = other_deposit_account_mask
+        linkage_account_name = None
+        linkage_type = 'Linkage Deposit - Deposit'
+        linkage_classification = 'Auto collection(transfer) for both P and I'
+        linkage_description = 'Linkage description auto test'
+        amount_for_fee_calculation = '1,000,000.00'
+        ifc_codes = ['346', '302']
+        values = ['1,500.00000', '0.05500']
+        fee_amount = '2,050.00'
+        total_fee = f'Total Amount = {fee_amount}' # 1,500.00000 + (0.05500 / 100 * 1,000,000.00) = 2,050.00
+        fee_amount_346 = '1,500.00'
+        fee_amount_302 = '550.00'
+        expected_posting = {
+            'expected_debits': [
+                (gl_cash, fee_amount),
+            ],
+            'expected_credits': [
+                (ifcc_gl_number_346, fee_amount_346),
+                (ifcc_gl_number_302, fee_amount_302),
+            ],
+        }
+        dpt_opal_result = self.dpt_opal(
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Cash',
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+            approve_later='Y',
+        )
+        transaction_references=dpt_opal_result
+        print('View transaction before approve')
+        self.dpt_opal_view(
+            transaction_references=transaction_references,
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_account_name=linkage_account_name,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Cash',
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+        )
+        # approve
+        self.transaction_approve(
+            transaction_references=transaction_references, 
+            username=username_approve,
+            password=password_approve
+        )
+        print('View transaction after approve')
+        self.dpt_opal_view(
+            transaction_references=transaction_references,
+            master_module_name=master_module_name,
+            master_account_code=master_account_code,
+            currency_for_fee=currency_for_fee,
+            linkage_module_name=linkage_module_name,
+            linkage_account_code=linkage_account_code,
+            linkage_account_name=linkage_account_name,
+            linkage_type=linkage_type,
+            linkage_classification=linkage_classification,
+            linkage_description=linkage_description,
+            fee_collect_method='Cash',
+            amount_for_fee_calculation=amount_for_fee_calculation,
+            ifc_codes=ifc_codes,
+            values=values,
+            total_fee=total_fee,
+            expected_posting=expected_posting,
         )
 
 if __name__ == '__main__':

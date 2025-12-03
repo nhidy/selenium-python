@@ -12,6 +12,7 @@ USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
 PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
 ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
 CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+CUSTOMER_CODE_CORPORATE = os.getenv("TEST_CONFIG_CUSTOMER_CODE_CORPORATE", "")
 USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
 PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
 USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
@@ -24,6 +25,8 @@ USERNAME_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_REVERSE_OTHER_BR
 PASSWORD_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_REVERSE_OTHER_BRANCH", "")
 
 customer_code_personal = CUSTOMER_CODE
+customer_code_corporate = CUSTOMER_CODE_CORPORATE
+
 class CheckEnvTest(FormAction):
     def get_url(self):
         return RUN_ON_URL
@@ -54,19 +57,37 @@ class CheckEnvTest(FormAction):
         self.data_begin()
 
     def end_class(self):
-        self.logout()
+        self.logout() 
 
     def reset_browser(self):
         self.logout()
         self.restart_browser()
         self.data_begin()
 
-    def test_000_check_env(self):
+    def test_001_check_env(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         if self.check_customer_profile_not_exist(customer_code_personal):
             self.stop()
             self.fail()
+        if self.check_customer_profile_not_exist(customer_code_corporate):
+            self.stop()
+            self.fail()
+        if self.check_bank_closed():
+            self.stop()
+            self.fail()
+        if self.check_branch_closed(branch_code):
+            self.stop()
+            self.fail()
 
+    def test_002_check_env_login_with_other_branch_user(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.close_popup()
+        self.logout()
+        self.login(username_other_branch, password_other_branch, one_app=ONE_APP)
+        other_branch_code = self.get_logged_branch_code()
+        if self.check_branch_closed(other_branch_code):
+            self.stop()
+            self.fail()
 
 if __name__ == '__main__': 
     webui_test.main()

@@ -1,16 +1,12 @@
 fastapi
 uvicorn
-xmlrunner
 colorama
 jinja2
-selenium
+selenium==4.34.0
 parameterized
 openpyxl
 pandas
 numpy
 PyYAML
-pyautogui
-unittest-xml-reporting
 markupsafe
 setuptools
-pyparsing

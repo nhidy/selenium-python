@@ -90,6 +90,31 @@ class FXTransactionTest(FormAction):
             currency_code='USD',
             account_number=account_number_credit_usd
         )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=ifcc_gl_number_346
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=ifcc_gl_number_302
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=deposit_gl_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=deposit_gl_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='SGD',
+            account_number=deposit_gl_sgd
+        )
 
     def test_000_02_create_other_deposit_account_use_for_testing(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))

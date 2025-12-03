@@ -18,6 +18,10 @@ USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
 PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
 USERNAME_LOGIN_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_LOGIN_OTHER_BRANCH", "")
 PASSWORD_LOGIN_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_LOGIN_OTHER_BRANCH", "")
+USERNAME_APPROVE_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_APPROVE_OTHER_BRANCH", "")
+PASSWORD_APPROVE_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_APPROVE_OTHER_BRANCH", "")
+USERNAME_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_USERNAME_REVERSE_OTHER_BRANCH", "")
+PASSWORD_REVERSE_OTHER_BRANCH = os.getenv("TEST_CONFIG_PASSWORD_REVERSE_OTHER_BRANCH", "")
 
 customer_code_single_mask = CUSTOMER_CODE
 
@@ -30,11 +34,11 @@ beneficiary = 'Public Rental Housing'
 beneficiary_address = '27, Nguyen Huu Tho, Tan Hung, Q7, HCM'
 currency_code = 'MMK'
 currency_short_code = '01' # MMK
-issued_date = '15/11/2024'
-effect_date = '16/11/2024'
+issued_date = '18/06/2025'
+effect_date = '19/06/2025'
 guarantee_period = '6'
 guarantee_period_unit = 'Months'
-maturity_date = '15/05/2025'
+maturity_date = '18/12/2025'
 sg_bg_amount = '9,537,000.00'
 guarantee_amount_no_margin = '9,537,000.00'
 released_guarantee_amount_no_margin_and_secured='14,037,000.00'
@@ -70,21 +74,21 @@ total_fee_10 = f'Total Amount = {total_fee_amount_10}'
 # data test extension 1st
 extend_period_1st = '3'
 extend_period_unit_1st = 'Months'
-extend_to_date_1st = '15/08/2025'
-extension_date_1st = '25/11/2024'
-effective_date_extension_1st = '16/05/2025'
+extend_to_date_1st = '18/03/2026'
+extension_date_1st = '25/11/2025'
+effective_date_extension_1st = '19/12/2025'
 # data test extension 2nd
 extend_period_2nd = '9'
 extend_period_unit_2nd = 'Months'
-extend_to_date_2nd = '15/05/2026'
+extend_to_date_2nd = '18/12/2026'
 extension_date_2nd = '20/11/2025'
-effective_date_extension_2nd = '16/08/2025'
+effective_date_extension_2nd = '19/03/2026'
 # data test extension 3rd
 extend_period_3rd = '1'
 extend_period_unit_3rd = 'Year'
-extend_to_date_3rd = '15/05/2027'
+extend_to_date_3rd = '18/12/2027'
 extension_date_3rd = '25/11/2026'
-effective_date_extension_3rd = '16/05/2026'
+effective_date_extension_3rd = '19/12/2026'
 # data test margin deposit
 deposit_catalog_saving = 'BSMMK0000'
 current_balance_003_1st = '5,000,000.00'
@@ -100,8 +104,8 @@ current_balance_005_after_verify_bg_no_fee = '1,479,235.00'
 current_balance_005_after_verify_bg_have_fee = '48,685.00'
 current_balance_005_after_collect_fee_extend_bg = '1,000.00'
 # data test GL IBT
-ibt_branch_trade_gl_number = '004-1101001010404-01'
-ibt_branch_deposit_gl_number = '003-1101001010606-01'
+ibt_branch_trade_gl_number = '004-1101001010707-01'
+ibt_branch_deposit_gl_number = '005-1101001010606-01'
 fee_collect_gl_number_003 = '003-1010107777777-01'
 fee_collect_gl_number_004 = '004-1010107777777-01'
 # data test secure mortgage
@@ -118,7 +122,7 @@ class TradeTest(FormAction):
         return RUN_ON_URL
 
     def data_begin(self):
-        global username_approve, password_approve, username_reverse, password_reverse, username, password, username_cross_branch, password_cross_branch
+        global username_approve, password_approve, username_reverse, password_reverse, username, password, username_cross_branch, password_cross_branch, username_approve_cross_branch, password_approve_cross_branch, username_reverse_cross_branch, password_reverse_cross_branch
         username_approve = USERNAME_APPROVE
         password_approve = PASSWORD_APPROVE
         username_reverse = USERNAME_REVERSE
@@ -127,6 +131,10 @@ class TradeTest(FormAction):
         password = PASSWORD_LOGIN
         username_cross_branch = USERNAME_LOGIN_OTHER_BRANCH
         password_cross_branch = PASSWORD_LOGIN_OTHER_BRANCH
+        username_approve_cross_branch = USERNAME_APPROVE_OTHER_BRANCH
+        password_approve_cross_branch = PASSWORD_APPROVE_OTHER_BRANCH
+        username_reverse_cross_branch = USERNAME_REVERSE_OTHER_BRANCH
+        password_reverse_cross_branch = PASSWORD_REVERSE_OTHER_BRANCH
         self.login(username, password, one_app=ONE_APP)
         global working_date, branch_code
         working_date = self.get_working_date()
@@ -1636,7 +1644,7 @@ class TradeTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         global deposit_account_number, deposit_gl_number
         self.logout()
-        self.login(username_cross_branch, password_cross_branch)
+        self.login(username_cross_branch, password_cross_branch, one_app=ONE_APP)
         global branch_code_deposit
         branch_code_deposit = self.get_logged_branch_code()
         deposit_gl_number = f'{branch_code_deposit}-2020302010202-01'
@@ -1650,19 +1658,25 @@ class TradeTest(FormAction):
         deposit_account_number = dpt_opn_result[1]
         # approve deposit account
         self.dpt_apr(
-            account_number=deposit_account_number
+            account_number=deposit_account_number,
+            approve_on_form='Y',
+            username=username_approve_cross_branch,
+            password=password_approve_cross_branch,
         )
         # cash deposit account
         self.dpt_cdp(
             account_number=deposit_account_number,
-            amount_deposit=current_balance_003_1st
+            amount_deposit=current_balance_003_1st,
+            approve_on_form='Y',
+            username=username_approve_cross_branch,
+            password=password_approve_cross_branch,
         )
 
     def test_003_bg_process_05_login_with_main_user_again(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
 
     def test_003_bg_process_06_trd_siv_verify_margin_and_collect_fee_by_deposit_cross_branch_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -2136,6 +2150,12 @@ class TradeTest(FormAction):
         self.fo_assert_text_table_index('Transaction code', 'TRD_SIV', 'Created by', 5, username)
 
 
+# RESTART BROWSER
+    def test_003_bg_process_09_restart_browser(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.reset_browser()
+
+
 # CASE 4: NEED TO CASH MARGIN AND SECURE GUARANTEE
     def test_004_bg_process_01_trd_sni_issue_for_collection_need_margin_and_need_secure_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -2247,7 +2267,7 @@ class TradeTest(FormAction):
     def test_004_bg_process_03_open_and_approve_mortgage_account_cross_branch_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.logout()
-        self.login(username_cross_branch, password_cross_branch)
+        self.login(username_cross_branch, password_cross_branch, one_app=ONE_APP)
         global branch_code_mortgage
         branch_code_mortgage = self.get_logged_branch_code()
         # open mortgage account
@@ -2257,12 +2277,19 @@ class TradeTest(FormAction):
             catalogue_code=catalogue_code_mortgage,
             collateral_asset_value=secured_amount,
             reference_number='Ref AUTO TEST',
-            evaluate_by='By AUTO TEST'
+            evaluate_by='By AUTO TEST',
+            approve_on_form='Y',
+            username=username_approve_cross_branch,
+            password=password_approve_cross_branch,
+            
         )
         mortgage_account_cross_branch_mask = mtg_opn_result[1]
         # approve mortgage account
         self.mtg_apr(
-            account_number=mortgage_account_cross_branch_mask
+            account_number=mortgage_account_cross_branch_mask,
+            approve_on_form='Y',
+            username=username_approve_cross_branch,
+            password=password_approve_cross_branch,
         )
         # view mortgage account information
         self.mortgage_account_view(
@@ -2284,7 +2311,7 @@ class TradeTest(FormAction):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
 
     def test_004_bg_process_05_trd_gsc_guarantee_by_secure_collateral_cross_branch_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -2921,7 +2948,7 @@ class TradeTest(FormAction):
         )
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
         # cash deposit account
         dpt_cdp_result = self.dpt_cdp(
             account_number=deposit_account_release_margin,
@@ -3027,12 +3054,6 @@ class TradeTest(FormAction):
             off_balance_sheet_amount=sg_bg_amount,
             release_off_balance_sheet_amount=sg_bg_amount
         )
-        # check deposit account information
-        self.deposit_account_view(
-            account_number=deposit_account_release_margin,
-            current_balance=current_balance_004_after_close_bg,
-            earmark_block_amount='0.00'
-        )
         # check deposit account history
         expected_trans_code=['DPT_OPN','DPT_APR','DPT_CDP','TRD_SCL']
         expected_users=[username] + [username_approve] + [username] * 2
@@ -3052,7 +3073,12 @@ class TradeTest(FormAction):
             expected_transaction_dates=expected_dates
         )
         self.assertEqual(deposit_account_release_margin, dpt_his_result[1])
-
+        # check deposit account information
+        self.deposit_account_view(
+            account_number=deposit_account_release_margin,
+            current_balance=current_balance_004_after_close_bg,
+            earmark_block_amount='0.00'
+        )
 
 # CASE 5: NEED TO DEPOSIT MARGIN AND SECURE GUARANTEE
     def test_005_bg_process_01_trd_sni_issue_for_collection_need_margin_and_need_secure_success(self):
@@ -3191,7 +3217,7 @@ class TradeTest(FormAction):
         )
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
         # view mortgage account information
         self.mortgage_account_view(
             account_number=mortgage_account_same_branch_mask,
@@ -3335,7 +3361,7 @@ class TradeTest(FormAction):
         )
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
         # cash deposit account
         dpt_cdp_result = self.dpt_cdp(
             account_number=deposit_account_same_branch,
@@ -4109,7 +4135,7 @@ class TradeTest(FormAction):
         )
         # login main user again
         self.logout()
-        self.login(username, password, one_app='Y')
+        self.login(username, password, one_app=ONE_APP)
         # view mortgage account information
         self.mortgage_account_view(
             account_number=mortgage_account_same_branch_mask_006,

@@ -143,3 +143,5 @@ jcodegen/ui_form_action/bo_015_adm/*.py
 jcodegen/ui_form_action/bo_016_job/*.py
 jcodegen/ui_form_action/bo_021_cz/*.py
 jcodegen/ui_form_action/bo_022_trd/*.py
+ui-test/tests/test_dir/shwebank_bo_approval/__pycache__/
+ui-test/tests/test_dir/shwebank_bo_not_approval/__pycache__/

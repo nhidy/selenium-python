@@ -1,28 +1,11 @@
-FROM selenium/standalone-chrome
-
-# Cài đặt Python 3.11 và các công cụ cần thiết
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.11 \
-    python3.11-distutils \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
-RUN python3.11 -m pip install --upgrade pip
-
-# Thiết lập thư mục làm việc trong container
-WORKDIR /app
-
-# Sao chép tệp yêu cầu và cài đặt các thư viện Python
-COPY requirements.txt .
-RUN python3.11 -m pip install --no-cache-dir -r requirements.txt \
-    # Thêm dòng này để xóa pip cache ngay sau khi cài đặt
-    && rm -rf /root/.cache/pip
+FROM 27.3.1.180/autotest/test-env:latest
 
 # Sao chép toàn bộ mã nguồn của bạn vào container
 COPY . .
+# COPY --chown=appuser:appuser . .
 
 # Cài đặt dự án của bạn như một gói Python
-RUN python3.11 -m pip install --no-cache-dir .
+RUN python3 -m pip install --no-cache-dir .
 
 # Đặt biến môi trường để Python có thể tìm thấy các gói cục bộ
 ENV PYTHONPATH="${PYTHONPATH}:/app"

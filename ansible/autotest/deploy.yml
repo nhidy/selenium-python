@@ -1,0 +1,23 @@
+- name: Deploy CBS Neptune Autotest
+  hosts: localhost
+  connection: local
+  vars:
+    namespace: "jits-autotest-{{ code }}"
+
+  tasks:
+
+    - name: Ensure namespace exists
+      kubernetes.core.k8s:
+        name: "{{ namespace }}"
+        state: present
+        kind: Namespace
+
+    - name: Create Persistent Volume Claim
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'pvc.yaml.j2') }}"
+
+    - name: Create Deployment for CBS Neptune Autotest
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('template', 'deployment.yaml.j2') }}"

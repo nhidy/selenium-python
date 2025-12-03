@@ -9,7 +9,6 @@ import importlib.util
 import json
 
 sys.stdout.reconfigure(encoding='utf-8')
-sys.stderr.reconfigure(encoding='utf-8')
 
 def str_to_bool(value):
     if isinstance(value, bool):
@@ -39,8 +38,6 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
     app_name = config_data.get("app_name", "Shwebank")
     folder_name = config_data.get("folder_name", "shwebank_run_by_api")
 
-    # From run_by_api.py, relative path is ../tests/test_dir/shwebank_run_by_api/
-    # test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', 'shwebank_run_by_api')
     print(f"Folder containing the test script: {folder_name}")
     test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', folder_name)
 

@@ -12,12 +12,14 @@ USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
 PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
 ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
 CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+CUSTOMER_CODE_CORPORATE = os.getenv("TEST_CONFIG_CUSTOMER_CODE_CORPORATE", "")
 USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
 PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
 USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
 PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
 
 customer_code_personal = CUSTOMER_CODE
+customer_code_corporate = CUSTOMER_CODE_CORPORATE
 
 # data test for 'Passbook for Fixed Deposit'
 stock_type_fb = 'Passbook for Fixed Deposit'
@@ -83,8 +85,9 @@ class Deposit1MNoRolloverTest(FormAction):
         global expected_account_gl_number, expected_ifc_gl_numbers, expected_other_account_gl_number
         expected_account_gl_number=f'{branch_code}-2020302030101-01'
         expected_ifc_gl_numbers=[f'{branch_code}-4010201010101-01', f'{branch_code}-2070101000202-01']
-        global gl_account_number, gl_cash
+        global gl_account_number, gl_cash, gl_account_number_usd
         gl_account_number=f'{branch_code}-1100601000000-01'
+        gl_account_number_usd=f'{branch_code}-1100601000000-02'
         gl_cash=f'{branch_code}-1010301000101-01'
         expected_other_account_gl_number=f'{branch_code}-2020301010202-01'
 
@@ -106,6 +109,11 @@ class Deposit1MNoRolloverTest(FormAction):
             branch_code=branch_code,
             currency_code='MMK',
             account_number=gl_account_number
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=gl_account_number_usd
         )
         if self.check_customer_profile_not_exist(customer_code_personal):
             self.stop()
@@ -447,6 +455,11 @@ class Deposit1MNoRolloverTest(FormAction):
             expected_ifc_gl_names=expected_ifc_gl_names,
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
+        self.transaction_reject(
+            transaction_references=transaction_references, 
+            username=username_reverse,
+            password=password_reverse
+        )
 
     def test_012_fixed_1m_dpt_blk_block_account_success(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
@@ -579,25 +592,40 @@ class Deposit1MNoRolloverTest(FormAction):
             expected_ifc_gl_numbers=expected_ifc_gl_numbers
         )
 
-    def test_016_fixed_1m_dpt_dls_close_deposit_account_by_deposit_error(self):
+    def test_016_fixed_1m_dpt_dls_close_deposit_account_is_linked_by_deposit_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_dls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
         )
+        self.dpt_dls_error(
+            account_number=deposit_account_fd_mask,
+            another_deposit_account=other_deposit_account_mask,
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
+        )
 
-    def test_017_fixed_1m_dpt_mls_close_deposit_account_by_gl_error(self):
+    def test_017_fixed_1m_dpt_mls_close_deposit_account_is_linked_by_gl_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_mls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
         )
+        self.dpt_mls_error(
+            account_number=deposit_account_fd_mask,
+            accounting_number=gl_account_number,
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
+        )
 
-    def test_018_fixed_1m_dpt_cls_close_deposit_account_by_cash_error(self):
+    def test_018_fixed_1m_dpt_cls_close_deposit_account_is_linked_by_cash_error(self):
         print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
         self.dpt_cls_error(
             account_number=deposit_account_fd_mask,
             error_message=f'Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked'
+        )
+        self.dpt_cls_error(
+            account_number=deposit_account_fd_mask,
+            gross_paid_interest_amount='0.00',
+            list_error_message=[f'AccountIsLinked: Deposit account [{self.no_mask(deposit_account_fd_mask)}] is linked']
         )
 
 # DELETE ACCOUNT LINKAGE
@@ -992,6 +1020,155 @@ class Deposit1MNoRolloverTest(FormAction):
             expected_transaction_dates=expected_dates
         )
         self.assertEqual(deposit_account_fd_mask, dpt_his_result[1])
+
+# Check invalid case
+    def test_024_fixed_1m_dpt_opn_check_open_account_with_to_account_number_not_same_customer_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_corporate,
+            customer_type='Single customer',
+            catalogue_code='CAMMK0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        other_deposit_account=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=other_deposit_account,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        list_error_message = [
+            f'ERROR: Invalid account number [{self.no_mask(other_deposit_account)}]'
+        ]
+        self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account,
+            list_error_message=list_error_message,
+        )
+
+    def test_025_fixed_1m_dpt_opn_check_open_account_with_to_account_number_not_same_currency_at_accept(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code='CAUSD0000',
+            reason_of_account_opening='Enter value reason of account opening'
+        )
+        other_deposit_account_usd=dpt_opn_result[1]
+        self.dpt_apr(
+            account_number=other_deposit_account_usd,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        list_error_message = [
+            f'InvalidCurrency: Invalid currency code [USD-MMK]'
+        ]
+        self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account_usd,
+            list_error_message=list_error_message,
+        )
+
+    def test_026_fixed_1m_01_check_deposit_account_with_new_fields_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        global deposit_account_fixed_1m_new_fields
+        reason_of_account_opening='Enter value reason of account opening'
+        business_purpose_code='A011130'
+        employer_organization_name='Employer Name'
+        safe_deposit_locker_number='0T5633433WQ'
+        dpt_opn_result = self.dpt_opn(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account_mask,
+            mpu_card=True,
+            passbook_cheque_book=True,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            safe_deposit_locker_number=safe_deposit_locker_number,
+        )
+        deposit_account_fixed_1m_new_fields=dpt_opn_result[1]
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening,
+            safe_deposit_locker_number=safe_deposit_locker_number
+        )
+        reason_of_account_opening_update_1st='Update value reason of account opening'
+        safe_deposit_locker_number_update_1st='Up0T5633433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_fixed_1m_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        self.dpt_apr(
+            account_number=deposit_account_fixed_1m_new_fields,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_1st,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_1st
+        )
+        reason_of_account_opening_update_2nd='Update 2nd value reason of acc opening'
+        safe_deposit_locker_number_update_2nd='Up2nd33433WQ'
+        self.deposit_account_update(
+            account_number=deposit_account_fixed_1m_new_fields,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+        self.deposit_account_modify_approve(
+            account_number=deposit_account_fixed_1m_new_fields
+        )
+        self.deposit_account_view(
+            account_number=deposit_account_fixed_1m_new_fields,
+            business_purpose_code=business_purpose_code,
+            employer_organization_name=employer_organization_name,
+            reason_of_account_opening=reason_of_account_opening_update_2nd,
+            safe_deposit_locker_number=safe_deposit_locker_number_update_2nd
+        )
+
+# Make transaction with lookup field
+    def test_027_fixed_1m_dpt_opn_open_account_with_lookup_field_successs(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        business_purpose_code='A011690'
+        agent_hub_referral='MON-THN-AH'
+        dpt_opn_result = self.dpt_opn_lookup(
+            customer_code=customer_code_personal,
+            customer_type='Single customer',
+            catalogue_code=catalogue_code,
+            reason_of_account_opening=reason_of_account_opening,
+            to_account_number=other_deposit_account_mask,
+            business_purpose_code=business_purpose_code,
+            agent_hub_referral=agent_hub_referral,
+        )
+        deposit_account=dpt_opn_result[1]
+        self.dpt_rej(
+            account_number=deposit_account,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve,
+        )
 
 if __name__ == '__main__':
     webui_test.main()

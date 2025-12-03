@@ -49,9 +49,9 @@ def start_browser():
         # Chrome
         if BrowserConfig.name is None or BrowserConfig.name in ["chrome", "google chrome", "gc"]:
             chrome_options = ChromeOptions() 
-            chrome_options.add_argument('--start-maximized')
-            chrome_options.add_argument('--ignore-ssl-errors=yes')
-            chrome_options.add_argument('--ignore-certificate-errors')
+            # chrome_options.add_argument("--start-maximized")
+            chrome_options.add_argument("--ignore-ssl-errors=yes")
+            chrome_options.add_argument("--ignore-certificate-errors")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-extensions")
             chrome_options.add_argument("--incognito") 
@@ -66,10 +66,9 @@ def start_browser():
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             chrome_options.accept_insecure_certs=True
             if BrowserConfig.headless: 
-                # chrome_options.add_argument('--headless')
-                chrome_options.add_argument('--headless=new')
-                # chrome_options.add_argument('--window-size=1920,1080')
-            log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+                chrome_options.add_argument("--headless=new")
+                # chrome_options.add_argument("--window-size=1920,1080")
+            log.info(f"CHROME TEMP_DATA_DIR={_TEMP_DATA_DIR}")
             if BrowserConfig.on_server == 'Y':
                 _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=chrome_options)
             else:
@@ -78,12 +77,14 @@ def start_browser():
         # Firefox
         elif BrowserConfig.name in ['firefox', 'ff']:
             firefox_options = FirefoxOptions()
-            firefox_options.add_argument('--start-maximized')
+            # firefox_options.add_argument("--start-maximized")
             _TEMP_DATA_DIR = tempfile.mkdtemp(prefix="selenium_firefox_profile_")
             firefox_options.add_argument(f"--user-data-dir={_TEMP_DATA_DIR}")
             if BrowserConfig.headless: 
-                firefox_options.add_argument('--headless')
-            log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+                firefox_options.add_argument("-headless")
+                # firefox_options.add_argument("--width=1920")
+                # firefox_options.add_argument("--height=1080")
+            log.info(f"FIREFOX TEMP_DATA_DIR={_TEMP_DATA_DIR}")
             if BrowserConfig.on_server == 'Y':
                 _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=firefox_options)
             else:
@@ -92,9 +93,9 @@ def start_browser():
         # Edge
         elif BrowserConfig.name in ['edge', 'ed']:
             edge_options = EdgeOptions()
-            edge_options.add_argument('--start-maximized')
-            edge_options.add_argument('--ignore-ssl-errors=yes')
-            edge_options.add_argument('--ignore-certificate-errors')
+            # edge_options.add_argument("--start-maximized")
+            edge_options.add_argument("--ignore-ssl-errors=yes")
+            edge_options.add_argument("--ignore-certificate-errors")
             edge_options.add_argument("--no-sandbox")
             edge_options.add_argument("--disable-extensions")
             edge_options.add_argument("--incognito") 
@@ -111,11 +112,10 @@ def start_browser():
             edge_options.add_experimental_option("prefs", edge_prefs)
             edge_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             edge_options.accept_insecure_certs=True
-            if BrowserConfig.headless: 
-                # edge_options.add_argument('--headless')
-                edge_options.add_argument('--headless=new')
-                # edge_options.add_argument('--window-size=1920,1080')
-            log.info(f"TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+            if BrowserConfig.headless:
+                edge_options.add_argument("--headless=new")
+                # edge_options.add_argument("--window-size=1920,1080")
+            log.info(f"EDGE TEMP_DATA_DIR={_TEMP_DATA_DIR}")
             if BrowserConfig.on_server == 'Y':
                 _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=edge_options)
             else:
@@ -139,9 +139,9 @@ def kill_browser():
     if _TEMP_DATA_DIR and os.path.exists(_TEMP_DATA_DIR):
         try:
             shutil.rmtree(_TEMP_DATA_DIR)
-            print(f"Cleaned up temporary user data directory: {_TEMP_DATA_DIR}")
+            log.info(f"Cleaned up temporary user data directory: {_TEMP_DATA_DIR}")
         except Exception as e:
-            print(f"Error cleaning up temporary directory {_TEMP_DATA_DIR}: {e}", file=sys.stderr)
+            log.error(f"Error cleaning up temporary directory {_TEMP_DATA_DIR}: {e}", file=sys.stderr)
 
 def get_driver():
     global _TEST_BROWSER

@@ -1,28 +1,9 @@
-# UI Auto Test
-
+# UI-TEST
 ## 1. Environment settings
 ### 1.1 Install python 3.9.1 (or newer)
 - Link tải file cài: https://www.python.org/downloads/windows/
 - Link hướng dẫn cài: https://phoenixnap.com/kb/how-to-install-python-3-windows chỉ là tới "Step 5: Verify Pip Was Installed"
 
-### 1.2 Install modules (mở cmd và gõ các lệnh sau và đợi downloads)
-```code
-python -m pip install fastapi
-python -m pip install uvicorn
-python -m pip install xmlrunner
-python -m pip install colorama
-python -m pip install jinja2
-python -m pip install selenium==4.24.0
-python -m pip install parameterized
-python -m pip install openpyxl
-python -m pip install pandas
-python -m pip install numpy
-python -m pip install PyYAML
-python -m pip install pyautogui
-python -m pip install unittest-xml-reporting
-python -m pip install markupsafe
-python -m pip install setuptools
-```
 
 ## 2. Virtual Environment
 ### 2.1 Create venv
@@ -32,7 +13,13 @@ python -m venv venv
 ```
 ### 2.2 Active venv
 ```code
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 .\venv\Scripts\activate
+```
+
+### 2.3 Install libs
+```code
+pip install -r requirements.txt
 ```
 
 ## 3. Modules webui_test settings after active `venv`
@@ -65,7 +52,7 @@ Proceed (Y/n)?
 ### 3.3 Start FastAPI
 #### 3.3.1 Run FastAPI at local for testing script
 ```code
-uvicorn main:app --reload
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 - Swagger UI: http://127.0.0.1:8000/docs
 

@@ -852,5 +852,16 @@ class CustomerTest(FormAction):
             media_name=file_name_test,
         )
 
-if __name__ == '__main__': 
+    def test_021_customer_media_files_add_personal_with_lookup_field_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        customer_media_files_add_result = self.customer_media_files_add_lookup(
+            file_path=file_path_test,
+            customer_code=customer_code_personal_mask,
+            business_line=business_line_test,
+            customer_name=customer_name_test,
+            account_number=account_number_test,
+        )
+        self.assertEqual(customer_media_files_add_result, self.customer_code_mask(customer_code_personal_mask))
+
+if __name__ == '__main__':
     webui_test.main()

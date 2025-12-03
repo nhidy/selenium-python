@@ -69,6 +69,25 @@ class MoneyMarketTest(FormAction):
         global gl_account_number_mmk, gl_account_number_usd
         gl_account_number_mmk = f'{branch_code}-1100601000000-01'
         gl_account_number_usd = f'{branch_code}-1100601000000-02'
+        global expected_account_gl_number_pla_mmk, expected_account_gl_number_pla_usd, expected_account_gl_number_dpt_mmk, expected_account_gl_number_dpt_usd
+        expected_account_gl_number_pla_mmk=f'{branch_code}-1010401010505-01'
+        expected_account_gl_number_pla_usd=f'{branch_code}-1010401010505-02'
+        expected_account_gl_number_dpt_mmk=f'{branch_code}-2010102011212-01'
+        expected_account_gl_number_dpt_usd=f'{branch_code}-2010102011212-02'
+        global expected_ifc_gl_interest_pla_mmk, expected_ifc_gl_paid_interest_pla_mmk, expected_ifc_gl_interest_pla_usd, expected_ifc_gl_paid_interest_pla_usd, expected_ifc_gl_interest_dpt_mmk, expected_ifc_gl_paid_interest_dpt_mmk, expected_ifc_gl_interest_dpt_usd, expected_ifc_gl_paid_interest_dpt_usd
+        global expected_ifc_gl_numbers_pla_mmk, expected_ifc_gl_numbers_pla_usd, expected_ifc_gl_numbers_dpt_mmk, expected_ifc_gl_numbers_dpt_usd
+        expected_ifc_gl_interest_pla_mmk=f'{branch_code}-1100202020101-01'
+        expected_ifc_gl_paid_interest_pla_mmk=f'{branch_code}-3010302000101-01'
+        expected_ifc_gl_numbers_pla_mmk=[expected_ifc_gl_interest_pla_mmk, expected_ifc_gl_paid_interest_pla_mmk]
+        expected_ifc_gl_interest_pla_usd=f'{branch_code}-1100202020101-02'
+        expected_ifc_gl_paid_interest_pla_usd=f'{branch_code}-3010302000101-02'
+        expected_ifc_gl_numbers_pla_usd=[expected_ifc_gl_interest_pla_usd, expected_ifc_gl_paid_interest_pla_usd]
+        expected_ifc_gl_interest_dpt_mmk=f'{branch_code}-2070101000303-01'
+        expected_ifc_gl_paid_interest_dpt_mmk=f'{branch_code}-4010401000101-01'
+        expected_ifc_gl_numbers_dpt_mmk=[expected_ifc_gl_interest_dpt_mmk, expected_ifc_gl_paid_interest_dpt_mmk]
+        expected_ifc_gl_interest_dpt_usd=f'{branch_code}-2070101000303-02'
+        expected_ifc_gl_paid_interest_dpt_usd=f'{branch_code}-4010401000101-02'
+        expected_ifc_gl_numbers_dpt_usd=[expected_ifc_gl_interest_dpt_usd, expected_ifc_gl_paid_interest_dpt_usd]
 
     def start_class(self):
         self.data_begin()
@@ -93,6 +112,66 @@ class MoneyMarketTest(FormAction):
             branch_code=branch_code,
             currency_code='USD',
             account_number=gl_account_number_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_account_gl_number_pla_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_account_gl_number_pla_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_account_gl_number_dpt_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_account_gl_number_dpt_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_interest_pla_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_paid_interest_pla_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_ifc_gl_interest_pla_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_ifc_gl_paid_interest_pla_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_interest_dpt_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='MMK',
+            account_number=expected_ifc_gl_paid_interest_dpt_mmk
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_ifc_gl_interest_dpt_usd
+        )
+        self.add_gl_level_9_use_for_testing(
+            branch_code=branch_code,
+            currency_code='USD',
+            account_number=expected_ifc_gl_paid_interest_dpt_usd
         )
         if self.check_customer_profile_not_exist(customer_code_corporate):
             self.stop()
