@@ -1,463 +1,970 @@
-DOCUMENTATION PART 1
+DOCUMENTATION PART 9
 ==================================================
 
 
-==================== START OF FILE: main.py ====================
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
-from fastapi.responses import FileResponse
-import subprocess
+==================== START OF FILE: tests\test_dir\shwebank_run_by_api\__init__.py ====================
+
+==================== END OF FILE: tests\test_dir\shwebank_run_by_api\__init__.py ====================
+
+
+==================== START OF FILE: tests\test_dir\test_excel_data\excel_reading.py ====================
+
+import webui_test 
+from webui_test import data , jweb_excel
+# from pandas import read_excel
+
+# thay doi gia tri thanh "Available balance" khi case "test_00_check_spelling" PASS
+available_bal_label="Avaiable balance"
+my_sheet = 'Sheet1'
+file_name = "D:/JWEB/JWebTestPython/demo/data_excel/data_transaction.xlsx"
+username =""
+password=""
+
+class DPT_CWCTest(webui_test.TestCase):
+    def get_url(self):
+        return('http://192.168.1.246:8080/login/')
+    
+    def start_class(self):
+        username =  self.get_value_excel( sheet= my_sheet, column= "Value", row= 7 , filename = file_name)
+        password = self.get_value_excel( sheet= my_sheet, column= "Value", row= 8 , filename = file_name)
+        self.login(username,password)
+    
+    def end_class(self):
+        self.logout()
+    
+    def test_06_read_excel(self):
+        data_file = self.open_file_excel(sheet = my_sheet, url_file_name=file_name)
+        print(data_file)
+        username =  self.get_value_excel_cell(data_file, column= "Value", row= 7 )
+        print(username)
+    
+    def test_07_read_excel_fail(self):
+        data_file = self.open_file_excel(sheet = my_sheet, url_file_name="file_name")
+        print(data_file)
+        username =  self.get_value_excel_cell(data_file, column= "Value", row= 7 )
+        print(username)
+        
+if __name__ == "__main__":
+    webui_test.main()
+==================== END OF FILE: tests\test_dir\test_excel_data\excel_reading.py ====================
+
+
+==================== START OF FILE: tests\test_dir\test_run_by_api\test_08_user_profile_02_change_password.py ====================
+import random
+import webui_test
 import os
-import uuid
-import asyncio
+from datetime import datetime
+from webui_test.logging import log
+
+from webui_test.form_action import FormAction
+
+# Get value from environment variable
+RUN_ON_URL = os.getenv("TEST_CONFIG_RUN_ON_URL", "")
+USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
+PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
+ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
+CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
+PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
+USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
+PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
+
+customer_code_personal = CUSTOMER_CODE
+
+USER_CODE_MANAGER = os.getenv("USER_CODE_MANAGER", "")
+PASSWORD_MANAGER = os.getenv("PASSWORD_MANAGER", "")
+USER_CODE_TELLER = os.getenv("USER_CODE_TELLER", "")
+PASSWORD_TELLER = os.getenv("PASSWORD_TELLER", "")
+# data required
+# user_name_test = None
+# login_name_test = None
+# branch_code_test = None
+# department_name_test = None
+# cashier_test = True
+# officer_test = True
+# chief_cashier_test = True
+# operation_staff_test = True
+# dealer_test = True
+# inter_branch_user_test = True
+# branch_manager_authorized_test = True
+# hr_test = True
+# # data optional
+# email_test = None
+# remark_test = None
+# status_of_this_record_test = None
+# password_test = None
+# main_language_test = None
+# user_phone_test = None
+# home_test = None
+# office_test = None
+# cell_test = None
+# facsimile_test = None
+# telex_test = None
+# time_zone_of_user_test = None
+# thousand_separate_character_in_amount_field_test = None
+# decimal_separate_character_in_amount_field_test = None
+# date_format_for_short_test = None
+# long_date_format_test = None
+# time_format_test = None
+# expire_date_of_this_user_test = None
+# id_of_policy_apply_for_this_user_test = None
+
+class UserProfileChangePasswordTest(FormAction):
+    def get_url(self):
+        return RUN_ON_URL
+
+    def data_begin(self):
+        global username_approve, password_approve, username_reverse, password_reverse, username, password
+        username_approve = USERNAME_APPROVE
+        password_approve = PASSWORD_APPROVE
+        username_reverse = USERNAME_REVERSE
+        password_reverse = PASSWORD_REVERSE
+        username = USERNAME_LOGIN
+        password = PASSWORD_LOGIN
+        self.login(username, password, one_app=ONE_APP)
+        global working_date, branch_code
+        working_date = self.get_working_date()
+        branch_code = self.get_logged_branch_code()
+
+    def start_class(self):
+        self.data_begin()
+
+    def end_class(self):
+        self.logout()
+
+    def reset_browser(self):
+        self.logout()
+        self.restart_browser()
+        self.data_begin()
+
+    def test_002_user_profile_view_teller_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        # data required
+        user_name_teller = 'Auto Teller 003'
+        login_name_teller = 'autoteller003'
+        branch_code_teller_view = '003 - Bayint Naung Branch'
+        department_teller_name_view = '003 - BYN'
+        cashier_teller = True
+        officer_teller = True
+        self.user_profile_view(
+            user_code=login_name_teller,
+            user_name=user_name_teller,
+            login_name=login_name_teller,
+            branch_code=branch_code_teller_view,
+            department_name=department_teller_name_view,
+            cashier=cashier_teller,
+            officer=officer_teller,
+        )
+
+if __name__ == '__main__': 
+    webui_test.main()
+==================== END OF FILE: tests\test_dir\test_run_by_api\test_08_user_profile_02_change_password.py ====================
+
+
+==================== START OF FILE: tests\test_dir\test_run_by_api\__init__.py ====================
+
+==================== END OF FILE: tests\test_dir\test_run_by_api\__init__.py ====================
+
+
+==================== START OF FILE: tests\test_dir\vy_test\test_country.py ====================
+import random
+import webui_test
+import os
+from datetime import datetime
+from webui_test.logging import log
+
+from webui_test.form_action import FormAction
+
+# Get value from environment variable
+RUN_ON_URL = os.getenv("TEST_CONFIG_RUN_ON_URL", "")
+USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
+PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
+ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
+CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
+PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
+USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
+PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
+
+customer_code_personal = CUSTOMER_CODE
+
+random_num = f"{random.randint(5, 999)}"
+date_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+# data not change
+value_iso_2_alpha = 'AB'
+value_iso_3_alpha = 'ABC'
+value_country_name = 'AUTO TEST Country'
+value_country_name_1 = 'Country name 1'
+value_country_name_2 = 'Country name 2'
+value_country_name_3 = 'Country name 3'
+value_country_short_name = 'AUTO'
+value_short_name_1 = 'Short name 1'
+value_short_name_2 = 'Short name 2'
+value_short_name_3 = 'Short name 3'
+value_currency_code = 'JPY'
+value_main_language = 'Spanish'
+value_region_of_country = 'Asia'
+value_status_of_country = 'Normal'
+value_order = random_num
+
+# data test add
+iso_2_alpha_test_add = value_iso_2_alpha
+iso_3_alpha_test_add = value_iso_3_alpha
+country_name_test_add = value_country_name
+country_name_1_test_add = value_country_name_1
+country_name_2_test_add = value_country_name_2
+country_name_3_test_add = value_country_name_3
+country_short_name_test_add = value_country_short_name
+short_name_1_test_add = value_short_name_1
+short_name_2_test_add = value_short_name_2
+short_name_3_test_add = value_short_name_3
+currency_code_test_add = value_currency_code
+main_language_test_add = value_main_language
+region_of_country_test_add = value_region_of_country
+status_of_country_test_add = value_status_of_country
+order_test_add = value_order
+
+# data test update
+iso_2_alpha_test_update = value_iso_2_alpha
+iso_3_alpha_test_update = value_iso_3_alpha
+country_name_test_update = value_country_name
+country_name_1_test_update = 'Country name update'
+country_name_2_test_update = value_country_name_2
+country_name_3_test_update = value_country_name_3
+country_short_name_test_update = value_country_short_name
+short_name_1_test_update = value_short_name_1
+short_name_2_test_update = value_short_name_2
+short_name_3_test_update = 'Short name update'
+currency_code_test_update = 'EUR'
+main_language_test_update = 'French'
+region_of_country_test_update = 'Europe'
+status_of_country_test_update = 'Closed'
+order_test_update = value_order
+
+
+class CountryTest(FormAction):
+    def get_url(self):
+        return RUN_ON_URL
+
+    def data_begin(self):
+        global username_approve, password_approve, username_reverse, password_reverse, username, password
+        username_approve = USERNAME_APPROVE
+        password_approve = PASSWORD_APPROVE
+        username_reverse = USERNAME_REVERSE
+        password_reverse = PASSWORD_REVERSE
+        username = USERNAME_LOGIN
+        password = PASSWORD_LOGIN
+        self.login(username, password, one_app=ONE_APP)
+        global working_date, branch_code
+        working_date = self.get_working_date()
+        branch_code = self.get_logged_branch_code()
+
+    def start_class(self):
+        self.data_begin()
+
+    def end_class(self):
+        self.logout()
+
+    def reset_browser(self):
+        self.logout()
+        self.restart_browser()
+        self.data_begin()
+
+    def test_001_country_add(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.country_add(
+            iso_2_alpha = iso_2_alpha_test_add,
+            iso_3_alpha = iso_3_alpha_test_add,
+            country_name = country_name_test_add,
+            country_name_1 = country_name_1_test_add,
+            country_name_2 = country_name_2_test_add,
+            country_name_3 = country_name_3_test_add,
+            country_short_name = country_short_name_test_add,
+            short_name_1 = short_name_1_test_add,
+            short_name_2 = short_name_2_test_add,
+            short_name_3 = short_name_3_test_add,
+            currency_code = currency_code_test_add,
+            main_language = main_language_test_add,
+            region_of_country = region_of_country_test_add,
+            status_of_country = status_of_country_test_add,
+            order = order_test_add 
+        )
+
+    def test_002_country_view(self):
+        self.country_view(
+            iso_2_alpha = iso_2_alpha_test_add,
+            iso_3_alpha = iso_3_alpha_test_add,
+            country_name = country_name_test_add,
+            country_name_1 = country_name_1_test_add,
+            country_name_2 = country_name_2_test_add,
+            country_name_3 = country_name_3_test_add,
+            country_short_name = country_short_name_test_add,
+            short_name_1 = short_name_1_test_add,
+            short_name_2 = short_name_2_test_add,
+            short_name_3 = short_name_3_test_add,
+            currency_code = currency_code_test_add,
+            main_language = main_language_test_add,
+            region_of_country = region_of_country_test_add,
+            status_of_country = status_of_country_test_add,
+            order = order_test_add
+        )
+
+    def test_003_country_update(self):
+        self.country_update(
+            iso_2_alpha = iso_2_alpha_test_update,
+            iso_3_alpha = iso_3_alpha_test_update,
+            country_name = country_name_test_update,
+            country_name_1 = country_name_1_test_update,
+            country_name_2 = country_name_2_test_update,
+            country_name_3 = country_name_3_test_update,
+            country_short_name = country_short_name_test_update,
+            short_name_1 = short_name_1_test_update,
+            short_name_2 = short_name_2_test_update,
+            short_name_3 = short_name_3_test_update,
+            currency_code = currency_code_test_update,
+            main_language = main_language_test_update,
+            region_of_country = region_of_country_test_update,
+            status_of_country = status_of_country_test_update,
+            order = order_test_update
+        )
+
+    def test_004_country_delete(self):
+        self.country_delete(
+            iso_3_alpha = iso_3_alpha_test_add
+        )
+
+if __name__ == '__main__': 
+    webui_test.main()
+==================== END OF FILE: tests\test_dir\vy_test\test_country.py ====================
+
+
+==================== START OF FILE: tests\test_dir\vy_test\test_ctm_cpa.py ====================
+import webui_test
+import os
+from datetime import datetime
+from webui_test.logging import log
+
+from webui_test.form_action import FormAction
+
+# Get value from environment variable
+RUN_ON_URL = os.getenv("TEST_CONFIG_RUN_ON_URL", "")
+USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
+PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
+ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
+CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
+PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
+USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
+PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
+
+customer_code_personal = CUSTOMER_CODE
+
+customer_code=customer_code_personal
+customer_type='Single customer'
+date_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+class ChangeCustomerPhoneEmailAddressTest(FormAction):
+    def get_url(self):
+        return RUN_ON_URL
+
+    def data_begin(self):
+        global username_approve, password_approve, username_reverse, password_reverse, username, password
+        username_approve = USERNAME_APPROVE
+        password_approve = PASSWORD_APPROVE
+        username_reverse = USERNAME_REVERSE
+        password_reverse = PASSWORD_REVERSE
+        username = USERNAME_LOGIN
+        password = PASSWORD_LOGIN
+        self.login(username, password, one_app=ONE_APP)
+        global working_date, branch_code
+        working_date = self.get_working_date()
+        branch_code = self.get_logged_branch_code()
+
+    def start_class(self):
+        self.data_begin()
+
+    def end_class(self):
+        self.logout()
+
+    def reset_browser(self):
+        self.logout()
+        self.restart_browser()
+        self.data_begin()
+
+# Check the data used for testing
+    def test_000_01_check_test_data_must_exist(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        if self.check_customer_profile_not_exist(customer_code_personal):
+            self.stop()
+            self.fail()
+
+    def test_001_ctm_cpa_approve_later_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        home_01 = 'Legal address - Home'
+        street_01 = 'Legal address - Street'
+        ward_01 = 'Legal address - Ward'
+        township_01 = 'Legal address - Township'
+        province_01 = '11. Mon State'
+        home_02 = 'Contact local address - Home'
+        street_02 = 'Contact local address - Street'
+        ward_02 = 'Contact local address - Ward'
+        township_02 = 'Contact local address - Township'
+        province_02 = '12. Rakhine State'
+        home_phone = '0123xxxxxx'
+        mobile_phone = '0909xxxxxx'
+        email_address = 'abc123@jits.com.vn'
+        description = None
+        ctm_cpa_result = self.ctm_cpa(
+            customer_code=customer_code_personal,
+            home_01=home_01,
+            street_01=street_01,
+            ward_01=ward_01,
+            township_01=township_01,
+            province_01=province_01,
+            home_02=home_02,
+            street_02=street_02,
+            ward_02=ward_02,
+            township_02=township_02,
+            province_02=province_02,
+            home_phone=home_phone,
+            mobile_phone=mobile_phone,
+            email_address=email_address,
+            approve_later='Y'
+        )
+        transaction_references=ctm_cpa_result[0]
+        # view transaction before approve
+        self.ctm_cpa_view(
+            transaction_references=transaction_references,
+            customer_code=customer_code_personal,
+            home_01=home_01,
+            street_01=street_01,
+            ward_01=ward_01,
+            township_01=township_01,
+            province_01=province_01,
+            home_02=home_02,
+            street_02=street_02,
+            ward_02=ward_02,
+            township_02=township_02,
+            province_02=province_02,
+            home_phone=home_phone,
+            mobile_phone=mobile_phone,
+            email_address=email_address,
+            description=description
+        )
+        self.transaction_approve(
+            transaction_references=transaction_references,
+            username=username_approve,
+            password=password_approve
+        )
+        # view transaction after approve
+        self.ctm_cpa_view(
+            transaction_references=transaction_references,
+            customer_code=customer_code_personal,
+            home_01=home_01,
+            street_01=street_01,
+            ward_01=ward_01,
+            township_01=township_01,
+            province_01=province_01,
+            home_02=home_02,
+            street_02=street_02,
+            ward_02=ward_02,
+            township_02=township_02,
+            province_02=province_02,
+            home_phone=home_phone,
+            mobile_phone=mobile_phone,
+            email_address=email_address,
+            description=description
+        )
+        
+    def test_002_ctm_cpa_approve_on_form_success(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        home_01 = 'Legal address - Home'
+        street_01 = 'Legal address - Street'
+        ward_01 = 'Legal address - Ward'
+        township_01 = 'Legal address - Township'
+        province_01 = '11. Mon State'
+        home_02 = 'Contact local address - Home'
+        street_02 = 'Contact local address - Street'
+        ward_02 = 'Contact local address - Ward'
+        township_02 = 'Contact local address - Township'
+        province_02 = '12. Rakhine State'
+        home_phone = '0123xxxxxx'
+        mobile_phone = '0909xxxxxx'
+        email_address = 'abc123@jits.com.vn'
+        description = None
+        ctm_cpa_result = self.ctm_cpa(
+            customer_code=customer_code_personal,
+            home_01=home_01,
+            street_01=street_01,
+            ward_01=ward_01,
+            township_01=township_01,
+            province_01=province_01,
+            home_02=home_02,
+            street_02=street_02,
+            ward_02=ward_02,
+            township_02=township_02,
+            province_02=province_02,
+            home_phone=home_phone,
+            mobile_phone=mobile_phone,
+            email_address=email_address,
+            approve_on_form='Y',
+            username=username_approve,
+            password=password_approve
+        )
+        transaction_references=ctm_cpa_result[0]
+        ctm_cpa_result = self.ctm_cpa_view(
+            transaction_references=transaction_references,
+            customer_code=customer_code_personal,
+            home_01=home_01,
+            street_01=street_01,
+            ward_01=ward_01,
+            township_01=township_01,
+            province_01=province_01,
+            home_02=home_02,
+            street_02=street_02,
+            ward_02=ward_02,
+            township_02=township_02,
+            province_02=province_02,
+            home_phone=home_phone,
+            mobile_phone=mobile_phone,
+            email_address=email_address,
+            description=description
+        )
+
+if __name__ == '__main__': 
+    webui_test.main()
+==================== END OF FILE: tests\test_dir\vy_test\test_ctm_cpa.py ====================
+
+
+==================== START OF FILE: tests\test_dir\vy_test\test_currency.py ====================
+import random
+import webui_test
+import os
+from datetime import datetime
+from webui_test.logging import log
+
+from webui_test.form_action import FormAction
+
+# Get value from environment variable
+RUN_ON_URL = os.getenv("TEST_CONFIG_RUN_ON_URL", "")
+USERNAME_LOGIN = os.getenv("TEST_CONFIG_USERNAME_LOGIN", "")
+PASSWORD_LOGIN = os.getenv("TEST_CONFIG_PASSWORD_LOGIN", "")
+ONE_APP = os.getenv("TEST_CONFIG_ONE_APP", "")
+CUSTOMER_CODE = os.getenv("TEST_CONFIG_CUSTOMER_CODE", "")
+USERNAME_APPROVE = os.getenv("TEST_CONFIG_USERNAME_APPROVE", "")
+PASSWORD_APPROVE = os.getenv("TEST_CONFIG_PASSWORD_APPROVE", "")
+USERNAME_REVERSE = os.getenv("TEST_CONFIG_USERNAME_REVERSE", "")
+PASSWORD_REVERSE = os.getenv("TEST_CONFIG_PASSWORD_REVERSE", "")
+
+customer_code_personal = CUSTOMER_CODE
+
+random_num1 = f"{random.randint(29, 98)}"
+random_num2 = f"{random.randint(100, 999)}"
+random_num3 = f"{random.randint(29, 999)}"
+date_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+# data not change
+value_currency_code = 'DEF'
+value_short_currency_code = random_num1
+value_currency_number = random_num2
+value_currency_name_1 = 'Currency name 1'
+value_currency_name_2 = 'Currency name 2'
+value_currency_name_3 = 'Currency name 3'
+value_master_name_1 = 'Master name 1'
+value_master_name_2 = 'Master name 2'
+value_master_name_3 = 'Master name 3'
+value_decimal_name_1 = 'Decimal name 1'
+value_decimal_name_2 = 'Decimal name 2'
+value_decimal_name_3 = 'Decimal name 3'
+value_decimal_digits = '2'
+value_rounding_digits = '2'
+value_status_of_currency = None
+value_order = random_num3
+
+# data test add
+currency_code_test_add = value_currency_code
+short_currency_code_test_add = value_short_currency_code
+currency_number_test_add = value_currency_number
+currency_name_1_test_add = value_currency_name_1
+currency_name_2_test_add = value_currency_name_2
+currency_name_3_test_add = value_currency_name_3
+master_name_1_test_add = value_master_name_1
+master_name_2_test_add = value_master_name_2
+master_name_3_test_add = value_master_name_3
+decimal_name_1_test_add = value_decimal_name_1
+decimal_name_2_test_add = value_decimal_name_2
+decimal_name_3_test_add = value_decimal_name_3
+decimal_digits_test_add = value_decimal_digits
+rounding_digits_test_add = value_rounding_digits
+status_of_currency_test_add = value_status_of_currency
+order_test_add = value_order
+
+# data test update
+currency_code_test_update = value_currency_code
+short_currency_code_test_update = value_short_currency_code
+currency_number_test_update = value_currency_number
+currency_name_1_test_update = 'Currency name update'
+currency_name_2_test_update = value_currency_name_2
+currency_name_3_test_update = value_currency_name_3
+master_name_1_test_update = value_master_name_1
+master_name_2_test_update = 'Master name update'
+master_name_3_test_update = value_master_name_3
+decimal_name_1_test_update = value_decimal_name_1
+decimal_name_2_test_update = value_decimal_name_2
+decimal_name_3_test_update = 'Decimal name update'
+decimal_digits_test_update = value_decimal_digits
+rounding_digits_test_update = value_rounding_digits
+status_of_currency_test_update = 'Not use'
+order_test_update = value_order
+
+class CurrencyTest(FormAction):
+    def get_url(self):
+        return RUN_ON_URL
+
+    def data_begin(self):
+        global username_approve, password_approve, username_reverse, password_reverse, username, password
+        username_approve = USERNAME_APPROVE
+        password_approve = PASSWORD_APPROVE
+        username_reverse = USERNAME_REVERSE
+        password_reverse = PASSWORD_REVERSE
+        username = USERNAME_LOGIN
+        password = PASSWORD_LOGIN
+        self.login(username, password, one_app=ONE_APP)
+        global working_date, branch_code
+        working_date = self.get_working_date()
+        branch_code = self.get_logged_branch_code()
+
+    def start_class(self):
+        self.data_begin()
+
+    def end_class(self):
+        self.logout()
+
+    def reset_browser(self):
+        self.logout()
+        self.restart_browser()
+        self.data_begin()
+
+    def test_001_currency_add(self):
+        print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+        self.currency_add(
+            currency_code = currency_code_test_add,
+            short_currency_code = short_currency_code_test_add,
+            currency_number = currency_number_test_add,
+            currency_name_1 = currency_name_1_test_add,
+            currency_name_2 = currency_name_2_test_add,
+            currency_name_3 = currency_name_3_test_add,
+            master_name_1 = master_name_1_test_add,
+            master_name_2 = master_name_2_test_add,
+            master_name_3 = master_name_3_test_add,
+            decimal_name_1 = decimal_name_1_test_add,
+            decimal_name_2 = decimal_name_2_test_add,
+            decimal_name_3 = decimal_name_3_test_add,
+            decimal_digits = decimal_digits_test_add,
+            rounding_digits = rounding_digits_test_add,
+            status_of_currency = status_of_currency_test_add,
+            order = order_test_add 
+        )
+
+    def test_002_currency_view(self):
+        self.currency_view(
+            currency_code = currency_code_test_add,
+            short_currency_code = short_currency_code_test_add,
+            currency_number = currency_number_test_add,
+            currency_name_1 = currency_name_1_test_add,
+            currency_name_2 = currency_name_2_test_add,
+            currency_name_3 = currency_name_3_test_add,
+            master_name_1 = master_name_1_test_add,
+            master_name_2 = master_name_2_test_add,
+            master_name_3 = master_name_3_test_add,
+            decimal_name_1 = decimal_name_1_test_add,
+            decimal_name_2 = decimal_name_2_test_add,
+            decimal_name_3 = decimal_name_3_test_add,
+            decimal_digits = decimal_digits_test_add,
+            rounding_digits = rounding_digits_test_add,
+            status_of_currency = status_of_currency_test_add,
+            order = order_test_add 
+        )
+
+    def test_003_currency_update(self):
+        self.currency_update(
+            currency_code = currency_code_test_update,
+            short_currency_code = short_currency_code_test_update,
+            currency_number = currency_number_test_update,
+            currency_name_1 = currency_name_1_test_update,
+            currency_name_2 = currency_name_2_test_update,
+            currency_name_3 = currency_name_3_test_update,
+            master_name_1 = master_name_1_test_update,
+            master_name_2 = master_name_2_test_update,
+            master_name_3 = master_name_3_test_update,
+            decimal_name_1 = decimal_name_1_test_update,
+            decimal_name_2 = decimal_name_2_test_update,
+            decimal_name_3 = decimal_name_3_test_update,
+            decimal_digits = decimal_digits_test_update,
+            rounding_digits = rounding_digits_test_update,
+            status_of_currency = status_of_currency_test_update,
+            order = order_test_update
+        )
+
+    def test_004_currency_delete(self):
+        self.currency_delete(
+            currency_code = currency_code_test_add
+        )
+
+if __name__ == '__main__': 
+    webui_test.main()
+==================== END OF FILE: tests\test_dir\vy_test\test_currency.py ====================
+
+
+==================== START OF FILE: tests\unit\test_case_core.py ====================
+import unittest
+from unittest.mock import MagicMock, patch, ANY, call
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 import sys
-import shutil
-import platform
-from concurrent.futures import ThreadPoolExecutor
-import threading
-import json
-import traceback
+import os
+
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from webui_test.case import TestCase
+from webui_test.wrapper import DriverWrapper
+
+class TestCoreFramework(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_driver = MagicMock()
+        # Patch get_driver to return our mock
+        self.patcher = patch('webui_test.case.get_driver', return_value=self.mock_driver)
+        self.patcher.start()
+        
+        # We need to mock start_browser as well if it's called
+        self.patcher_start = patch('webui_test.case.start_browser', return_value=self.mock_driver)
+        self.patcher_start.start()
+
+        self.test_case = TestCase(methodName='runTest')
+        self.test_case.driver = self.mock_driver
+
+    def tearDown(self):
+        self.patcher.stop()
+        self.patcher_start.stop()
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_common_xpath_click(self, mock_wait):
+        """Test common method with xpath and click action"""
+        mock_element = MagicMock()
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        self.test_case.common(xpath="//div[@id='test']", action="click", method="visibility")
+        
+        mock_element.click.assert_called_once()
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_common_css_send_keys(self, mock_wait):
+        """Test common method with css and send_keys action"""
+        mock_element = MagicMock()
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        self.test_case.common(css=".my-input", action="send_keys", value="hello", method="visibility")
+        
+        mock_element.send_keys.assert_any_call("hello")
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_common_element_not_found(self, mock_wait):
+        """Test common method when element is not found"""
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.side_effect = TimeoutException("Element not found")
+        
+        result = self.test_case.common(xpath="//missing", action="click", method="visibility")
+        
+        self.assertIsNone(result)
+
+    @patch('webui_test.wrapper.DriverWrapper.common')
+    def test_click_button(self, mock_common):
+        """Test click_button wrapper calls common correctly"""
+        self.test_case.click_button("Save")
+        
+        mock_common.assert_called_with(
+            xpath=ANY, 
+            method='unobscured', 
+            action='click', 
+            info="Clicked on 'Save' button.", 
+            error=ANY
+        )
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_common_get_text(self, mock_wait):
+        """Test common method with get_text action"""
+        mock_element = MagicMock()
+        mock_element.text = "Sample Text"
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        result = self.test_case.common(xpath="//div", action="get_text", method="visibility")
+        
+        self.assertEqual(result, "Sample Text")
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_common_get_value(self, mock_wait):
+        """Test common method with get_value action"""
+        mock_element = MagicMock()
+        mock_element.get_attribute.return_value = "Sample Value"
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        result = self.test_case.common(xpath="//input", action="get_value", method="visibility")
+        
+        self.assertEqual(result, "Sample Value")
+        mock_element.get_attribute.assert_called_with('value')
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_wait_for_element_visibility(self, mock_wait):
+        """Test wait_for_element_visibility_by_xpath"""
+        mock_element = MagicMock()
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        result = self.test_case.wait_for_element_visibility_by_xpath("//div")
+        
+        self.assertEqual(result, mock_element)
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_wait_for_element_enabled(self, mock_wait):
+        """Test wait_for_element_enabled_by_xpath"""
+        mock_element = MagicMock()
+        mock_wait_instance = mock_wait.return_value
+        mock_wait_instance.until.return_value = mock_element
+        
+        result = self.test_case.wait_for_element_enabled_by_xpath("//button")
+        
+        self.assertEqual(result, mock_element)
+
+    # New tests for DriverWrapper methods
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_accept_alert(self, mock_wait):
+        """Test accept_alert"""
+        mock_wait_instance = mock_wait.return_value
+        # alert_is_present returns a condition, until returns the alert object usually, 
+        # but here until returns True/False or the alert? 
+        # EC.alert_is_present() returns the alert object if present.
+        
+        self.test_case.driver.switch_to.alert = MagicMock()
+        
+        self.test_case.accept_alert()
+        
+        self.test_case.driver.switch_to.alert.accept.assert_called_once()
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_dismiss_alert(self, mock_wait):
+        """Test dismiss_alert"""
+        self.test_case.driver.switch_to.alert = MagicMock()
+        
+        self.test_case.dismiss_alert()
+        
+        self.test_case.driver.switch_to.alert.dismiss.assert_called_once()
+
+    @patch('webui_test.wrapper.WebDriverWait')
+    def test_switch_to_frame(self, mock_wait):
+        """Test switch_to_frame"""
+        self.test_case.switch_to_frame("frame_id")
+        
+        # EC.frame_to_be_available_and_switch_to_it returns a condition.
+        # WebDriverWait.until calls the condition.
+        # We just check if WebDriverWait was called correctly.
+        mock_wait.assert_called()
+
+    def test_switch_to_default_content(self):
+        """Test switch_to_default_content"""
+        self.test_case.switch_to_default_content()
+        self.test_case.driver.switch_to.default_content.assert_called_once()
+
+if __name__ == '__main__':
+    unittest.main()
+
+==================== END OF FILE: tests\unit\test_case_core.py ====================
 
 
-executor = ThreadPoolExecutor(max_workers=5)
-if platform.system() == "Windows":
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+==================== START OF FILE: tests\unit\test_form_action_structure.py ====================
+import sys
+import os
+import unittest
+from unittest.mock import MagicMock
 
-python_executable = shutil.which("python") or sys.executable
-if not python_executable:
-    print("CRITICAL ERROR: Python executable not found!")
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+# Mock selenium to avoid browser startup
+sys.modules['selenium'] = MagicMock()
+sys.modules['selenium.webdriver'] = MagicMock()
+sys.modules['selenium.webdriver.common.by'] = MagicMock()
+sys.modules['selenium.webdriver.common.keys'] = MagicMock()
+sys.modules['selenium.webdriver.common.action_chains'] = MagicMock()
+sys.modules['selenium.webdriver.support.ui'] = MagicMock()
+sys.modules['selenium.webdriver.support'] = MagicMock()
+sys.modules['selenium.common.exceptions'] = MagicMock()
+
+# Mock jwebui_action because it imports selenium
+sys.modules['webui_test.jwebui_action'] = MagicMock()
+
+try:
+    from webui_test.form_action import FormAction
+    print("Successfully imported FormAction")
+except ImportError as e:
+    print(f"Failed to import FormAction: {e}")
+    sys.exit(1)
+except Exception as e:
+    print(f"An error occurred during import: {e}")
     sys.exit(1)
 
-app = FastAPI(
-    title="Selenium Test Runner API",
-    description="API to run Selenium test cases in a specified order.",
-    version="1.0.0"
-)
-running_tasks = {}
-test_run_results = {}
-test_run_status = {}
+class TestFormActionStructure(unittest.TestCase):
+    def test_import(self):
+        self.assertIsNotNone(FormAction)
+        print("Successfully imported FormAction")
 
-DEFAULT_HISTORY_DIR = os.path.join(os.getcwd(), "test_history")
-HISTORY_DIR = os.environ.get("TEST_HISTORY_PATH", DEFAULT_HISTORY_DIR)
-HISTORY_FILE = os.path.join(HISTORY_DIR, "runs.json")
-
-DEFAULT_REPORTS_DIR = os.path.join(os.getcwd(), "reports")
-REPORTS_DIR = os.environ.get("REPORTS_PATH", DEFAULT_REPORTS_DIR)
-
-DEFAULT_LOGS_DIR = os.path.join(os.getcwd(), "logs")
-LOGS_DIR = os.environ.get("LOGS_PATH", DEFAULT_LOGS_DIR)
-
-class TestRunRequest(BaseModel):
-    test_files: list[str]
-    release_version: str = ""
-    server_name: str = ""
-    run_on_url: str = ""
-    username_login: str = ""
-    password_login: str = ""
-    one_app: Optional[str] = None
-    browser: Optional[str] = None
-    headless: Optional[str] = None
-    customer_code: str = ""
-    customer_code_corporate: str = ""
-    username_approve: str = ""
-    password_approve: str = ""
-    username_reverse: str = ""
-    password_reverse: str = ""
-    report_name: str = ""
-    f8_config: Optional[str] = None
-    debug_mode: Optional[str] = None
-    hour_to_run: Optional[int] = None
-    minute_to_run: Optional[int] = None
-    username_login_other_branch: Optional[str] = None
-    password_login_other_branch: Optional[str] = None
-    username_approve_other_branch: Optional[str] = None
-    password_approve_other_branch: Optional[str] = None
-    username_reverse_other_branch: Optional[str] = None
-    password_reverse_other_branch: Optional[str] = None
-    app_name: Optional[str] = None
-    folder_name: Optional[str] = None
-
-@app.get("/")
-def read_root():
-    return {"message": "API is working"}
-
-@app.on_event("startup")
-async def startup_event():
-    """Event called when FastAPI application starts."""
-    if not os.path.exists(HISTORY_DIR):
-        try:
-            os.makedirs(HISTORY_DIR)
-            print(f"'test_history' folder created: {HISTORY_DIR}")
-        except OSError as e:
-            print(f"Error creating 'test_history' folder {HISTORY_DIR}: {e}", file=sys.stderr)
-            
-    if not os.path.exists(REPORTS_DIR):
-        try:
-            os.makedirs(REPORTS_DIR)
-            print(f"'reports' folder created: {REPORTS_DIR}")
-        except OSError as e:
-            print(f"Error creating 'reports' folder {REPORTS_DIR}: {e}", file=sys.stderr)
-
-    if not os.path.exists(LOGS_DIR):
-        try:
-            os.makedirs(LOGS_DIR)
-            print(f"'logs' folder created: {LOGS_DIR}")
-        except OSError as e:
-            print(f"Error creating 'logs' folder {LOGS_DIR}: {e}", file=sys.stderr)
-
-    load_test_history()
-
-def run_tests_in_background(run_id: str, request_data: TestRunRequest):
-    """
-    Run script run_by_api.py in a child process.
-    """
-    print(f"[{run_id}] Starting test run in background...")
-    test_run_status[run_id] = "running"
-    save_test_history()
-    
-    # From main.py, relative path is tests/run_by_api.py
-    script_path = os.path.join(os.path.dirname(__file__), 'tests', 'run_by_api.py')
-    
-    command = [sys.executable, script_path]
-
-    command.extend(["--release-version", request_data.release_version])
-    command.extend(["--server-name", request_data.server_name])
-    command.extend(["--run-on-url", request_data.run_on_url])
-    command.extend(["--username-login", request_data.username_login])
-    command.extend(["--password-login", request_data.password_login])
-    if request_data.one_app is not None:
-        command.extend(["--one-app", request_data.one_app])
-    if request_data.browser is not None:
-        command.extend(["--browser", request_data.browser])
-    if request_data.headless is not None:
-        command.extend(["--headless", str(request_data.headless).lower()])
-    command.extend(["--customer-code", request_data.customer_code])
-    command.extend(["--customer-code-corporate", request_data.customer_code_corporate])
-    command.extend(["--username-approve", request_data.username_approve])
-    command.extend(["--password-approve", request_data.password_approve])
-    command.extend(["--username-reverse", request_data.username_reverse])
-    command.extend(["--password-reverse", request_data.password_reverse])
-    if request_data.test_files:
-        command.extend(["--test-files-order", ",".join(request_data.test_files)])
-    command.extend(["--report-name", request_data.report_name])
-    if request_data.debug_mode is not None:
-        command.extend(["--debug-mode", str(request_data.debug_mode).lower()])
-    if request_data.hour_to_run is not None:
-        command.extend(["--hour-to-run", str(request_data.hour_to_run)])
-    if request_data.minute_to_run is not None:
-        command.extend(["--minute-to-run", str(request_data.minute_to_run)])
-    if request_data.username_login_other_branch is not None:
-        command.extend(["--username-login-other-branch", request_data.username_login_other_branch])
-    if request_data.password_login_other_branch is not None:
-        command.extend(["--password-login-other-branch", request_data.password_login_other_branch])
-    if request_data.username_approve_other_branch is not None:
-        command.extend(["--username-approve-other-branch", request_data.username_approve_other_branch])
-    if request_data.password_approve_other_branch is not None:
-        command.extend(["--password-approve-other-branch", request_data.password_approve_other_branch])
-    if request_data.username_reverse_other_branch is not None:
-        command.extend(["--username-reverse-other-branch", request_data.username_reverse_other_branch])
-    if request_data.password_reverse_other_branch is not None:
-        command.extend(["--password-reverse-other-branch", request_data.password_reverse_other_branch])
-    if request_data.f8_config is not None:
-        command.extend(["--f8-config", request_data.f8_config])
-    if request_data.app_name is not None:
-        command.extend(["--app-name", request_data.app_name])
-    if request_data.folder_name is not None:
-        command.extend(["--folder-name", request_data.folder_name])
-
-    try:
-        process = subprocess.run(command, capture_output=True, text=True, check=False)
-        # output_log = process.stdout + "\n" + process.stderr
-        output_log = process.stderr
-        # output_log = ""
+    def test_methods_exist(self):
+        # Check for methods from different mixins
+        self.assertTrue(hasattr(FormAction, 'csh_mov'), "csh_mov should exist (from CashActions)")
+        self.assertTrue(hasattr(FormAction, 'dpt_opn'), "dpt_opn should exist (from DepositActions)")
+        self.assertTrue(hasattr(FormAction, 'common'), "common should exist (from TestCase/CommonActions)")
+        self.assertTrue(hasattr(FormAction, 'transaction_view'), "transaction_view should exist")
+        self.assertTrue(hasattr(FormAction, 'check_transaction'), "check_transaction should exist")
+        self.assertTrue(hasattr(FormAction, 'add_fees'), "add_fees should exist")
         
-        parsed_result = {}
-        try:
-            json_output_line = [line for line in process.stdout.splitlines() if line.strip().startswith('{') and line.strip().endswith('}')]
-            if json_output_line:
-                parsed_result = json.loads(json_output_line[-1])
-        except json.JSONDecodeError:
-            print(f"[{run_id}] Warning: Could not decode JSON from subprocess output. Output: {process.stdout}", file=sys.stderr)
-            pass
+    def test_inheritance(self):
+        from webui_test.case import TestCase
+        self.assertTrue(issubclass(FormAction, TestCase), "FormAction should inherit from TestCase")
 
-        status = "completed" if process.returncode == 0 else "failed"
-        # status = "completed"
-        passed = parsed_result.get("passed", False)
+    def test_attributes(self):
+        # Check for methods from Mixins
+        self.assertTrue(hasattr(FormAction, 'deposit_catalogue_definition_add_verify'), "Should have deposit method")
+        self.assertTrue(hasattr(FormAction, 'credit_catalogue_definition_add_verify'), "Should have credit method")
+        self.assertTrue(hasattr(FormAction, 'bo_approval_search'), "Should have common bo method")
+        # Check for methods from FormAction
+        self.assertTrue(hasattr(FormAction, 'simple_search_f8'), "Should have FormAction method")
 
-        test_run_results[run_id] = {
-            "status": status,
-            "passed": passed,
-            "output_log": output_log,
-            **parsed_result
-        }
-        test_run_status[run_id] = status
-        print(f"[{run_id}] Test run finished with status: {status}. Passed: {passed}")
+if __name__ == '__main__':
+    unittest.main()
 
-    except Exception as e:
-        full_traceback = traceback.format_exc()
-        test_run_results[run_id] = {
-            "status": "failed",
-            "passed": False,
-            "output_log": f"An unexpected error occurred while running subprocess: {e}\n{full_traceback}"
-        }
-        test_run_status[run_id] = "failed"
-        print(f"[{run_id}] Exception while trying to run subprocess: {e}\n{full_traceback}")
-    finally:
-        save_test_history()
-
-@app.post("/run_test")
-async def run_test(request: TestRunRequest):
-    """
-    Triggers Selenium test cases to run in the specified order via `run_by_api.py`. Test run in background.
-    """
-    run_id = str(uuid.uuid4())
-
-    test_run_results[run_id] = {
-        "timestamp": datetime.now().isoformat(),
-        "status": "pending",
-        "passed": False,
-        "request_data": request.dict()
-    }
-    test_run_status[run_id] = "pending"
-    save_test_history()
-
-    threading.Thread(
-        target=run_tests_in_background,
-        args=(run_id, request)
-    ).start()
-
-    return {"message": "Test run initiated", "run_id": run_id, "status": "running"}
-
-@app.get("/get_test_status/{run_id}")
-async def get_run_test_status(run_id: str):
-    """
-    Check status and get test results of run under folder.
-    """
-    status = test_run_status.get(run_id, "not_found")
-    result = test_run_results.get(run_id, None)
-
-    if status == "not_found":
-        raise HTTPException(status_code=404, detail="Run ID not found.")
-    
-    return {"run_id": run_id, "status": status, "result": result}
-
-def load_test_history():
-    """Load history test from JSON file when application starts."""
-    global test_run_results, test_run_status
-    if not os.path.exists(HISTORY_DIR):
-        try:
-            os.makedirs(HISTORY_DIR)
-            print(f"Created history directory: {HISTORY_DIR}")
-        except OSError as e:
-            print(f"Error creating history directory {HISTORY_DIR}: {e}", file=sys.stderr)
-            return
-
-    if os.path.exists(HISTORY_FILE):
-        try:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                loaded_data = json.load(f)
-                test_run_results = loaded_data.get("results", {})
-                test_run_status = loaded_data.get("status", {})
-                print(f"Loaded {len(test_run_results)} test runs from {HISTORY_FILE}")
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON from {HISTORY_FILE}: {e}. Starting with empty history.", file=sys.stderr)
-            backup_file = f"{HISTORY_FILE}.bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            try:
-                shutil.copyfile(HISTORY_FILE, backup_file)
-                print(f"Backed up corrupted history file to {backup_file}", file=sys.stderr)
-            except Exception as copy_e:
-                print(f"Error backing up corrupted file: {copy_e}", file=sys.stderr)
-            test_run_results = {}
-            test_run_status = {}
-        except Exception as e:
-            print(f"An unexpected error occurred while loading test history: {e}. Starting with empty history.", file=sys.stderr)
-            test_run_results = {}
-            test_run_status = {}
-    else:
-        print(f"No existing history file found at {HISTORY_FILE}. Starting with empty history.")
-
-def save_test_history():
-    """Save test history to JSON file."""
-    if not os.path.exists(HISTORY_DIR):
-        print(f"Cannot save history: directory {HISTORY_DIR} does not exist.", file=sys.stderr)
-        return
-    try:
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-            json.dump({
-                "results": test_run_results,
-                "status": test_run_status
-            }, f, indent=4, ensure_ascii=False)
-        print(f"Saved test history to {HISTORY_FILE}")
-    except Exception as e:
-        print(f"Error saving test history to {HISTORY_FILE}: {e}", file=sys.stderr)
-
-@app.get("/test-history")
-async def get_test_history():
-    """
-    Get all test history.
-    """
-    return test_run_results
-
-@app.post("/clear-history")
-async def clear_history():
-    """
-    Delete all test history (in memory and files).
-    """
-    global test_run_results, test_run_status
-    test_run_results = {}
-    test_run_status = {}
-    save_test_history()
-    return {"message": "Test history cleared."}
-
-@app.get("/reports")
-async def list_reports():
-    """
-    Returns a list of all available report file names in the reports directory.
-    """
-    try:
-        if not os.path.exists(REPORTS_DIR):
-            return {"message": "Report folder does not exist.", "reports": []}
-
-        report_files = [f for f in os.listdir(REPORTS_DIR) if os.path.isfile(os.path.join(REPORTS_DIR, f))]
-        report_files = sorted([f for f in report_files if f.endswith(('.html', '.xml'))])
-        
-        return {"reports": report_files}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error while getting report list: {e}")
-
-@app.get("/reports/download/{report_name}")
-async def download_report(report_name: str):
-    """
-    Download a specific report by file name.
-    """
-    report_path = os.path.join(REPORTS_DIR, report_name)
-
-    if not os.path.exists(report_path) or not os.path.isfile(report_path):
-        raise HTTPException(status_code=404, detail=f"No report found: {report_name}")
-    
-    if not report_name.endswith(('.html', '.xml')):
-         raise HTTPException(status_code=400, detail="Only supports downloading HTML or XML report files.")
-
-    try:
-        return FileResponse(path=report_path, filename=report_name, media_type="application/octet-stream")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error downloading report '{report_name}': {e}")
-
-@app.delete("/reports/clear_all")
-async def clear_all_reports():
-    """
-    Delete all files in the reports folder.
-    """
-    if not os.path.exists(REPORTS_DIR):
-        raise HTTPException(status_code=404, detail=f"The reports directory does not exist: {REPORTS_DIR}")
-
-    try:
-        for item in os.listdir(REPORTS_DIR):
-            item_path = os.path.join(REPORTS_DIR, item)
-            if os.path.isfile(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-        
-        return {"message": f"All files and subfolders in '{REPORTS_DIR}' have been successfully deleted."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error while deleting all reports: {e}")
-
-@app.get("/logs")
-async def list_logs():
-    """
-    Returns a list of all log file names available in the logs directory.
-    """
-    try:
-        if not os.path.exists(LOGS_DIR):
-            return {"message": "The logs directory does not exist.", "logs": []}
-
-        log_files = [f for f in os.listdir(LOGS_DIR) if os.path.isfile(os.path.join(LOGS_DIR, f))]
-        log_files = sorted([f for f in log_files if f.endswith(('.log', '.txt'))])
-        
-        return {"logs": log_files}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting logs list: {e}")
-
-@app.get("/logs/download/{log_name}")
-async def download_log(log_name: str):
-    """
-    Download a specific log file by file name.
-    """
-    log_path = os.path.join(LOGS_DIR, log_name)
-
-    if not os.path.exists(log_path) or not os.path.isfile(log_path):
-        raise HTTPException(status_code=404, detail=f"Log file not found: {log_name}")
-    
-    if not log_name.endswith(('.log', '.txt')):
-         raise HTTPException(status_code=400, detail="Only supports downloading log files (.log, .txt).")
-
-    try:
-        return FileResponse(path=log_path, filename=log_name, media_type="text/plain")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error downloading log file '{log_name}': {e}")
-
-@app.delete("/logs/clear_all")
-async def clear_all_logs():
-    """
-    Delete all files in the logs folder.
-    """
-    if not os.path.exists(LOGS_DIR):
-        raise HTTPException(status_code=404, detail=f"The logs directory does not exist: {LOGS_DIR}")
-
-    try:
-        for item in os.listdir(LOGS_DIR):
-            item_path = os.path.join(LOGS_DIR, item)
-            if os.path.isfile(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-
-        return {"message": f"All files and subdirectories in '{LOGS_DIR}' have been successfully deleted."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error when deleting all logs: {e}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-==================== END OF FILE: main.py ====================
+==================== END OF FILE: tests\unit\test_form_action_structure.py ====================
 
 
-==================== START OF FILE: setup.py ====================
-from setuptools import setup, find_packages 
-
-setup(
-    name='webui_test',
-    version="2.0.0",
-    author="NhiDY",
-    author_email="nhidy@jits.vn",
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires=[], 
-    scripts=[
-        'webui_test/running/html/charts_script.html',
-        'webui_test/running/html/heading.html',
-        'webui_test/running/html/report.html',
-        'webui_test/running/html/stylesheet.html',
-        'webui_test/running/html/template.html'
-    ]
-)
-==================== END OF FILE: setup.py ====================
-
-
-==================== START OF FILE: backup\case_bk.py ====================
-from inspect import cleandoc
+==================== START OF FILE: webui_test\case.py ====================
 import os
 import unittest
 import sys
+import random
+
+from inspect import cleandoc
 from time import sleep
 from webui_test.jwebui_action import *
 from webui_test.logging import log
+# from webui_test.wrapper import DriverWrapper
+from webui_test.wrapper import *
 
-from webui_test.running.config import BrowserConfig, WaitConfig
+from webui_test.running.config import BrowserConfig, WaitConfig, F8Config
 from webui_test.jweb_excel import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -477,7 +984,7 @@ def tearDownModule():
     log.info("--- Tearing down Module ---")
     pass
 
-class TestCase(unittest.TestCase):
+class TestCase(DriverWrapper, unittest.TestCase):
     def start_class(self):
         self.driver = get_driver()
         pass
@@ -495,22 +1002,28 @@ class TestCase(unittest.TestCase):
             _TEST_BROWSER = cls.driver
         else: 
             cls.driver = _TEST_BROWSER
-        cls().go_to(cls().get_url())
-        cls().wait_page_login()
-        cls().start_class()
+        # cls().go_to(cls().get_url())
+        # cls().wait_page_login()
+        # cls().start_class()
+        instance = cls(driver=cls.driver, methodName='run')
+        instance.go_to(instance.get_url())
+        instance.wait_page_login()
+        instance.start_class()
 
     @classmethod
     def tearDownClass(cls):
-        cls().end_class()
+        # cls().end_class()
+        instance = cls(driver=cls.driver, methodName='run')
+        instance.end_class()
 
     def start(self):
         self.driver = get_driver()
-        # log.debug("2. Go to 'start' method")
+        log.debug("2. Go to 'start' method")
         pass
 
     def end(self):
         self.driver = get_driver()
-        # log.debug("4. Go to 'end' method")
+        log.debug("4. Go to 'end' method")
         pass
 
     def stop(self):
@@ -531,25 +1044,26 @@ class TestCase(unittest.TestCase):
     def get_url(self):
         return
 
-    def go_to(self, url):
-        log.info("1. Go to 'go_to'")
-        BrowserConfig.url_env = url
-        if self.driver:
-            log.debug('2. vao if self.driver')
-            if BrowserConfig.headless:
-                log.debug(f'Headless: [{BrowserConfig.headless}]')
-                self.driver.set_window_size(1920, 1080)
-            else:
-                log.debug(f'NO Headless: [{BrowserConfig.headless}]')
-                # self.driver.maximize_window()
-                self.driver.set_window_size(1920, 1080)
-            size = self.driver.get_window_size()
-            log.debug(f'3. window size: {size}')
-            self.driver.get(url)
-            log.debug(f"4. Go to 'go_to' method, url: {url}")
-
-    def wait(self, seconds=1):
-        sleep(seconds)
+    # def go_to(self, url):
+    #     log.debug("1. Go to 'go_to'")
+    #     # self.driver = get_driver()
+    #     # log.debug(f'1.2 Set value fo self.driver: {self.driver}')
+    #     BrowserConfig.url_env = url
+    #     if self.driver:
+    #         log.debug('2. vao if self.driver')
+    #         if BrowserConfig.headless:
+    #             log.debug(f'Headless: [{BrowserConfig.headless}]')
+    #             self.driver.set_window_size(1920, 1080)
+    #         else:
+    #             log.debug(f'NO Headless: [{BrowserConfig.headless}]')
+    #             # self.driver.maximize_window()
+    #             self.driver.set_window_size(1920, 1080)
+    #         size = self.driver.get_window_size()
+    #         log.debug(f'3. window size: {size}')
+    #         self.driver.get(url)
+    #         log.debug(f"4. Go to 'go_to' method, url: {url}")
+    #     else:
+    #         log.error("self.driver is NULL.")
 
     def restart_browser(self):
         global _TEST_BROWSER
@@ -559,25 +1073,18 @@ class TestCase(unittest.TestCase):
         self.go_to(BrowserConfig.url_env)
         self.wait_page_login()
 
-    def screen_size(self):
-        width = self.driver.get_window_size()['width']
-        if width > 996:
-            return 'desktop'
-        elif width > 768:
-            return 'desktop_small'
-        elif width > 575:
-            return 'tablet'
-        elif width > 350:
-            return 'mobile'
-        else:
-            return 'mobile_small'
-
-    def take_screenshot(self, path):
-        result = self.driver.get_screenshot_as_file(path)
-        if result:
-            log.info(f"Take screenshot '{path}'.")
-        else:
-            log.error('Take screenshot failed.')
+    # def screen_size(self):
+    #     width = self.driver.get_window_size()['width']
+    #     if width > 996:
+    #         return 'desktop'
+    #     elif width > 768:
+    #         return 'desktop_small'
+    #     elif width > 575:
+    #         return 'tablet'
+    #     elif width > 350:
+    #         return 'mobile'
+    #     else:
+    #         return 'mobile_small'
 
     def get_value_excel(self, sheet, column, row, filename=None):
         return get_value_from_excel(sheet, column, row, filename)
@@ -591,253 +1098,850 @@ class TestCase(unittest.TestCase):
     def write_value_to_excel(self, new_value, sheet_name, column, row, url_file_name=None):
         return write_value_to_excel(new_value, sheet_name, column, row, url_file_name=url_file_name)
 
+# ================================= handle TRANSACTION JOURNAL =================================
+    # FOF-Transaction Journal
+    def transaction_search(self, transaction_references):
+        # search f8
+        self.close_all_form()
+        self.open_transaction_journal()
+        self.wait_for_button_available('Search')
+        self.assert_form_title('FOF-Transaction Journal')
+        self.simple_search_f8(transaction_references)
+        self.wait_loading()
+        self.assert_table_data('Tran Number', 1, transaction_references)
+
+    def transaction_search_advanced(self, transaction_references):
+        # search f8
+        self.close_all_form()
+        self.open_transaction_journal()
+        self.assert_form_title('FOF-Transaction Journal')
+        self.advanced_search_f8('Tran number', transaction_references, field_type='A')
+        self.click_button_search_advanced_f8()
+        self.wait_loading()
+        self.assert_table_data('Tran Number', 1, transaction_references)
+
+    def transaction_mode_simple(self, transaction_references, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.transaction_search_advanced(transaction_references)
+        if mode=='N':
+            self.transaction_search(transaction_references)
+
+    def transaction_view(self, transaction_references, form_title=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        #  view f8
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_button_available('Accept')
+        if form_title:
+            self.assert_form_title(form_title)
+        self.fo_assert_text('Transaction references', transaction_references)
+
+    def transaction_view_no_return_transaction_references(self, transaction_references, form_title=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        #  view f8
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_button_available('Accept')
+        if form_title:
+            self.assert_form_title(form_title)
+
+    def transaction_reverse(self, transaction_references, username, password, reason=None, allow_reverse=None, list_error_message=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Delete', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # reversed transaction: N: not allow
+        if list_error_message:
+            self.assert_notification('Deleted error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Completed')
+            print(f'Transaction references is NOT reversed: {transaction_references}')
+        else:
+            self.check_notification('Deleted successfully')
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Reversed')
+            print(f'Transaction references has been reversed: {transaction_references}')
+
+    def transaction_approve(self, transaction_references, username, password, reason=None, allow_approve=None, list_error_message=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Approve', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # approve transaction: N: not allow
+        if list_error_message:
+            self.assert_notification('Approve error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Pending to approve')
+        else:
+            self.check_notification('Approve successfully')
+            self.check_error_message()
+            # search and compare status
+            self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+            self.assert_status_table_data('Status', 1, 'Completed')
+
+    def transaction_reject(self, transaction_references, username, password, reason=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.click_table_menu('Reject', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        self.check_notification('Reject successfully')
+        self.check_error_message()
+        # search and compare status
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        self.assert_status_table_data('Status', 1, 'Rejected')
+        print(f'Transaction references has been rejected: {transaction_references}')
+
+    def check_transaction(self, transaction_references, transaction_status=None, mode=None):
+        self.transaction_mode_simple(transaction_references=transaction_references, mode=mode)
+        if transaction_status:
+            transaction_status_actual = self.get_status_table_data('Status', 1)
+            if transaction_status==transaction_status_actual:
+                return True
+            else:
+                return False
+
+# ================================= handle BACK OFFICE APPROVAL =================================
+    # FOF-Back Office Approval
+    def bo_approval_search(self, text):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.wait_for_button_available('Search')
+        self.assert_form_title('FOF-Back Office Approval')
+        self.simple_search_f8(text)
+        self.wait_loading()
+
+    def bo_approval_search_advanced_status(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.assert_form_title('FOF-Back Office Approval')
+        if transaction_number:
+            self.advanced_search_f8('Tran number', transaction_number, field_type='A')
+        if master_code:
+            self.advanced_search_f8('Master Code', master_code, field_type='A')
+        if tran_name:
+            self.advanced_search_f8('Tran name', tran_name, field_type='A')
+        self.key_escape()
+        if status:
+            self.advanced_search_f8('Status', status, field_type='S')
+        if user_name:
+            self.advanced_search_f8('User name', user_name, field_type='A')
+        self.click_button_search_advanced_f8()
+        self.wait_loading()
+
+    def bo_approval_search_advanced_normal(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.close_all_form()
+        self.open_bo_approval()
+        self.assert_form_title('FOF-Back Office Approval')
+        self.bo_click_collap('Advanced search')
+        if transaction_number:
+            self.advanced_search('Tran number', transaction_number, field_type='A')
+        if master_code:
+            self.advanced_search('Master code', master_code, field_type='A')
+        if tran_name:
+            self.advanced_search('Tran name', tran_name, field_type='A')
+        self.key_escape()
+        if status:
+            self.advanced_search('Status', status, field_type='S')
+        if user_name:
+            self.advanced_search('User name', user_name, field_type='A')
+        self.click_button_search_advanced()
+        self.wait_loading()
+        self.bo_click_uncollap('Advanced search')
+
+    def bo_approval_mode_simple(self, transaction_number, mode=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.bo_approval_search_advanced_status(transaction_number=transaction_number)
+        if mode=='N':
+            self.bo_approval_search(transaction_number)
+
+    def bo_approval_mode_advanced(self, transaction_number=None, master_code=None, tran_name=None, mode=None, status=None, user_name=None):
+        if mode is None:
+            mode = F8Config.view_mode
+        if mode=='S':
+            self.bo_approval_search_advanced_status(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, status=status, user_name=user_name)
+        if mode=='N':
+            self.bo_approval_search_advanced_normal(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, status=status, user_name=user_name)
+
+    def bo_approval_view(self, transaction_number, form_title=None, mode=None):
+        self.bo_approval_mode_simple(transaction_number=transaction_number, mode=mode)
+        self.click_table_menu('View', 1)
+        self.wait_loading()
+        self.check_notification('Get info successfully')
+        self.wait_for_label_available('This change requires approval to be affected.')
+        if form_title:
+            self.assert_form_title(form_title)
+        self.fo_assert_text('Transaction number', transaction_number)
+
+    def bo_approval_approve(self, username, password, reason=None, list_error_message=None, mode=None, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.click_table_menu('Approve', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # approve transaction not allow
+        if list_error_message:
+            self.assert_notification('Approve error')
+            self.assert_error_message()
+            self.assert_list_error_message(list_error_message)
+            # search and compare status
+            self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+            self.assert_status_table_data('Status', 1, 'Pending to approve')
+        else:
+            # self.check_notification('Approve successfully')
+            self.assert_notification('Approve successfully')
+            # search and compare status
+            self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+            self.assert_status_table_data('Status', 1, 'Completed')
+
+    def bo_approval_reject(self, username, password, reason=None, mode=None, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.click_table_menu('Reject', 1)
+        self.approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+        self.wait_loading()
+        # self.check_notification('Reject successfully')
+        self.assert_notification('Reject successfully')
+        # search and compare status
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=None, user_name=user_name)
+        self.assert_status_table_data('Status', 1, 'Rejected')
+        print(f'Transaction number has been rejected: {transaction_number}')
+
+    def check_bo_approval(self, transaction_number=None, master_code=None, tran_name=None, transaction_status=None, mode=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        if transaction_status:
+            transaction_status_actual = self.get_status_table_data('Status', 1)
+            if transaction_status==transaction_status_actual:
+                return True
+            else:
+                return False
+
+    def bo_approval_search_verify(self, transaction_number=None, master_code=None, tran_name=None, status=None, user_name=None):
+        if transaction_number:
+            self.assert_table_data('Tran Number', 1, transaction_number)
+        if master_code:
+            self.assert_table_data('Master Code', 1, master_code)
+        if tran_name:
+            self.assert_table_data('Tran Name', 1, tran_name)
+        if status:
+            self.assert_status_table_data('Status', 1, status)
+        if user_name:
+            self.assert_table_data('Tran Name', 1, user_name)
+
+    def get_transaction_number(self):
+        transaction_number = self.bo_get_text_single('Transaction number')
+        print(f'Transaction number: {transaction_number}')
+        return transaction_number
+
+    def bo_approval_verify_actions(self, mode=None, transaction_number=None, master_code=None, tran_name=None, expected_actions=None, row=None, status=None, user_name=None):
+        self.bo_approval_mode_advanced(transaction_number=transaction_number, master_code=master_code, tran_name=tran_name, mode=mode, status=status, user_name=user_name)
+        self.assert_actions(expected_actions=expected_actions, row=row)
+
+# ================================= handle common methods =================================
+    def check_serial_number_from_to_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+        self.stock_inventory_advanced_search(prefix, generated_number_from, generated_number_to, s_type)
+        if (self.get_text_notification(timeout=5) == 'Data not found'):
+            return True
+        else:
+            return False
+
+    def check_serial_number_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
+        # """
+        # Kiểm tra số serial không tồn tại dựa trên 3 cặp trường khác nhau.
+        # Hàm chỉ trả về True khi cả 3 cặp tìm kiếm đều không tìm thấy dữ liệu.
+        # Nếu bất kỳ cặp nào tìm thấy dữ liệu, hàm sẽ trả về False.
+        # """
+        # print(f"Bắt đầu kiểm tra số serial từ {generated_number_from} đến {generated_number_to}")
+
+        # Check 1: "From serial from" and "From serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            from_serial_to=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'From serial to'. Trả về False.")
+            return False
+
+        # Check 2: "To serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            to_serial_from=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'To serial from' và 'To serial to'. Trả về False.")
+            return False
+        
+        # Check 3: "From serial from" and "To serial to"
+        self.stock_inventory_advanced_search(
+            stock_prefix=prefix,
+            from_serial=generated_number_from,
+            to_serial=generated_number_to,
+            stock_type=s_type,
+        )
+        if self.get_text_notification(timeout=5) != 'Data not found':
+            # print("Tìm thấy dữ liệu với cặp 'From serial from' và 'To serial to'. Trả về False.")
+            return False
+
+        # Nếu tất cả 3 cặp đều không tìm thấy dữ liệu
+        # print("Tất cả 3 cặp kiểm tra đều không tìm thấy dữ liệu. Trả về True.")
+        return True
+
+    def gen_serial_number(self, prefix, s_type, index):
+        """
+        Gen serial number use for stock
+        Args:
+            prefix (str): prefix of stock.
+            s_type (str): stock type.
+            index (int): the number of next serial number, 0 means gen one number only, 9: means gen 10 numbers, 24: means gen 25 numbers.
+        Returns:
+            Tuple ([str, str]): from number, to number. include prefix and format of stock number XX-000000.
+        """
+        while True:
+            # Generate a random number with the desired format
+            generated_number_from = f"6{random.randint(0, 99999):05}"
+            generated_number_to = f"{int(generated_number_from) + index:05}"
+            # Check if the generated number exists; if not, break the loop
+            if index == 0:
+                if self.check_serial_number_from_to_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
+            else:
+                if self.check_serial_number_not_exist(generated_number_from, generated_number_to, prefix=prefix, s_type=s_type):
+                    break
+        generated_number_from = f"{prefix}-{generated_number_from}"
+        generated_number_to = f"{prefix}-{generated_number_to}"
+        return generated_number_from, generated_number_to
+
+    def get_list_serial_number(self, prefix, number_from, number_to):
+        start = int(str(number_from).split('-')[1])
+        end = int(str(number_to).split('-')[1])
+        list_serial_numbers = [f"{prefix}-{num:06}" for num in range(start, end + 1)] # because the range() function in Python generates numbers up to but not including the end value
+        return list_serial_numbers
+
+    def get_next_serial_number(self, prefix, stock_number, index):
+        serial_number = str(stock_number).replace(prefix+'-', '')
+        next_serial_number = f"{int(serial_number) + index}"
+        next_stock_number = f"{prefix}-{next_serial_number}"
+        return next_stock_number
+
+    def get_serial_number_no_refix(self, serial_number):
+        """
+        format: 'XX000000' or 'XX-000000'.
+
+        Args:
+            serial_number: input serial number have prefix.
+
+        Returns:
+            serial_number have no prefix: 000000 or None if serial_number have format incorrect.
+        """
+        serial_number = str(serial_number).replace('-', '')
+        if len(serial_number) == 8:
+            return serial_number[2:]
+        elif len(serial_number) == 6:
+            return serial_number
+        else:
+            return None
+
+    def stock_number_mask(self, stock_number):
+        stock_number = str(stock_number).replace('-', '')
+        if len(stock_number) < 8:
+            log.warn("Stock number must be at least 8 digits long")
+            return ''
+        # Format the string as XX-XXXXXX
+        stock_number_mask = f"{stock_number[:2]}-{stock_number[2:]}"
+        return stock_number_mask
+
+    def stock_number_no_mask(self, stock_number):
+        stock_number_no_mask = str(stock_number).replace('-', '')
+        if len(stock_number_no_mask) < 8:
+            log.warn("Stock number must be at least 8 digits long")
+            return ''
+        return stock_number_no_mask
+
+    def no_mask(self, value_mask):
+        value_no_mask = str(value_mask).replace('-', '')
+        return value_no_mask
+
+    def no_thousands_separator(self, number):
+        value_no_thousands_separator = str(number).replace(',', '')
+        return value_no_thousands_separator
+
+    def deposit_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XX-XXX-XXXXXX-X
+        account_number_mask = f"{account_number[:2]}-{account_number[2:5]}-{account_number[5:11]}-{account_number[11:]}"
+        return account_number_mask
+
+    def treasury_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XXX-XX-XXXXXXX
+        account_number_mask = f"{account_number[:3]}-{account_number[3:5]}-{account_number[5:]}"
+        return account_number_mask
+
+    def trade_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = (
+            f"{account_number[:3]}-{account_number[3:4]}-"
+            f"{account_number[4:6]}-{account_number[6:8]}-"
+            f"{account_number[8:14]}-{account_number[14:]}"
+        )
+        return account_number_mask
+
+    def customer_code_mask(self, customer_code):
+        customer_code = str(customer_code).replace('-', '')
+        if len(customer_code) < 8:
+            log.warn("Customer code must be at least 8 digits long")
+            return ''
+        # Format the string as X-X-XXXXXX
+        customer_code_mask = f"{customer_code[:1]}-{customer_code[1:2]}-{customer_code[2:]}"
+        return customer_code_mask
+
+    def gl_account_number_mask(self, gl_account_number):
+        gl_account_number = str(gl_account_number).replace('-', '')
+        if len(gl_account_number) < 18:
+            log.warn("GL account number must be at least 18 digits long")
+            return ''
+        # Format the string as XXX-XXXXXXXXXXXXX-XX
+        gl_account_number_mask = f"{gl_account_number[:3]}-{gl_account_number[3:16]}-{gl_account_number[16:]}"
+        return gl_account_number_mask
+
+    def credit_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 12:
+            log.warn("Account number must be at least 12 digits long")
+            return ''
+        # Format the string as XX-XXX-XXXXXX-X
+        account_number_mask = f"{account_number[:2]}-{account_number[2:5]}-{account_number[5:11]}-{account_number[11:]}"
+        return account_number_mask
+
+    def product_limit_code_mask(self, product_limit_code):
+        product_limit_code = str(product_limit_code).replace('-', '')
+        if len(product_limit_code) < 13:
+            log.warn("Product limit code must be at least 13 digits long")
+            return ''
+        # Format the string as xxxx-xxxxxx-x-xx
+        product_limit_code_mask = f"{product_limit_code[:4]}-{product_limit_code[4:10]}-{product_limit_code[10:11]}-{product_limit_code[11:]}"
+        return product_limit_code_mask
+
+    def sub_product_limit_code_mask(self, sub_product_limit_code):
+        sub_product_limit_code = str(sub_product_limit_code).replace('-', '')
+        if len(sub_product_limit_code) < 15:
+            log.warn("Sub product limit code must be at least 15 digits long")
+            return ''
+        # Format the string as XXXX-XXXXXX-X-XX-XX
+        sub_product_limit_code_mask = f"{sub_product_limit_code[:4]}-{sub_product_limit_code[4:10]}-{sub_product_limit_code[10:11]}-{sub_product_limit_code[11:13]}-{sub_product_limit_code[13:]}"
+        return sub_product_limit_code_mask
+
+    def mortgage_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = f"{account_number[:3]}-{account_number[3:4]}-{account_number[4:6]}-{account_number[6:8]}-{account_number[8:14]}-{account_number[14:]}"
+        return account_number_mask
+
+    def fixed_asset_account_number_mask(self, account_number):
+        account_number = str(account_number).replace('-', '')
+        if len(account_number) < 15:
+            log.warn("Account number must be at least 15 digits long")
+            return ''
+        # Format the string as XXX-X-XX-XX-XXXXXX-X
+        account_number_mask = f"{account_number[:3]}-{account_number[3:4]}-{account_number[4:6]}-{account_number[6:8]}-{account_number[8:14]}-{account_number[14:]}"
+        return account_number_mask
+
+    def add_fees(self, ifc_codes, values, total_fee=None, index=None):
+        """
+        Adds multiple fees based on lists of fee codes and corresponding values.
+
+        Args:
+            ifc_codes (list): A list of fee codes. Ex: ['101', '102', '103']
+            values (list): A list of corresponding fee values. Ex: ['100.00', '0.1', '1,000.54']
+            total_fee (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(ifc_codes) != len(values):
+            print('Error: The number of fee codes and values do not match.')
+            return
+        for ifc_code, value in zip(ifc_codes, values):
+            self.click_button('Add', index)
+            self.wait_loading()
+            self.fo_write_text_group('Interest/fee/charge code', ifc_code)
+            self.wait_loading()
+            self.fo_write_number('Value', value)
+            self.wait_loading()
+            self.click_button('Apply', index)
+            self.wait_loading()
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def add_fees_lookup(self, ifc_codes, values, total_fee=None, index=None):
+        """
+        Adds multiple fees based on lists of fee codes and corresponding values.
+
+        Args:
+            ifc_codes (list): A list of fee codes. Ex: ['101', '102', '103']
+            values (list): A list of corresponding fee values. Ex: ['100.00', '0.1', '1,000.54']
+            total_fee (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(ifc_codes) != len(values):
+            print('Error: The number of fee codes and values do not match.')
+            return
+        for ifc_code, value in zip(ifc_codes, values):
+            self.click_button('Add', index)
+            self.wait_loading()
+            self.lookup_data_text(
+                title='Interest/fee/charge code',
+                value_search_code=ifc_code,
+                value_code=ifc_code,
+            )
+            self.wait_loading()
+            self.fo_write_number('Value', value)
+            self.wait_loading()
+            self.click_button('Apply', index)
+            self.wait_loading()
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def add_gl_entries(self, posting_types=None, gl_accounts=None, currencies=None, debit_amounts=None, credit_amounts=None, descs=None, section_names=None, total_credit_amount=None, list_error_message_under_group=None):
+        """
+        Adds multiple gl account number based on lists of gl accounts and corresponding amounts.
+
+        Args:
+            posting_types (list): ['Debit', 'Credit', 'Debit', 'Credit']
+            gl_accounts (list): A list of gl accounts. Ex: ['003-1100601000000-01', '003-1100601000000-01', '003-1100601000000-01', '003-1100601000000-01']
+            currencies (list): ['MMK', 'MMK', 'MMK', 'MMK']
+            debit_amounts (list): A list of corresponding fee amounts. Ex: ['100.00', '0.1', None, None]
+            credit_amounts (list): A list of corresponding fee amounts. Ex: [None, None, '0.1', '100.00']
+            descs (list): ['Descs 1', 'Descs 2', 'Descs 3', 'Descs 4']
+            section_names (list): ['Section names 1', 'Section names 2', 'Section names 3', 'Section names 4']
+            total_credit_amount (str): Ex: 'Total Amount = 1,100.64'
+        """
+        if len(posting_types) != len(gl_accounts):
+            print('Error: The number of Posting types and GL accounts do not match.')
+            return
+        if len(currencies) != len(gl_accounts):
+            print('Error: The number of Currencies and GL accounts do not match.')
+            return
+        if len(debit_amounts) != len(gl_accounts):
+            print('Error: The number of Debit amounts and GL accounts do not match.')
+            return
+        if len(credit_amounts) != len(gl_accounts):
+            print('Error: The number of Credit amounts and GL accounts do not match.')
+            return
+        if len(descs) != len(gl_accounts):
+            print('Error: The number of Descs and GL accounts do not match.')
+            return
+        if len(section_names) != len(gl_accounts):
+            print('Error: The number of Section names and GL accounts do not match.')
+            return
+        for posting_type, gl_account, currency, debit_amount, credit_amount, desc, section_name in zip(posting_types, gl_accounts, currencies, debit_amounts, credit_amounts, descs, section_names):
+            self.click_button('Add')
+            self.wait_loading()
+            if posting_type:
+                self.select('Type', posting_type)
+            if gl_account:
+                self.write_input('Account number', self.no_mask(gl_account), need_tab='Y')
+                self.wait_loading()
+            if currency:
+                self.fo_assert_value_data('Currency', currency)
+            if posting_type == 'Debit':
+                if debit_amount:
+                    self.write_input_act_man('Debit amount', debit_amount, is_decimal='Y')
+                    self.wait_loading()
+            if posting_type == 'Credit':
+                if credit_amount:
+                    self.write_input_act_man('Credit amount', credit_amount, is_decimal='Y')
+                    self.wait_loading()
+            if desc:
+                self.write_textarea_act_man('Description', desc)
+            if section_name:
+                self.write_textarea('Section name', section_name)
+            self.click_button('Apply')
+            self.wait_loading()
+            if list_error_message_under_group:
+            # verify error
+                self.assert_error_message()
+                self.assert_list_error_message_under_group(list_error_message_under_group)
+                print('Transaction failed!')
+        if total_credit_amount:
+            self.assert_total_fee_table_data(total_credit_amount)
+
+    def add_extension_group_entry(self, i, replace_bys, system_account_names, business_lines, customer_sectors=None, customer_resident_statuss=None, sub_products=None, bank_identifications=None, replace_code=None):
+        self.click_button_in_tab('Add')
+        self.wait_loading()
+        self.write_textarea('Replace by', replace_bys[i])
+        self.write_textarea('System account name', system_account_names[i])
+        if replace_code:
+            self.select('Replace code', replace_code)
+        # Lấy từng giá trị tương ứng nếu có
+        conditions = [
+            ('Customer sector', customer_sectors[i] if customer_sectors else None),
+            ('Customer resident status', customer_resident_statuss[i] if customer_resident_statuss else None),
+            ('Business line', business_lines[i]),
+            ('Sub product', sub_products[i] if sub_products else None),
+            ('Bank Identification', bank_identifications[i] if bank_identifications else None)
+        ]
+        if any(value is not None for _, value in conditions):
+            self.bo_click_collap('Condition account of group')
+            for label, value in conditions:
+                if value is not None:
+                    self.select(label, value)
+        self.click_button_in_tab('Apply')
+        self.wait_loading()
+
+    def add_gls_entry(self, i, sys_account_names, account_aliass, coa_accounts=None):
+        self.wait_loading()
+        self.click_button_in_tab('Add')
+        self.wait_loading()
+        self.write_textarea('Sys Account Name', sys_account_names[i])
+        if coa_accounts:
+            self.write_textarea('COA Account', coa_accounts[i])
+        self.write_textarea('Account Alias', account_aliass[i])
+        self.click_button_in_tab('Apply')
+        self.wait_loading()
+
+    def format_number(self, number):
+        number = str(number).replace(',', '')
+        number = float(number)
+        if number.is_integer():
+            return str(int(number))
+        else:
+            return str(number)
+
+    def assert_fees(self, ifc_codes, values=None, total_fee=None, ifc_names=None, value_types=None, fees=None, floors=None, ceilings=None, currencies=None):
+        if ifc_names:
+            for ifc_code, ifc_name in zip(ifc_codes, ifc_names):
+                self.bo_assert_text_table('IFC code', ifc_code, 'IFC Name', ifc_name)
+        if value_types:
+            for ifc_code, value_type in zip(ifc_codes, value_types):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Value type', value_type)
+        if values:
+            for ifc_code, value in zip(ifc_codes, values):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Value', value)
+        if fees:
+            for ifc_code, fee in zip(ifc_codes, fees):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Fee', fee)
+        if floors:
+            for ifc_code, floor in zip(ifc_codes, floors):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Floor', floor)
+        if ceilings:
+            for ifc_code, ceiling in zip(ifc_codes, ceilings):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Ceiling', ceiling)
+        if currencies:
+            for ifc_code, currency in zip(ifc_codes, currencies):
+                self.bo_assert_text_table('IFC code', ifc_code, 'Currency', currency)
+        if total_fee:
+            self.assert_total_fee_table_data(total_fee)
+
+    def assert_posting_debit_account_number(self, index, expected):
+        self.assert_table_data_posting('Debit', 'Account number', index=index, expected=expected)
+
+    def assert_posting_debit_amount(self, index, expected):
+        self.assert_table_data_posting('Debit', 'Amount', index=index, expected=expected)
+
+    def assert_posting_credit_account_number(self, index, expected):
+        self.assert_table_data_posting('Credit', 'Account number', index=index, expected=expected)
+
+    def assert_posting_credit_amount(self, index, expected):
+        self.assert_table_data_posting('Credit', 'Amount', index=index, expected=expected)
+
+    def assert_posting_data(self, expected_debits=None, expected_credits=None):
+        """
+        Hàm tổng quát để kiểm tra dữ liệu trong bảng Posting cho cả Debit và Credit theo thứ tự nhóm của cặp Posting.
+
+        Args:
+            self: Tham chiếu đến đối tượng chứa các hàm assert.
+            expected_debits (list, optional): Danh sách các dictionary hoặc tuple chứa dữ liệu mong đợi cho Debit.
+                Mỗi phần tử trong danh sách đại diện cho một dòng và chứa thông tin cho 'Account number' và 'Amount'.
+                Ví dụ: [{'Account number': '002-1101001010404-01', 'Amount': '1,000.00'}, ...]
+                Hoặc: [('002-1101001010404-01', '1,000.00'), ...]
+                Defaults to None.
+            expected_credits (list, optional): Danh sách tương tự như expected_debits nhưng dành cho Credit.
+                Defaults to None.
+        """
+        if expected_debits:
+            for index, expected_data in enumerate(expected_debits, start=1):
+                if isinstance(expected_data, dict):
+                    expected_account = expected_data.get('Account number')
+                    expected_amount = expected_data.get('Amount')
+                elif isinstance(expected_data, (tuple, list)) and len(expected_data) == 2:
+                    expected_account, expected_amount = expected_data
+                else:
+                    raise ValueError(f"Invalid format for expected debit data at index {index}: {expected_data}")
+
+                if expected_account is not None:
+                    self.assert_posting_debit_account_number(str(index), self.gl_account_number_mask(expected_account))
+                if expected_amount is not None:
+                    self.assert_posting_debit_amount(str(index), str(expected_amount))
+
+        if expected_credits:
+            for index, expected_data in enumerate(expected_credits, start=1):
+                if isinstance(expected_data, dict):
+                    expected_account = expected_data.get('Account number')
+                    expected_amount = expected_data.get('Amount')
+                elif isinstance(expected_data, (tuple, list)) and len(expected_data) == 2:
+                    expected_account, expected_amount = expected_data
+                else:
+                    raise ValueError(f"Invalid format for expected credit data at index {index}: {expected_data}")
+
+                if expected_account is not None:
+                    self.assert_posting_credit_account_number(str(index), self.gl_account_number_mask(expected_account))
+                if expected_amount is not None:
+                    self.assert_posting_credit_amount(str(index), str(expected_amount))
+
+        # # Cách sử dụng hàm mới:
+        # def test_posting_with_variable_rows(self):
+        #     trade_gl_number = "002-1101001010404-01"
+        #     sg_bg_amount = "1,000.00"
+        #     liability_gl_number = "002-2020301010202-01"
+        #     cash_gl_number = "003-1010301000101-01"
+        #     total_fee_amount = "1,000.00"
+        #     ifcc_gl_number = "003-1101001010202-01"
+
+        #     # Ví dụ với 2 dòng Debit và 2 dòng Credit
+        #     expected_data_1 = {
+        #         'expected_debits': [
+        #             {'Account number': trade_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': cash_gl_number, 'Amount': total_fee_amount},
+        #         ],
+        #         'expected_credits': [
+        #             {'Account number': liability_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': ifcc_gl_number, 'Amount': total_fee_amount},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_1)
+
+        #     # Ví dụ với 3 dòng Debit và 1 dòng Credit
+        #     expected_data_2 = {
+        #         'expected_debits': [
+        #             (trade_gl_number, sg_bg_amount),
+        #             (cash_gl_number, total_fee_amount),
+        #             ('Debit Account 3', 'Debit Amount 3'),
+        #         ],
+        #         'expected_credits': [
+        #             ('Credit Account 1', 'Credit Amount 1'),
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_2)
+
+        #     # Ví dụ chỉ có Debit
+        #     expected_data_3 = {
+        #         'expected_debits': [
+        #             {'Account number': trade_gl_number, 'Amount': sg_bg_amount},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_3)
+
+        #     # Ví dụ chỉ có Credit
+        #     expected_data_4 = {
+        #         'expected_credits': [
+        #             {'Account number': liability_gl_number, 'Amount': sg_bg_amount},
+        #             {'Account number': ifcc_gl_number, 'Amount': total_fee_amount},
+        #             {'Account number': 'Credit Account 3', 'Amount': 'Credit Amount 3'},
+        #             {'Account number': 'Credit Account 4', 'Amount': 'Credit Amount 4'},
+        #         ],
+        #     }
+        #     self.assert_posting_data(**expected_data_4)
+
+    def assert_transaction_number_not_null(self, title_transaction_references='Transaction references'):
+        if self.check_error_message():
+            log.error('Found error message in case of success.')
+        transaction_references=self.fo_get_text(title_transaction_references)
+        self.assertNotEqual(transaction_references, None)
+        return transaction_references
+
+    def add_sheet(self, denominations, type_of_notes, sheets):
+        if (len(denominations) != len(type_of_notes)) | (len(denominations) != len(sheets)) | (len(type_of_notes) != len(sheets)):
+            print("Error: The number of 'denomination' and 'type of note' and 'sheet' do not match.")
+            return
+        for denomination, type_of_note, sheet in zip(denominations, type_of_notes, sheets):
+            self.write_table(
+                column_01='Denomination',
+                value_column_01=denomination,
+                column_02='Type of Notes',
+                value_column_02=type_of_note,
+                column_expected='Sheet',
+                value_expected=sheet
+            )
+            self.wait_loading()
+
+    def get_branch_name(self, branch_code_and_name):
+        branch_name=None
+        if branch_code_and_name:
+            parts = str(branch_code_and_name).split('-', 1)
+            if len(parts) > 1:
+                branch_name = str(branch_code_and_name).split('-', 1)[1].strip()
+            else:
+                branch_name = str(branch_code_and_name).strip()
+        return branch_name
+
+    def add_reminders(self, reminder_codes, orders, reminder_names=None):
+        """
+        Adds multiple collection reminder based on lists of reminder codes and corresponding orders.
+
+        Args:
+            reminder_codes (list): A list of reminder codes. Ex: ['AAA', 'CCC', 'BBB']
+            orders (list): A list of corresponding reminder orders. Ex: ['1', '3', '2']
+            reminder_names (list): A list of corresponding reminder orders. Ex: ['1', '3', '2']
+        """
+        if len(reminder_codes) != len(orders):
+            print('Error: The number of reminder codes and orders do not match.')
+            return
+        for reminder_code, order, reminder_name in zip(reminder_codes, orders, reminder_names):
+            self.click_button('Add')
+            self.wait_loading()
+            self.lookup_data('Reminder code', 'Reminder code', reminder_code)
+            self.wait_loading()
+            self.write_input('Order', order)
+            self.wait_loading()
+            self.bo_assert_text_data('Reminder name', reminder_name)
+            self.click_button('Apply')
+            self.wait_loading()
+
 # ================================= Using Selenium 4.x =================================
-# ================= xpath =================
-    def wait_for_element_visibility_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.visibility_of_element_located((By.XPATH, xpath))
-            )
-            # log.info(f"Element with xpath '{xpath}' visible.")
-            return element  # The element is visible
-        except TimeoutException:
-            log.warn(f"The element with xpath '{xpath}' was NOT visible.")
-            return None
-
-    def wait_for_element_enabled_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.element_to_be_clickable((By.XPATH, xpath))
-            )
-            # log.info(f"Element with xpath '{xpath}' enabled.")
-            return element  # The element is enabled
-        except TimeoutException:
-            log.warn(f"The element with xpath '{xpath}' was NOT enabled.")
-            return None
-
-    def wait_until_element_disappears_by_xpath(self, xpath, max_wait_time=WaitConfig.timeout_explicit):
-        try:
-            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
-                EC.invisibility_of_element_located((By.XPATH, xpath))
-            )
-            if is_invisible:
-                # log.info(f"Element with xpath '{xpath}' disappeared.")
-                return True  # Return True if the element disappears
-        except TimeoutException:
-            log.warn(f"Element with xpath '{xpath}' did NOT disappear.")
-            return False
-
-    def wait_for_element_unobscured_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
-        # Get the element you want to interact with
-        element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-        if element is None:
-            return None
-        if BrowserConfig.name in ['firefox', 'ff']:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        else:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            # location = element.location_once_scrolled_into_view
-            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
-            actions = ActionChains(self.driver)
-            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-            actions.move_to_element(element).perform()
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        max_wait_time = timeout  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with xpath '{xpath}' is still obscured.")
-            return None
-
-    def wait_for_element_by_xpath(self, xpath):
-        # Get the element you want to interact with
-        element = self.driver.find_element(By.XPATH, xpath)
-        if element is None:
-            return None
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with xpath '{xpath}' is still obscured.")
-            return None
-
-    def is_displayed_by_xpath(self, xpath):
-        try:
-            is_displayed = self.driver.find_element(By.XPATH, xpath).is_displayed()
-            if is_displayed:
-                return True
-            else:
-                return False
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check element displayed by xpath failed. Exception: {e}")
-
-# ================= css =================
-    def wait_for_element_visibility_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector))
-            )
-            # log.info(f"Element with CSS selector '{css_selector}' visible.")
-            return element  # The element is visible
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' was NOT visible.")
-            return None
-
-    def wait_for_element_enabled_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
-            )
-            # log.info(f"Element with CSS selector '{css_selector}' enabled.")
-            return element  # The element is enabled
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' was NOT enabled.")
-            return None
-
-    def wait_until_element_disappears_by_css(self, css_selector, max_wait_time=WaitConfig.timeout_explicit):
-        try:
-            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
-                EC.invisibility_of_element_located((By.CSS_SELECTOR, css_selector))
-            )
-            if is_invisible:
-                # log.info(f"Element with CSS selector '{css_selector}' disappeared.")
-                return True  # Return True if the element disappears
-        except TimeoutException:
-            log.warn(f"Element with CSS selector '{css_selector}' did NOT disappear.")
-            return False
-
-    def wait_for_element_unobscured_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
-        # Get the element you want to interact with
-        element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-        if element is None:
-            return None
-        if BrowserConfig.name in ['firefox', 'ff']:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        else:
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-            # location = element.location_once_scrolled_into_view
-            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
-            actions = ActionChains(self.driver)
-            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-            actions.move_to_element(element).perform()
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        max_wait_time = timeout  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with CSS selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with CSS selector '{css_selector}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element # return True
-        else:
-            log.error(f"Element with CSS selector '{css_selector}' is still obscured.")
-            return None # return False
-
-    def wait_for_element_by_css(self, css_selector):
-        # Get the element you want to interact with
-        element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
-        if element is None:
-            return None
-        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
-        # While loop to wait until the element is no longer obscured
-        is_obscured = True
-        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
-        elapsed_time = 0
-        interval = 1  # Time to wait between checks (in seconds)
-        while is_obscured and elapsed_time < max_wait_time:
-            # Execute the JavaScript to check if the element is obscured
-            is_obscured = self.driver.execute_script("""
-                var element = arguments[0];
-                var rect = element.getBoundingClientRect();
-                var x = rect.left + (rect.width / 2);
-                var y = rect.top + (rect.height / 2);
-                return document.elementFromPoint(x, y) !== element;
-            """, element)
-            if is_obscured:
-                # log.warn(f"Element with css_selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
-                self.wait(interval)  # Wait for the specified interval before checking again
-                elapsed_time += interval
-            else:
-                # log.info(f"Element with css_selector '{css_selector}' is no longer obscured.")
-                break
-        if not is_obscured:
-            # log.info("Element is unobstructed.")
-            return element
-        else:
-            log.error(f"Element with css_selector '{css_selector}' is still obscured.")
-            return None
-
-    def is_displayed_by_css(self, css_selector):
-        try:
-            is_displayed = self.driver.find_element(By.CSS_SELECTOR, css_selector).is_displayed()
-            if is_displayed:
-                return True
-            else:
-                return False
-        except (NoSuchElementException, ElementNotInteractableException) as e:
-            log.error(f"Check element displayed by css failed. Exception: {e}")
-
 # ================= other =================
     def wait_loading(self, max_wait_time=60):
         loading_xpath = "//div[contains(@class, 'malibu-desktop-uFormLoading')]"
@@ -914,111 +2018,13 @@ class TestCase(unittest.TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"'{label_name}' NOT available. Exception: {e}")
 
-    def key_escape(self):
-        actions = ActionChains(self.driver)
-        actions.send_keys(Keys.ESCAPE).perform()
+    # def key_escape(self):
+    #     actions = ActionChains(self.driver)
+    #     actions.send_keys(Keys.ESCAPE).perform()
 
-    def key_tab(self):
-        actions = ActionChains(self.driver)
-        actions.send_keys(Keys.TAB).perform()
-
-    def common(self, xpath=None, css=None, method=None, action=None, value=None, clear_text=None, need_tab=None, need_enter=None, info=None, error=None, warn=None, timeout=WaitConfig.timeout_explicit):
-        """
-        Performs a common interaction with a web element based on provided locators and actions.
-
-        Args:
-            xpath (str, optional): XPath locator for the element.
-            css (str, optional): CSS selector for the element.
-            method (str, optional): Waiting method for the element.
-                Possible values: 'unobscured', 'visibility', 'enabled'.
-            action (str, optional): Action to perform on the element.
-                Possible values: 'send_keys', 'click', 'get_text', 'get_value', 'send_values'.
-            value (str, optional): Value to send to the element when action is 'send_keys'.
-            clear_text (str, optional): Flag to clear the text of the element before sending keys.
-                Possible value: 'Y'.
-            need_tab (str, optional): Flag to send a TAB key press after sending keys.
-                Possible value: 'Y'.
-            need_enter (str, optional): Flag to send an ENTER key press after sending keys.
-                Possible value: 'Y'.
-            info (str, optional): Information message to log upon successful interaction.
-            error (str, optional): Error message to log if the element is not found.
-            warn (str, optional): Warning message to log if the element is not found.
-            timeout (int, optional): Explicit wait timeout in seconds.
-                Defaults to WaitConfig.timeout_explicit.
-
-        Returns:
-            Returns the text or value of the element if action is 'get_text' or 'get_value', otherwise returns None.
-        """
-        def get_element():
-            if xpath:
-                if method == 'unobscured':
-                    return self.wait_for_element_unobscured_by_xpath(xpath, timeout)
-                if method == 'visibility':
-                    return self.wait_for_element_visibility_by_xpath(xpath, timeout)
-                if method == 'enabled':
-                    return self.wait_for_element_enabled_by_xpath(xpath, timeout)
-                if method == 'find':
-                    return self.wait_for_element_by_xpath(xpath)
-            elif css:
-                if method == 'unobscured':
-                    return self.wait_for_element_unobscured_by_css(css, timeout)
-                if method == 'visibility':
-                    return self.wait_for_element_visibility_by_css(css, timeout)
-                if method == 'enabled':
-                    return self.wait_for_element_enabled_by_css(css, timeout)
-                if method == 'find':
-                    return self.wait_for_element_by_css(css)
-            return None
-        element = get_element()
-        if element is not None:
-            if action == 'send_keys':
-                if clear_text == 'Y':
-                    self.clear_text(element)
-                    if element.text != '':
-                        self.clear_text(element)
-                element.send_keys(value)
-                if need_tab == 'Y':
-                    element.send_keys(Keys.TAB)
-                if need_enter == 'Y':
-                    element.send_keys(Keys.ENTER)
-                if info:
-                    log.info(info)
-            elif action == 'click':
-                element.click()
-                if info:
-                    log.info(info)
-            elif action == 'get_text':
-                # if info:
-                #     log.info(info)
-                return element.text
-            elif action == 'get_value':
-                # if info:
-                #     log.info(info)
-                return element.get_attribute('value')
-            if action == 'send_values':
-                # clear data
-                self.driver.execute_script("arguments[0].value = '';", element)
-                self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
-                self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
-                log.debug('Clear data.')
-                actions = ActionChains(self.driver)
-                actions.click(element).send_keys(value).perform()
-                log.debug(f"element.get_attribute('value') is: {element.get_attribute('value')}")
-                if element.get_attribute('value') != value:
-                    self.driver.execute_script("arguments[0].value = '';", element)
-                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
-                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
-                    log.debug("Clear data again in get_attribute('value').")
-                    actions = ActionChains(self.driver)
-                    actions.click(element).send_keys(value).perform()
-                if info:
-                    log.info(info)
-        else:
-            if error:
-                log.error(error)
-            if warn:
-                log.warn(warn)
-            return None
+    # def key_tab(self):
+    #     actions = ActionChains(self.driver)
+    #     actions.send_keys(Keys.TAB).perform()
 
     def choose_item(self, title, value, fieldset_xpath):
         title_xpath = f"{fieldset_xpath}preceding-sibling::input"
@@ -1126,31 +2132,31 @@ class TestCase(unittest.TestCase):
             icon_xpath = f"//div[@class='malibu-desktop-uInput-icon']/i[@class='material-icons-outlined' and text()='{icon}']"
         self.common(xpath=icon_xpath, method='visibility', action='click', info="Clicked icon.", error=f"Click icon '{icon}' failed.")
 
-    def scroll_down(self, pixels=1000):
-        self.driver.execute_script(f"window.scrollBy(0, {pixels});")
+    # def scroll_down(self, pixels=1000):
+    #     self.driver.execute_script(f"window.scrollBy(0, {pixels});")
 
-    def scroll_up(self, pixels=1000):
-        self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
+    # def scroll_up(self, pixels=1000):
+    #     self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
 
-    def switch_to_core_banking(self):
-        for handle in self.driver.window_handles: # Iterate over all open windows
-            self.driver.switch_to.window(handle)
-            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-                return  # Stop once we've switched to 'Core Banking'
-        # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
-        raise Exception("No window with title 'Core Banking' found")
+    # def switch_to_core_banking(self):
+    #     for handle in self.driver.window_handles: # Iterate over all open windows
+    #         self.driver.switch_to.window(handle)
+    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+    #             return  # Stop once we've switched to 'Core Banking'
+    #     # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
+    #     raise Exception("No window with title 'Core Banking' found")
 
-    def close_voucher(self):
-        core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
-        # Iterate over all open windows
-        for handle in self.driver.window_handles:
-            self.driver.switch_to.window(handle)
-            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-                core_banking_window = handle  # Save this handle to avoid closing it
-            else:
-                self.driver.close() # Close all windows that are not 'Core Banking'
-        if core_banking_window: # Switch back to 'Core Banking' window if it's found
-            self.driver.switch_to.window(core_banking_window)
+    # def close_voucher(self):
+    #     core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
+    #     # Iterate over all open windows
+    #     for handle in self.driver.window_handles:
+    #         self.driver.switch_to.window(handle)
+    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+    #             core_banking_window = handle  # Save this handle to avoid closing it
+    #         else:
+    #             self.driver.close() # Close all windows that are not 'Core Banking'
+    #     if core_banking_window: # Switch back to 'Core Banking' window if it's found
+    #         self.driver.switch_to.window(core_banking_window)
 
     def click_clear_search(self):
         clear_search_xpath = "//div[@class='malibu-desktop-uHeaderMoreOption-search-clear']/i"
@@ -1247,8 +2253,9 @@ class TestCase(unittest.TestCase):
             self.common(xpath=input_search_xpath, method='unobscured', action='send_keys', value=value)
         # 3. click choose value
         action_xpath = f"{table_xpath}/tbody/tr/td[@data-title='{column_name}']/div[text()='{value}']/parent::td/preceding-sibling::td/div/i"
-        self.common(xpath=action_xpath, method='unobscured', action='click', error='Lookup data failed.')
+        self.common(xpath=action_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value} failed.')
         self.wait_loading()
+        self.close_popup()
 
     def lookup_data_text(self, title, value_search_code=None, value_search_name=None, value_code=None, value_name=None, use_search="Y", border_name=None):
         # 1. click icon lookup
@@ -1277,13 +2284,14 @@ class TestCase(unittest.TestCase):
         # value_code at column 'Code'
         if value_code:
             value_code_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Code']/div[text()='{value_code}']/parent::td/preceding-sibling::td/div/i"
-            self.common(xpath=value_code_xpath, method='unobscured', action='click', error='Lookup data failed.')
+            self.common(xpath=value_code_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_code} failed.')
             self.wait_loading()
         # value_name at column 'Name'
         if value_name:
             value_name_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Name']/div[text()='{value_name}']/parent::td/preceding-sibling::td/div/i"
-            self.common(xpath=value_name_xpath, method='unobscured', action='click', error='Lookup data failed.')
+            self.common(xpath=value_name_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_name} failed.')
             self.wait_loading()
+        self.close_popup()
 
     def lookup_data_value(self, title, value_search_code=None, value_search_name=None, value_code=None, value_name=None, use_search="Y", border_name=None):
         # 1. click icon lookup
@@ -1312,13 +2320,14 @@ class TestCase(unittest.TestCase):
         # value_code at column 'Code'
         if value_code:
             value_code_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Code']/div[text()='{value_code}']/parent::td/preceding-sibling::td/div/i"
-            self.common(xpath=value_code_xpath, method='unobscured', action='click', error='Lookup data failed.')
+            self.common(xpath=value_code_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_code} failed.')
             self.wait_loading()
         # value_name at column 'Name'
         if value_name:
             value_name_xpath = f"{table_xpath}/tbody/tr/td[@data-title='Name']/div[text()='{value_name}']/parent::td/preceding-sibling::td/div/i"
-            self.common(xpath=value_name_xpath, method='unobscured', action='click', error='Lookup data failed.')
+            self.common(xpath=value_name_xpath, method='unobscured', action='click', error=f'Lookup data failed. Click {value_name} failed.')
             self.wait_loading()
+        self.close_popup()
 
     def write_search_table_column(self, text, into, index=0, css='malibu-desktop-uTable-info', press_right=0):
         # screen_type = screen_size()
@@ -1357,7 +2366,7 @@ class TestCase(unittest.TestCase):
         if timeout is None:
             timeout=WaitConfig.timeout_explicit
         message_xpath = "//div[@class='malibu-desktop-uNotification-title']"
-        return self.common(xpath=message_xpath, method='visibility', action='get_text', info=f"Get text from notification success.", error=f"Get text from notification failed.", timeout=timeout)
+        return self.common(xpath=message_xpath, method='visibility', action='get_text', info=f"Get text from notification success.", warn=f"Get text from notification failed.", timeout=timeout)
 
     def click_close_notification(self):
         close_xpath = "//div[@class='malibu-desktop-uNotification-close']/i"
@@ -1475,7 +2484,7 @@ class TestCase(unittest.TestCase):
 
     def get_text_form_title_header_popup(self):
         title_xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header-title']"
-        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title header of popup failed.")
+        return self.common(xpath=title_xpath, method='visibility', action='get_text', warn=f"Get text title header of popup failed.")
 
     def assert_form_title_header_popup(self, expected_title=None):
         if expected_title is None: 
@@ -1485,7 +2494,7 @@ class TestCase(unittest.TestCase):
 
     def get_text_form_title_popup(self, timeout=5):
         title_xpath = "//div[@class='malibu-desktop-uModal-content-content']/div/div[contains(@class,'malibu-desktop-uForm')]/div[@class='malibu-desktop-uForm-title']"
-        return self.common(xpath=title_xpath, method='visibility', action='get_text', error=f"Get text title popup failed.", timeout=timeout)
+        return self.common(xpath=title_xpath, method='visibility', action='get_text', warn=f"Get text title popup failed.", timeout=timeout)
 
     def assert_form_title_popup(self, expected_title=None):
         if expected_title is None: 
@@ -1804,10 +2813,10 @@ class TestCase(unittest.TestCase):
         xpath = "//div[@class='malibu-desktop-uFormNotify-span']"
         element = self.wait_for_element_unobscured_by_xpath(xpath, timeout=3)
         if element is not None:
-            self.get_list_error_message()
+            self.get_error_message_content()
         return element and element.text == expected
 
-    def get_list_error_message(self):
+    def get_error_message_content(self):
         xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
         try:
             elements = WebDriverWait(self.driver, 10).until(
@@ -1817,8 +2826,24 @@ class TestCase(unittest.TestCase):
             for element in elements:
                 actual = element.get_attribute('innerText').split('\n')[0].strip()
                 list_actual.append(actual)
-            print(f"List error messages: '{list_actual}'")
-            log.warn(f"get_list_error_message: '{list_actual}'")
+            print(f"Error messages content: '{list_actual}'")
+            log.warn(f"get_error_message_content: '{list_actual}'")
+            return list_actual
+        except (NoSuchElementException, ElementNotInteractableException, TimeoutException):
+            return None
+
+    def get_list_error_message(self):
+        xpath = "//div[@id='content']/div/div[@class='malibu-desktop-uForm col-12']/div[contains(@class,'malibu-desktop-uForm-content')]/div[@class='malibu-desktop-uFormNotify']/div/ul[@class='malibu-desktop-uFormNotify-ul']/div/div[@class='malibu-desktop-uFormNotify-li']/li"
+        try:
+            elements = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.XPATH, xpath))
+            )
+            # list_actual = []
+            # for element in elements:
+            #     actual = element.get_attribute('innerText').split('\n')[0].strip()
+            #     list_actual.append(actual)
+            # print(f"List error messages: '{list_actual}'")
+            # log.warn(f"get_list_error_message: '{list_actual}'")
             return elements
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check get_list_error_message failed. Exception: '{e}'")
@@ -3779,7 +4804,715 @@ class TestCase(unittest.TestCase):
         return self.write_text_textarea_multi_line(title, value, clear_text=clear_text)
 
 # ================= handle clear_text field =================
-    def clear_text(self, element_input):
+    # def clear_text(self, element_input):
+    #     """Clear text for element 'input'"""
+    #     self.key_escape()
+    #     self.switch_to_core_banking()
+    #     self.driver.execute_script("arguments[0].focus();", element_input)
+    #     self.wait(0.1)
+    #     try:
+    #         actions = ActionChains(self.driver)
+    #         actions.click(element_input).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
+    #         # log.warn(f"Cleared value.")
+    #     except (NoSuchElementException, ElementNotInteractableException) as e:
+    #         log.error(f"Clear value failed. Exception: {e}")
+
+# ================= handle check attribute =================
+    # def check_disable(self, element):
+    #     """Check attribute disable for 'element'"""
+    #     try:
+    #         css_class = element.get_attribute('class')
+    #         if 'disable' in css_class:
+    #             # log.info(f"Attribute 'disable' in class '{css_class}'.")
+    #             return True
+    #         else:
+    #             # log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
+    #             return False
+    #     except:
+    #         log.error(f"Check attribute 'disable' for element '{element}' failed.")
+
+    # def check_disabled_field(self, element):
+    #     """Check attribute disabled for 'element' is field"""
+    #     try:
+    #         css_class = element.get_attribute('class')
+    #         if 'disabled' in css_class:
+    #             # log.info(f"Attribute 'disabled' in class '{css_class}'.")
+    #             return True
+    #         else:
+    #             # log.warn(f"Attribute 'disabled' NOT in class '{css_class}'.")
+    #             return False
+    #     except:
+    #         log.error(f"Check attribute 'disabled' for element '{element}' failed.")
+
+    def click_input_non_tab(self, title):
+        """Click of 'input' in screen non tab"""
+        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
+        self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked at '{title}' in screen NON tab.", error=f"Click at '{title}' in screen NON tab failed.")
+
+
+==================== END OF FILE: webui_test\case.py ====================
+
+
+==================== START OF FILE: webui_test\form_action.py ====================
+from webui_test.case import *
+from webui_test.actions.cash import CashActions
+from webui_test.actions.credit import CreditActions
+from webui_test.actions.customer import CustomerActions
+from webui_test.actions.deposit import DepositActions
+from webui_test.actions.overdraft import OverdraftActions
+from webui_test.actions.stock import StockActions
+from webui_test.actions.standing_instructions import StandingInstructionsActions
+from webui_test.actions.sweeping import SweepingActions
+from webui_test.actions.trade import TradeActions
+from webui_test.actions.payment import PaymentActions
+from webui_test.actions.mortgage import MortgageActions
+from webui_test.actions.accounting import AccountingActions
+from webui_test.actions.fixed_asset import FixedAssetActions
+from webui_test.actions.treasury import TreasuryActions
+from webui_test.actions.admin import AdminActions
+from webui_test.actions.cardzone import CardzoneActions
+from webui_test.actions.system_code_table import SystemCodeTableActions
+
+class FormAction(
+        CashActions,
+        DepositActions,
+        OverdraftActions,
+        StockActions,
+        StandingInstructionsActions,
+        SweepingActions,
+        CustomerActions,
+        CreditActions,
+        TradeActions,
+        PaymentActions,
+        MortgageActions,
+        AccountingActions,
+        FixedAssetActions,
+        TreasuryActions,
+        AdminActions,
+        CardzoneActions,
+        SystemCodeTableActions,
+        TestCase
+    ):
+    pass
+==================== END OF FILE: webui_test\form_action.py ====================
+
+
+==================== START OF FILE: webui_test\jwebui_action.py ====================
+# This file use for server DOCKER
+import atexit
+from webui_test.logging import log 
+from time import sleep
+import os
+import sys
+import tempfile
+import shutil
+
+from webui_test.running.config import BrowserConfig, WaitConfig
+from selenium import webdriver
+# from selenium.webdriver import Chrome, ChromeOptions, Firefox, FirefoxOptions, Edge, EdgeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.common.exceptions import UnexpectedAlertPresentException, ElementNotVisibleException, MoveTargetOutOfBoundsException, WebDriverException, StaleElementReferenceException, NoAlertPresentException, NoSuchWindowException
+
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Add import RemoteWebDriver
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+
+# _TEST_BROWSER=None
+# _TEMP_DATA_DIR=None
+
+# _TEST_BROWSER: RemoteWebDriver = None
+_TEST_BROWSER = None
+_TEMP_DATA_DIR = None
+_SELENIUM_HUB_URL = os.getenv("SELENIUM_HUB_URL", "http://localhost:4444")
+
+def start_browser():
+    global _TEST_BROWSER, _TEMP_DATA_DIR
+    if BrowserConfig.on_server == 'Y':
+        log.info(f"Starting browser: '{BrowserConfig.name}' on Selenium Grid.")
+        log.debug(f"HEADLESS MODE: '{BrowserConfig.headless}'")
+        log.debug(f"BROWSERCONFIG.APP_NAME: '{BrowserConfig.app_name}'")
+    else:
+        log.info(f"Starting browser: '{BrowserConfig.name}' on Local.")
+        log.debug(f"HEADLESS MODE: '{BrowserConfig.headless}'")
+        log.debug(f"BROWSERCONFIG.APP_NAME: '{BrowserConfig.app_name}'")
+    if _TEST_BROWSER is None:
+        # Chrome
+        if BrowserConfig.name is None or BrowserConfig.name in ["chrome", "google chrome", "gc"]:
+            chrome_options = ChromeOptions() 
+            # chrome_options.add_argument("--start-maximized")
+            chrome_options.add_argument("--ignore-ssl-errors=yes")
+            chrome_options.add_argument("--ignore-certificate-errors")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-extensions")
+            chrome_options.add_argument("--incognito") 
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--remote-debugging-port=9222")
+            chrome_options.add_argument("--disable-infobars")
+            chrome_options.add_argument("--disable-notifications")
+            chrome_options.add_argument("--disable-clipboard-access")
+            _TEMP_DATA_DIR = tempfile.mkdtemp(prefix="selenium_chrome_profile_")
+            chrome_options.add_argument(f"--user-data-dir={_TEMP_DATA_DIR}")
+            chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            chrome_options.accept_insecure_certs=True
+            if BrowserConfig.headless: 
+                chrome_options.add_argument("--headless=new")
+                # chrome_options.add_argument("--window-size=1920,1080")
+            log.info(f"CHROME TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=chrome_options)
+            else:
+                _TEST_BROWSER = webdriver.Chrome(options=chrome_options)
+
+        # Firefox
+        elif BrowserConfig.name in ['firefox', 'ff']:
+            firefox_options = FirefoxOptions()
+            # firefox_options.add_argument("--start-maximized")
+            _TEMP_DATA_DIR = tempfile.mkdtemp(prefix="selenium_firefox_profile_")
+            firefox_options.add_argument(f"--user-data-dir={_TEMP_DATA_DIR}")
+            if BrowserConfig.headless: 
+                firefox_options.add_argument("-headless")
+                # firefox_options.add_argument("--width=1920")
+                # firefox_options.add_argument("--height=1080")
+            log.info(f"FIREFOX TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=firefox_options)
+            else:
+                _TEST_BROWSER = webdriver.Firefox(options=firefox_options)
+
+        # Edge
+        elif BrowserConfig.name in ['edge', 'ed']:
+            edge_options = EdgeOptions()
+            # edge_options.add_argument("--start-maximized")
+            edge_options.add_argument("--ignore-ssl-errors=yes")
+            edge_options.add_argument("--ignore-certificate-errors")
+            edge_options.add_argument("--no-sandbox")
+            edge_options.add_argument("--disable-extensions")
+            edge_options.add_argument("--incognito") 
+            edge_options.add_argument("--disable-dev-shm-usage")
+            edge_options.add_argument("--disable-gpu")
+            edge_options.add_argument("--disable-infobars")  # Optional
+            edge_options.add_argument("--disable-notifications")
+            edge_options.add_argument("--disable-clipboard-access")
+            _TEMP_DATA_DIR = tempfile.mkdtemp(prefix="selenium_edge_profile_")
+            edge_options.add_argument(f"--user-data-dir={_TEMP_DATA_DIR}")
+            edge_prefs = {
+                "profile.default_content_setting_values.clipboard": 2
+            }
+            edge_options.add_experimental_option("prefs", edge_prefs)
+            edge_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            edge_options.accept_insecure_certs=True
+            if BrowserConfig.headless:
+                edge_options.add_argument("--headless=new")
+                # edge_options.add_argument("--window-size=1920,1080")
+            log.info(f"EDGE TEMP_DATA_DIR={_TEMP_DATA_DIR}")
+            if BrowserConfig.on_server == 'Y':
+                _TEST_BROWSER = webdriver.Remote(command_executor=_SELENIUM_HUB_URL, options=edge_options)
+            else:
+                _TEST_BROWSER = webdriver.Edge(options=edge_options)
+        else:
+            if _TEMP_DATA_DIR and os.path.exists(_TEMP_DATA_DIR):
+                shutil.rmtree(_TEMP_DATA_DIR)
+            raise NameError("Not found '{}' browser".format(BrowserConfig.name))
+
+    atexit.register(kill_browser)
+    log.warn(f"Start driver: '{_TEST_BROWSER}'")
+    _TEST_BROWSER.implicitly_wait(WaitConfig.timeout_implicitly)
+    return _TEST_BROWSER
+
+def kill_browser():
+    global _TEST_BROWSER, _TEMP_DATA_DIR
+    log.warn(f"Killing driver: '{_TEST_BROWSER}'")
+    if _TEST_BROWSER is not None:
+        _TEST_BROWSER.quit()
+        _TEST_BROWSER = None
+    if _TEMP_DATA_DIR and os.path.exists(_TEMP_DATA_DIR):
+        try:
+            shutil.rmtree(_TEMP_DATA_DIR)
+            log.info(f"Cleaned up temporary user data directory: {_TEMP_DATA_DIR}")
+        except Exception as e:
+            log.error(f"Error cleaning up temporary directory {_TEMP_DATA_DIR}: {e}", file=sys.stderr)
+
+def get_driver():
+    global _TEST_BROWSER
+    if _TEST_BROWSER is not None:
+        return _TEST_BROWSER
+    else:
+        return
+
+def restart_driver():
+    global _TEST_BROWSER
+    log.warn("Restarting driver...")
+    kill_browser()
+    wait()
+    _TEST_BROWSER = start_browser()
+    log.warn("Driver restarted.")
+    return _TEST_BROWSER
+
+def wait(seconds=1):
+    sleep(seconds)
+==================== END OF FILE: webui_test\jwebui_action.py ====================
+
+
+==================== START OF FILE: webui_test\jweb_excel.py ====================
+from pandas import read_excel
+from pandas import ExcelWriter
+# from openpyxl import load_workbook
+import os 
+
+_URL_FILE = os.path.join(os.path.dirname(__file__), '../tests/data_excel/data_dpt_account.xlsx')
+
+def get_value_from_excel(sheet_name, column, row, url_file_name=None):
+    if url_file_name is None:
+        url_file_name = _URL_FILE
+    df = read_excel(url_file_name, sheet_name=sheet_name, dtype=str)
+    return df[column][row-1]
+
+def read_file_excel(sheet_name, url_file_name=None):
+    if url_file_name is None:
+        url_file_name = _URL_FILE
+    return read_excel(url_file_name, sheet_name=sheet_name, dtype=str)
+
+def get_value_cell_excel(df, column, row):
+    return df[column][row-1]
+
+def write_value_to_excel(new_value, sheet_name, column, row, url_file_name=None):
+    if url_file_name is None:
+        url_file_name=_URL_FILE
+    # Load the sheet into a DataFrame
+    df = read_excel(url_file_name, sheet_name=sheet_name, dtype=str)
+    # Update the value at the specified row and column
+    df.at[row-1, column] = new_value
+    # Write the updated DataFrame back to the same Excel file
+    with ExcelWriter(url_file_name, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
+==================== END OF FILE: webui_test\jweb_excel.py ====================
+
+
+==================== START OF FILE: webui_test\wrapper.py ====================
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException
+from webui_test.logging import log
+from webui_test.running.config import BrowserConfig, WaitConfig
+from time import sleep
+
+class DriverWrapper:
+    def __init__(self, *args, driver: WebDriver = None, **kwargs):
+        self.driver: WebDriver = driver
+        super().__init__(*args, **kwargs)
+
+    def go_to(self, url):
+        log.debug("1. Go to 'go_to'")
+        BrowserConfig.url_env = url
+        if self.driver:
+            log.debug('2. vao if self.driver')
+            if BrowserConfig.headless:
+                log.debug(f'Headless: [{BrowserConfig.headless}]')
+                self.driver.set_window_size(1920, 1080)
+            else:
+                log.debug(f'NO Headless: [{BrowserConfig.headless}]')
+                # self.driver.maximize_window()
+                self.driver.set_window_size(1920, 1080)
+            size = self.driver.get_window_size()
+            log.debug(f'3. window size: {size}')
+            self.driver.get(url)
+            log.debug(f"4. Go to 'go_to' method, url: {url}")
+        else:
+            log.error("self.driver is NULL.")
+
+    def screen_size(self):
+        width = self.driver.get_window_size()['width']
+        if width > 996:
+            return 'desktop'
+        elif width > 768:
+            return 'desktop_small'
+        elif width > 575:
+            return 'tablet'
+        elif width > 350:
+            return 'mobile'
+        else:
+            return 'mobile_small'
+
+    def wait(self, seconds=1):
+        sleep(seconds)
+
+    def take_screenshot(self, path):
+        try:
+            result = self.driver.get_screenshot_as_file(path)
+            if result:
+                log.info(f"Take screenshot '{path}'.")
+            else:
+                log.error('Take screenshot failed.')
+        except Exception as e:
+            log.error(f"Error taking screenshot: {e}")
+
+# ================================= Using Selenium 4.x =================================
+# -------------------------- Wait Methods --------------------------
+# ================= xpath =================
+    def wait_for_element_visibility_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.visibility_of_element_located((By.XPATH, xpath))
+            )
+            # log.info(f"Element with xpath '{xpath}' visible.")
+            return element  # The element is visible
+        except TimeoutException:
+            log.warn(f"The element with xpath '{xpath}' was NOT visible.")
+            return None
+
+    def wait_for_element_enabled_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.element_to_be_clickable((By.XPATH, xpath))
+            )
+            # log.info(f"Element with xpath '{xpath}' enabled.")
+            return element  # The element is enabled
+        except TimeoutException:
+            log.warn(f"The element with xpath '{xpath}' was NOT enabled.")
+            return None
+
+    def wait_until_element_disappears_by_xpath(self, xpath, max_wait_time=WaitConfig.timeout_explicit):
+        try:
+            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
+                EC.invisibility_of_element_located((By.XPATH, xpath))
+            )
+            if is_invisible:
+                # log.info(f"Element with xpath '{xpath}' disappeared.")
+                return True  # Return True if the element disappears
+        except TimeoutException:
+            log.warn(f"Element with xpath '{xpath}' did NOT disappear.")
+            return False
+
+    def wait_for_element_unobscured_by_xpath(self, xpath, timeout=WaitConfig.timeout_explicit):
+        # Get the element you want to interact with
+        element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
+        if element is None:
+            return None
+        if BrowserConfig.name in ['firefox', 'ff']:
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        else:
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            # location = element.location_once_scrolled_into_view
+            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            actions = ActionChains(self.driver)
+            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
+            actions.move_to_element(element).perform()
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        max_wait_time = timeout  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
+            # is_obscured = self.driver.execute_script("""
+            #     var element = arguments[0];
+            #     var rect = element.getBoundingClientRect();
+            #     var x = rect.left + (rect.width / 2);
+            #     var y = rect.top + (rect.height / 2);
+            #     return document.elementFromPoint(x, y) !== element;
+            # """, element)
+            try:
+                is_obscured = self.driver.execute_script("""
+                    var element = arguments[0];
+                    var rect = element.getBoundingClientRect();
+                    var x = rect.left + (rect.width / 2);
+                    var y = rect.top + (rect.height / 2);
+                    return document.elementFromPoint(x, y) !== element;
+                """, element)
+            except StaleElementReferenceException:
+                element = self.wait_for_element_visibility_by_xpath(xpath, timeout=timeout)
+                continue
+
+            if is_obscured:
+                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
+                break
+        if not is_obscured:
+            # log.info("Element is unobstructed.")
+            return element
+        else:
+            log.error(f"Element with xpath '{xpath}' is still obscured.")
+            return None
+
+    def wait_for_element_by_xpath(self, xpath):
+        # Get the element you want to interact with
+        # element = self.driver.find_element(By.XPATH, xpath)
+        try:
+            element = self.driver.find_element(By.XPATH, xpath)
+        except NoSuchElementException:
+            return None
+            
+        if element is None:
+            return None
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            # is_obscured = self.driver.execute_script("""
+            #     var element = arguments[0];
+            #     var rect = element.getBoundingClientRect();
+            #     var x = rect.left + (rect.width / 2);
+            #     var y = rect.top + (rect.height / 2);
+            #     return document.elementFromPoint(x, y) !== element;
+            # """, element)
+            try:
+                is_obscured = self.driver.execute_script("""
+                    var element = arguments[0];
+                    var rect = element.getBoundingClientRect();
+                    var x = rect.left + (rect.width / 2);
+                    var y = rect.top + (rect.height / 2);
+                    return document.elementFromPoint(x, y) !== element;
+                """, element)
+            except StaleElementReferenceException:
+                 # If stale, try to find again, or just break/continue
+                try:
+                    element = self.driver.find_element(By.XPATH, xpath)
+                    continue
+                except:
+                    break
+
+            if is_obscured:
+                # log.warn(f"Element with xpath {xpath} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                # log.info(f"Element with xpath '{xpath}' is no longer obscured.")
+                break
+        if not is_obscured:
+            # log.info("Element is unobstructed.")
+            return element
+        else:
+            log.error(f"Element with xpath '{xpath}' is still obscured.")
+            return None
+
+    def is_displayed_by_xpath(self, xpath):
+        try:
+            is_displayed = self.driver.find_element(By.XPATH, xpath).is_displayed()
+            if is_displayed:
+                return True
+            else:
+                return False
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"Check element displayed by xpath failed. Exception: {e}")
+            return False
+
+# ================= css =================
+    def wait_for_element_visibility_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector))
+            )
+            # log.info(f"Element with CSS selector '{css_selector}' visible.")
+            return element  # The element is visible
+        except TimeoutException:
+            log.warn(f"Element with CSS selector '{css_selector}' was NOT visible.")
+            return None
+
+    def wait_for_element_enabled_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
+            )
+            # log.info(f"Element with CSS selector '{css_selector}' enabled.")
+            return element  # The element is enabled
+        except TimeoutException:
+            log.warn(f"Element with CSS selector '{css_selector}' was NOT enabled.")
+            return None
+
+    def wait_until_element_disappears_by_css(self, css_selector, max_wait_time=WaitConfig.timeout_explicit):
+        try:
+            is_invisible = WebDriverWait(self.driver, max_wait_time).until(
+                EC.invisibility_of_element_located((By.CSS_SELECTOR, css_selector))
+            )
+            if is_invisible:
+                # log.info(f"Element with CSS selector '{css_selector}' disappeared.")
+                return True  # Return True if the element disappears
+        except TimeoutException:
+            log.warn(f"Element with CSS selector '{css_selector}' did NOT disappear.")
+            return False
+
+    def wait_for_element_unobscured_by_css(self, css_selector, timeout=WaitConfig.timeout_explicit):
+        # Get the element you want to interact with
+        element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
+        if element is None:
+            return None
+        if BrowserConfig.name in ['firefox', 'ff']:
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        else:
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            # location = element.location_once_scrolled_into_view
+            # self.driver.execute_script(f"window.scrollTo({location['x']}, {location['y']});")
+            actions = ActionChains(self.driver)
+            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
+            actions.move_to_element(element).perform()
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        # max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        max_wait_time = timeout  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
+            # is_obscured = self.driver.execute_script("""
+            #     var element = arguments[0];
+            #     var rect = element.getBoundingClientRect();
+            #     var x = rect.left + (rect.width / 2);
+            #     var y = rect.top + (rect.height / 2);
+            #     return document.elementFromPoint(x, y) !== element;
+            # """, element)
+            try:
+                is_obscured = self.driver.execute_script("""
+                    var element = arguments[0];
+                    var rect = element.getBoundingClientRect();
+                    var x = rect.left + (rect.width / 2);
+                    var y = rect.top + (rect.height / 2);
+                    return document.elementFromPoint(x, y) !== element;
+                """, element)
+            except StaleElementReferenceException:
+                element = self.wait_for_element_visibility_by_css(css_selector, timeout=timeout)
+                continue
+
+            if is_obscured:
+                # log.warn(f"Element with CSS selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                # log.info(f"Element with CSS selector '{css_selector}' is no longer obscured.")
+                break
+        if not is_obscured:
+            # log.info("Element is unobstructed.")
+            return element # return True
+        else:
+            log.error(f"Element with CSS selector '{css_selector}' is still obscured.")
+            return None # return False
+
+    def wait_for_element_by_css(self, css_selector):
+        # Get the element you want to interact with
+        try:
+            element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
+        except NoSuchElementException:
+            return None
+            
+        if element is None:
+            return None
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", element)
+        # While loop to wait until the element is no longer obscured
+        is_obscured = True
+        max_wait_time = WaitConfig.timeout_explicit  # Max time to wait (in seconds)
+        elapsed_time = 0
+        interval = 1  # Time to wait between checks (in seconds)
+        while is_obscured and elapsed_time < max_wait_time:
+            # Execute the JavaScript to check if the element is obscured
+            try:
+                is_obscured = self.driver.execute_script("""
+                    var element = arguments[0];
+                    var rect = element.getBoundingClientRect();
+                    var x = rect.left + (rect.width / 2);
+                    var y = rect.top + (rect.height / 2);
+                    return document.elementFromPoint(x, y) !== element;
+                """, element)
+            except StaleElementReferenceException:
+                try:
+                    element = self.driver.find_element(By.CSS_SELECTOR, css_selector)
+                    continue
+                except:
+                    break
+
+            if is_obscured:
+                # log.warn(f"Element with css_selector {css_selector} is still obscured after {elapsed_time} seconds, waiting...")
+                self.wait(interval)  # Wait for the specified interval before checking again
+                elapsed_time += interval
+            else:
+                # log.info(f"Element with css_selector '{css_selector}' is no longer obscured.")
+                break
+        if not is_obscured:
+            # log.info("Element is unobstructed.")
+            return element
+        else:
+            log.error(f"Element with css_selector '{css_selector}' is still obscured.")
+            return None
+
+    def is_displayed_by_css(self, css_selector):
+        try:
+            is_displayed = self.driver.find_element(By.CSS_SELECTOR, css_selector).is_displayed()
+            if is_displayed:
+                return True
+            else:
+                return False
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            log.error(f"Check element displayed by css failed. Exception: {e}")
+            return False
+
+    # -------------------------- Common Interaction --------------------------
+    def key_escape(self):
+        actions = ActionChains(self.driver)
+        actions.send_keys(Keys.ESCAPE).perform()
+
+    def key_tab(self):
+        actions = ActionChains(self.driver)
+        actions.send_keys(Keys.TAB).perform()
+
+    def scroll_down(self, pixels=1000):
+        self.driver.execute_script(f"window.scrollBy(0, {pixels});")
+
+    def scroll_up(self, pixels=1000):
+        self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
+
+    def switch_to_core_banking(self):
+        for handle in self.driver.window_handles: # Iterate over all open windows
+            self.driver.switch_to.window(handle)
+            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+                return  # Stop once we've switched to 'Core Banking'
+        # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
+        raise Exception("No window with title 'Core Banking' found")
+
+    def close_voucher(self):
+        core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
+        # Iterate over all open windows
+        for handle in self.driver.window_handles:
+            self.driver.switch_to.window(handle)
+            if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
+                core_banking_window = handle  # Save this handle to avoid closing it
+            else:
+                self.driver.close() # Close all windows that are not 'Core Banking'
+        if core_banking_window: # Switch back to 'Core Banking' window if it's found
+            self.driver.switch_to.window(core_banking_window)
+
+# ================= handle clear_text field =================
+    # def clear_text(self, element: WebElement):
+    #     element.clear()
+    #     # If text remains, try Ctrl+A + Delete (common fallback)
+    #     if element.get_attribute('value'):
+    #         element.send_keys(Keys.CONTROL + "a")
+    #         element.send_keys(Keys.DELETE)
+
+    def clear_text(self, element_input: WebElement):
         """Clear text for element 'input'"""
         self.key_escape()
         self.switch_to_core_banking()
@@ -3793,7 +5526,7 @@ class TestCase(unittest.TestCase):
             log.error(f"Clear value failed. Exception: {e}")
 
 # ================= handle check attribute =================
-    def check_disable(self, element):
+    def check_disable(self, element: WebElement):
         """Check attribute disable for 'element'"""
         try:
             css_class = element.get_attribute('class')
@@ -3806,7 +5539,7 @@ class TestCase(unittest.TestCase):
         except:
             log.error(f"Check attribute 'disable' for element '{element}' failed.")
 
-    def check_disabled_field(self, element):
+    def check_disabled_field(self, element: WebElement):
         """Check attribute disabled for 'element' is field"""
         try:
             css_class = element.get_attribute('class')
@@ -3819,10 +5552,159 @@ class TestCase(unittest.TestCase):
         except:
             log.error(f"Check attribute 'disabled' for element '{element}' failed.")
 
-    def click_input_non_tab(self, title):
-        """Click of 'input' in screen non tab"""
-        xpath = f"//div[contains(@class,'malibu-desktop-uLayout')]/div[contains(@class,'malibu-desktop-uView')]/div[contains(@class,'malibu-desktop-uView-content')]/div[contains(@class,'malibu-desktop-uView-content-main')]/div[contains(@class,'malibu-desktop-uInput')]//legend[@title='{title}']/parent::fieldset/preceding-sibling::input"
-        self.common(xpath=xpath, method='unobscured', action='click', info=f"Clicked at '{title}' in screen NON tab.", error=f"Click at '{title}' in screen NON tab failed.")
+    def common(self, xpath=None, css=None, method=None, action=None, value=None, clear_text=None, need_tab=None, need_enter=None, info=None, error=None, warn=None, timeout=WaitConfig.timeout_explicit):
+        """
+        Performs a common interaction with a web element based on provided locators and actions.
 
-==================== END OF FILE: backup\case_bk.py ====================
+        Args:
+            xpath (str, optional): XPath locator for the element.
+            css (str, optional): CSS selector for the element.
+            method (str, optional): Waiting method for the element.
+                Possible values: 'unobscured', 'visibility', 'enabled'.
+            action (str, optional): Action to perform on the element.
+                Possible values: 'send_keys', 'click', 'get_text', 'get_value', 'send_values'.
+            value (str, optional): Value to send to the element when action is 'send_keys'.
+            clear_text (str, optional): Flag to clear the text of the element before sending keys.
+                Possible value: 'Y'.
+            need_tab (str, optional): Flag to send a TAB key press after sending keys.
+                Possible value: 'Y'.
+            need_enter (str, optional): Flag to send an ENTER key press after sending keys.
+                Possible value: 'Y'.
+            info (str, optional): Information message to log upon successful interaction.
+            error (str, optional): Error message to log if the element is not found.
+            warn (str, optional): Warning message to log if the element is not found.
+            timeout (int, optional): Explicit wait timeout in seconds.
+                Defaults to WaitConfig.timeout_explicit.
+
+        Returns:
+            Returns the text or value of the element if action is 'get_text' or 'get_value', otherwise returns None.
+        """
+        def get_element():
+            if xpath:
+                if method == 'unobscured':
+                    return self.wait_for_element_unobscured_by_xpath(xpath, timeout)
+                if method == 'visibility':
+                    return self.wait_for_element_visibility_by_xpath(xpath, timeout)
+                if method == 'enabled':
+                    return self.wait_for_element_enabled_by_xpath(xpath, timeout)
+                if method == 'find':
+                    return self.wait_for_element_by_xpath(xpath)
+            elif css:
+                if method == 'unobscured':
+                    return self.wait_for_element_unobscured_by_css(css, timeout)
+                if method == 'visibility':
+                    return self.wait_for_element_visibility_by_css(css, timeout)
+                if method == 'enabled':
+                    return self.wait_for_element_enabled_by_css(css, timeout)
+                if method == 'find':
+                    return self.wait_for_element_by_css(css)
+            return None
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                element = get_element()
+                if element is None:
+                    if error:
+                        log.error(error)
+                    if warn:
+                        log.warn(warn)
+                    return None
+                if action == 'send_keys':
+                    if clear_text == 'Y':
+                        self.clear_text(element)
+                        if element.text != '':
+                            self.clear_text(element)
+                    element.send_keys(value)
+                    if need_tab == 'Y':
+                        element.send_keys(Keys.TAB)
+                    if need_enter == 'Y':
+                        element.send_keys(Keys.ENTER)
+                    if info:
+                        log.info(info)
+                    return None
+                elif action == 'click':
+                    element.click()
+                    if info:
+                        log.info(info)
+                    return None
+                elif action == 'get_text':
+                    # if info:
+                    #     log.info(info)
+                    return element.text
+                elif action == 'get_value':
+                    # if info:
+                    #     log.info(info)
+                    return element.get_attribute('value')
+                elif action == 'send_values':
+                    # clear data
+                    self.driver.execute_script("arguments[0].value = '';", element)
+                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
+                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
+                    log.debug('Clear data.')
+                    actions = ActionChains(self.driver)
+                    actions.click(element).send_keys(value).perform()
+                    log.debug(f"element.get_attribute('value') is: {element.get_attribute('value')}")
+                    if element.get_attribute('value') != value:
+                        self.driver.execute_script("arguments[0].value = '';", element)
+                        self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element)
+                        self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element)
+                        log.debug("Clear data again in get_attribute('value').")
+                        actions = ActionChains(self.driver)
+                        actions.click(element).send_keys(value).perform()
+                    if info:
+                        log.info(info)
+                    return None
+                break 
+            except StaleElementReferenceException:
+                if attempt < max_retries - 1:
+                    log.debug(f"Encountered StaleElementReferenceException. Retrying... (Times {attempt + 1})")
+                    self.wait(0.5)
+                    continue
+                else:
+                    log.error(f"Unable to operate on element due to Stale error after {max_retries} attempts.")
+                    return None
+            except Exception as e:
+                log.error(f"Exception: {str(e)}")
+                return None
+        return None
+
+    # -------------------------- New Methods gen by BOT --------------------------
+    def accept_alert(self):
+        try:
+            WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+            self.driver.switch_to.alert.accept()
+            log.info("Accepted alert.")
+        except TimeoutException:
+            log.warn("No alert to accept.")
+
+    def dismiss_alert(self):
+        try:
+            WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+            self.driver.switch_to.alert.dismiss()
+            log.info("Dismissed alert.")
+        except TimeoutException:
+            log.warn("No alert to dismiss.")
+
+    def switch_to_frame(self, frame_reference):
+        try:
+            WebDriverWait(self.driver, 10).until(EC.frame_to_be_available_and_switch_to_it(frame_reference))
+            log.info(f"Switched to frame: {frame_reference}")
+        except TimeoutException:
+            log.error(f"Could not switch to frame: {frame_reference}")
+
+    def switch_to_default_content(self):
+        self.driver.switch_to.default_content()
+        log.info("Switched to default content.")
+
+==================== END OF FILE: webui_test\wrapper.py ====================
+
+
+==================== START OF FILE: webui_test\__init__.py ====================
+from .running.test_runner import main 
+from .running.config import WebUI_Test, F8Config, WaitConfig, BrowserConfig
+from .testdata.parameterized import data, data_class 
+# from .case import TestCase , FirstTestCase , LastTestCase
+from .case import TestCase
+from .form_action import FormAction
+==================== END OF FILE: webui_test\__init__.py ====================
 
