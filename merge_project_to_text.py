@@ -2,10 +2,10 @@ import os
 
 # CẤU HÌNH
 PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test' # Thay đường dẫn dự án của bạn
-OUTPUT_PREFIX = 'Source_Part'
-MAX_FILE_SIZE_MB = 0.5  # Giới hạn mỗi file khoảng 0.5 MB (an toàn cho NotebookLM)
-EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache', 'reports', 'logs'}
-ALLOWED_EXTENSIONS = {'.py', '.ini', '.yaml', '.json', '.sql'} # Chỉ lấy các file code cần thiết
+OUTPUT_PREFIX = 'merged\Source_Part'
+MAX_FILE_SIZE_MB = 0.4  # Giới hạn mỗi file khoảng 0.5 MB (an toàn cho NotebookLM)
+EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache', 'reports', 'logs', 'backup'}
+ALLOWED_EXTENSIONS = {'.py', '.ini', '.yaml', '.json', '.sql', '.txt'} # Chỉ lấy các file code cần thiết
 
 def split_project_to_text(root_dir, output_prefix, max_size_mb):
     max_bytes = max_size_mb * 1024 * 1024
