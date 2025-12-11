@@ -132,57 +132,77 @@ python run.py
 | 3 | run_on_url | `Yes` | String |  |  | URL cần run test suite |
 | 4 | username_login | `Yes` | String |  |  | user login vào hệ thống |
 | 5 | password_login | `Yes` | String |  |  | password của user login vào hệ thống |
-| 6 | one_app | `Yes` | String |  |  | user login được phân quyền chỉ có một app. `Y`: một app; `N`: nhiều app |
-| 7 | browser | `Yes` | String |  |  | Google Edge: `edge` or `ed`; Google Chrome: `chrome` or `google chrome` or `gc`; Firefox: `firefox` or `ff` |
-| 8 | headless | `Yes` | String |  |  | `Y`: chạy không UI; `N`: chạy có UI |
-| 9 | customer_code | No | String |  |  | Customer code có mask |
-| 10 | username_approve | `Yes` | String |  |  | user approve |
-| 11 | password_approve | `Yes` | String |  |  | password của user approve |
-| 12 | username_reverse | `Yes` | String |  |  | user reverse |
-| 13 | password_reverse | `Yes` | String |  |  | password của user reverse |
-| 14 | test_files | `Yes` | `Array` |  |  | tên file test under folder `test_dir/shwebank_run_by_api/`, nếu truyền [] sẽ chạy hết các file theo thứ tự mặt định |
-| 15 | report_name | `Yes` | String |  |  | tên report muốn đặt tên |
-| 16 | debug_mode | No | String |  |  | `Y`: chạy không xuất report; `N`: chạy có xuất report |
-| 17 | hour_to_run | No | `Int` |  |  | giờ để run |
-| 18 | minute_to_run | No | `Int` |  |  | phút để run |
-| 19 | username_login_other_branch | No | String |  |  | user khác chi nhánh login vào hệ thống |
-| 20 | password_login_other_branch | No | String |  |  | password của user khác chi nhánh login vào hệ thống |
-| 21 | username_approve_other_branch | No | String |  |  | user khác chi nhánh approve |
-| 22 | password_approve_other_branch | No | String |  |  | password của user khác chi nhánh approve |
-| 23 | username_reverse_other_branch | No | String |  |  | user khác chi nhánh reverse |
-| 24 | password_reverse_other_branch | No | String |  |  | password của user khác chi nhánh reverse |
+| 6 | browser | No | String |  | `chrome` | Google Edge: `edge` or `ed`; Google Chrome: `chrome` or `google chrome` or `gc`; Firefox: `firefox` or `ff` |
+| 7 | customer_code | No | String |  |  | Customer code của personal có mask |
+| 8 | customer_code_corporate | No | String |  |  | Customer code của corporate có mask |
+| 9 | username_approve | `Yes` | String |  |  | user approve |
+| 10 | password_approve | `Yes` | String |  |  | password của user approve |
+| 11 | username_reverse | `Yes` | String |  |  | user reverse |
+| 12 | password_reverse | `Yes` | String |  |  | password của user reverse |
+| 13 | test_files | `Yes` | `Array` |  |  | tên file test under folder `test_dir/shwebank_run_by_api/`, nếu truyền [] sẽ chạy hết các file theo thứ tự mặt định |
+| 14 | report_name | `Yes` | String |  |  | tên report muốn đặt tên |
+| 15 | username_login_other_branch | No | String |  |  | user khác chi nhánh login vào hệ thống |
+| 16 | password_login_other_branch | No | String |  |  | password của user khác chi nhánh login vào hệ thống |
+| 17 | username_approve_other_branch | No | String |  |  | user khác chi nhánh approve |
+| 18 | password_approve_other_branch | No | String |  |  | password của user khác chi nhánh approve |
+| 19 | username_reverse_other_branch | No | String |  |  | user khác chi nhánh reverse |
+| 20 | password_reverse_other_branch | No | String |  |  | password của user khác chi nhánh reverse |
+| 21 | app_name | No | String |  | `Shwebank` | Tên ứng dụng, ex: Demo Bank. |
+| 22 | one_app | No | String |  | `Y` | user login được phân quyền chỉ có một app. `Y`: một app; `N`: nhiều app |
+| 23 | headless | No | String |  | `N` | `Y`: chạy không UI; `N`: chạy có UI |
+| 24 | f8_config | No | String |  | `S` | Cấu hình search F8 (`S`: Status, `N`: Normal) |
+| 25 | folder_name | No | String |  | `shwebank_run_by_api` | Tên thư mục chứa script test, ex: shwebank_bo_approval. |
 
 **Example:**
 ```json
 {
-    "release_version": "Core-4.7.1",
-    "server_name": "104",
-    "run_on_url": "https://test-cbs.shwesit.jits.digital/login/",
-    "username_login": "cashier003",
-    "password_login": "Sh@123456",
-    "one_app": "N",
-    "browser": "edge",
-    "headless": "N",
-    "customer_code": "1-1-000000",
+    "release_version": "Core-4.15.1",
+    "server_name": "117",
+    "run_on_url": "https://demo-cbs.finasit.jits.digital/login/",
+    "username_login": "autoteller",
+    "password_login": "Jits@123",
+    "browser": "edge", // defult: chrome
+    "customer_code": "1-1-056856", //117
+    "customer_code_corporate": "3-6-000026", //117
     "username_approve": "automanager",
-    "password_approve": "Sh@123456",
+    "password_approve": "Jits@123",
     "username_reverse": "automanager",
-    "password_reverse": "Sh@123456",
+    "password_reverse": "Jits@123",
     "test_files": [
+        // "check_env"
         "test_01_customer",
+        "test_02_deposit_01_current",
+        "test_02_deposit_02_s1_savings",
+        "test_02_deposit_03_1m_no_rollover",
+        "test_02_deposit_03_1m_pri_only",
+        "test_02_deposit_03_1m_pri_plus_int",
+        "test_02_deposit_04_prepaid_no_rollover",
+        "test_02_deposit_04_prepaid_pri_only",
+        "test_02_deposit_gift_cheque",
+        "test_02_deposit_payment_order",
+        "test_03_credit_compound",
         "test_04_mortgage",
-        "test_03_credit_compound"
+        "test_05_fixed_asset",
+        "test_06_payment",
+        "test_07_money_market",
+        // "test_08_fx_transaction"
+        "test_08_fx_transaction_section",
+        "test_09_trade",
+        "test_11_internal_transaction"
+        // "test_verify_transaction"
     ],
-    "report_name": "run_all",
-    "debug_mode": null,
-    "hour_to_run": null,
-    "minute_to_run": null,
-    "username_login_other_branch": null,
-    "password_login_other_branch": null,
-    "username_approve_other_branch": null,
-    "password_approve_other_branch": null,
-    "username_reverse_other_branch": null,
-    "password_reverse_other_branch": null
+    "report_name": "shwebank_regression",
+    "username_login_other_branch": "autoteller005",
+    "password_login_other_branch": "Jits@123",
+    "username_approve_other_branch": "automanager005",
+    "password_approve_other_branch": "Jits@123",
+    "username_reverse_other_branch": "automanager005",
+    "password_reverse_other_branch": "Jits@123"
+    // "app_name": "Demo Bank" // defult: "Shwebank"
+    // "one_app": "N", // defult: Y
+    // "headless": "Y", // defult: N
+    // "f8_config": "N" // defult: "S"
+    // "folder_name": "shwebank_bo_approval"
 }
 ```
 
@@ -234,23 +254,40 @@ http://{{IP}}:8000/get_test_status/609b033b-d288-4ce9-b19f-241c6a8f83ed
         "status": "completed",
         "passed": false,
         "output_log": "",
-        "total_tests": 0,
+        "total_tests": 1,
         "failures": 1,
         "errors": 0,
         "skipped": 0,
-        "successful": -1,
+        "successful": 0,
         "report_path": "D:\\2022_AutoTest\\source-code\\cbs-neptune-autotest\\ui-test\\reports\\Core-4.7.1-104-run_folders_30072025_195910.html"
     }
 }
 ```
 
-## 4. Optional
-### 4.1  Uninstall selenium 3.141.0 and msedge-selenium-tools
+## 5. Optional
+### 5.1  Uninstall selenium 3.141.0 and msedge-selenium-tools
 ```code
 pip uninstall selenium 3.141.0
 pip uninstall msedge-selenium-tools
 ```
-### 4.2 Check thư viện đang dùng
+### 5.2 Check thư viện đang dùng
 ```code
 pip list
+```
+
+## 6. Unit test for ui-test
+- Các script unit test các thành phần chính được đặt ở folder `ui-test/tests/unit`:
+  - main.py
+  - run_by_api.py
+  - case.py
+  - form_action.py
+  - wrapper.py
+
+- Cách run script unit test sau mỗi lần sửa code hàm chính:
+```code
+py tests/unit/test_config_loading.py
+```
+- Cách run folder unit sau mỗi lần sửa code hàm chính:
+```code
+py -m unittest discover tests/unit
 ```

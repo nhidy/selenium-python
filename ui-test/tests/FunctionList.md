@@ -190,9 +190,6 @@
 - `get_text_form_title_popup`: get title trong content của popup
 - `close_popup`: click close popup
 
- <!-- table function -->
-write_search_table_column: search giá trị tại 1 column của table
-
 <!-- scroll to element, scroll to page-->
 `scroll_to_element`: scroll tới element
 `scroll_to_top_page`: scroll tới đầu trang

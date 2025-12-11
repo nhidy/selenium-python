@@ -11,16 +11,31 @@ import json
 sys.stdout.reconfigure(encoding='utf-8')
 
 def str_to_bool(value):
+    if value is None:
+        return False
     if isinstance(value, bool):
         return value
-    if value.lower() in ('yes', 'y', 'true', 't'):
+    if str(value).lower() in ('yes', 'y', 'true', 't'):
         return True
-    elif value.lower() in ('no', 'n', 'false', 'f'):
+    elif str(value).lower() in ('no', 'n', 'false', 'f'):
         return False
     else:
-        if value is None or value.lower() == "null" or value == "":
+        if str(value).lower() == "null" or str(value) == "":
             return False
         raise argparse.ArgumentTypeError(f"Boolean value expected (true/false, Y/N, etc.), got '{value}'")
+
+def parse_test_files(config_data):
+    """Parse test_files from config data, handling both list and string formats."""
+    test_files_order_list = []
+    test_files = config_data.get("test_files")
+
+    if test_files:
+        if isinstance(test_files, list):
+            test_files_order_list = [f.strip() for f in test_files if f.strip()]
+        elif isinstance(test_files, str):
+            test_files_order_list = [f.strip() for f in test_files.split(',') if f.strip()]
+    
+    return test_files_order_list
 
 def run_test_suite_wrapper(config_data, test_files_order_list):
     env_vars = os.environ.copy()
@@ -28,15 +43,14 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
         env_vars[f"TEST_CONFIG_{key.upper()}"] = str(value) if value is not None else ""
     os.environ.update(env_vars)
 
-    headless = config_data.get("headless", False)
-    browser = config_data.get("browser", "chrome")
-    report_name = config_data.get("report_name", "")
-    debug_mode = config_data.get("debug_mode", False)
-    release_version = config_data.get("release_version", "")
-    server_name = config_data.get("server_name", "")
-    f8_config = config_data.get("f8_config", "S")
-    app_name = config_data.get("app_name", "Shwebank")
-    folder_name = config_data.get("folder_name", "shwebank_run_by_api")
+    headless = str_to_bool(config_data.get("headless")) or False
+    browser = config_data.get("browser") or "chrome"
+    report_name = config_data.get("report_name") or ""
+    release_version = config_data.get("release_version") or ""
+    server_name = config_data.get("server_name") or ""
+    f8_config = config_data.get("f8_config") or "S"
+    app_name = config_data.get("app_name") or "Shwebank"
+    folder_name = config_data.get("folder_name") or "shwebank_run_by_api"
 
     print(f"Folder containing the test script: {folder_name}")
     test_case_base_dir = os.path.join(os.path.dirname(__file__), 'test_dir', folder_name)
@@ -92,13 +106,12 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
         test_run_result = webui_test.main(
             suite_to_run=combined_suite,
             browser=browser,
-            debug=debug_mode,
             headless=headless,
             report=report_filename,
             title=f"{release_version}-{server_name}-Test Report",
             description="Automated WEBUI Test Case Execution",
             f8_config=f8_config,
-            app_name = app_name
+            app_name=app_name
         )
         print("All tests completed successfully.", file=sys.stdout)
         return test_run_result
@@ -108,73 +121,26 @@ def run_test_suite_wrapper(config_data, test_files_order_list):
         traceback.print_exc(file=sys.stderr)
         return {"passed": False, "total_tests": 0, "message": f"Fatal error: {e}"}
 
+def load_config_from_file(config_file_path):
+    """Load configuration from a JSON file."""
+    try:
+        with open(config_file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error reading config file: {e}", file=sys.stderr)
+        raise
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run UI tests with provided configuration.")
-
-    parser.add_argument("--release-version", type=str, default="", help="Release version to run tests.")
-    parser.add_argument("--server-name", type=str, default="", help="Sever name to run tests on.")
-    parser.add_argument("--run-on-url", type=str, default="", help="URL to run tests on.")
-    parser.add_argument("--username-login", type=str, default="", help="Username for login.")
-    parser.add_argument("--password-login", type=str, default="", help="Password for login.")
-    parser.add_argument("--one-app", type=str, default="Y", help="One app parameter.")
-    parser.add_argument("--browser", type=str, default="chrome", help="Browser to use (e.g., chrome, firefox).")
-    parser.add_argument("--headless", type=str_to_bool, default=False, help="Run browser in headless mode (true/false, Y/N).")
-    parser.add_argument("--customer-code", type=str, default="", help="Customer code personal use for testing DPT, CRD, MTG.")
-    parser.add_argument("--customer-code-corporate", type=str, default="", help="Customer code corporate use for testing TMM.")
-    parser.add_argument("--username-approve", type=str, default="", help="Username for approval.")
-    parser.add_argument("--password-approve", type=str, default="", help="Password for approval.")
-    parser.add_argument("--username-reverse", type=str, default="", help="Username for reverse.")
-    parser.add_argument("--password-reverse", type=str, default="", help="Password for reverse.")
-    parser.add_argument("--report-name", type=str, default="report", help="Specific report name.")
-    parser.add_argument("--debug-mode", type=str_to_bool, default=False, help="Debug mode setting (optional (true/false, Y/N)).")
-    parser.add_argument("--hour-to-run", type=int, default=None, help="Specific hour to run the test (optional int).")
-    parser.add_argument("--minute-to-run", type=int, default=None, help="Specific minute to run the test (optional int).")
-    parser.add_argument("--username-login-other-branch", type=str, default=None, help="Username other branch for login.")
-    parser.add_argument("--password-login-other-branch", type=str, default=None, help="Password other branch for login.")
-    parser.add_argument("--username-approve-other-branch", type=str, default=None, help="Username other branch for approval.")
-    parser.add_argument("--password-approve-other-branch", type=str, default=None, help="Password other branch for approval.")
-    parser.add_argument("--username-reverse-other-branch", type=str, default=None, help="Username other branch for reverse.")
-    parser.add_argument("--password-reverse-other-branch", type=str, default=None, help="Password other branch for reverse.")
-    parser.add_argument("--test-files-order", type=str, default="",  help="Comma-separated list of test file names (without .py extension) in the desired execution order. Example: 'test_login,test_create_user'")
-    parser.add_argument("--f8-config", type=str, default="S", help="View mode of F8 screen (optional (S/N). S: Mode view status, N: mode view normal).")
-    parser.add_argument("--app-name", type=str, default="Shwebank", help="App name use for core banking, default is 'Shwebank'.")
-    parser.add_argument("--folder-name", type=str, default="shwebank_run_by_api", help="Folder containing the test script, default is 'shwebank_run_by_api'.")
-
+    parser.add_argument("--config-file", type=str, required=True, help="Path to the JSON configuration file.")
     args = parser.parse_args()
 
-    config_data = {
-        "release_version": args.release_version,
-        "server_name": args.server_name,
-        "run_on_url": args.run_on_url,
-        "username_login": args.username_login,
-        "password_login": args.password_login,
-        "one_app": args.one_app,
-        "browser": args.browser,
-        "headless": args.headless,
-        "customer_code": args.customer_code,
-        "customer_code_corporate": args.customer_code_corporate,
-        "username_approve": args.username_approve,
-        "password_approve": args.password_approve,
-        "username_reverse": args.username_reverse,
-        "password_reverse": args.password_reverse,
-        "report_name": args.report_name,
-        "debug_mode": args.debug_mode,
-        "hour_to_run": args.hour_to_run,
-        "minute_to_run": args.minute_to_run,
-        "username_login_other_branch": args.username_login_other_branch,
-        "password_login_other_branch": args.password_login_other_branch,
-        "username_approve_other_branch": args.username_approve_other_branch,
-        "password_approve_other_branch": args.password_approve_other_branch,
-        "username_reverse_other_branch": args.username_reverse_other_branch,
-        "password_reverse_other_branch": args.password_reverse_other_branch,
-        "f8_config": args.f8_config,
-        "app_name": args.app_name,
-        "folder_name": args.folder_name
-    }
+    try:
+        config_data = load_config_from_file(args.config_file)
+    except Exception:
+        sys.exit(1)
 
-    test_files_order_list = []
-    if args.test_files_order:
-        test_files_order_list = [f.strip() for f in args.test_files_order.split(',') if f.strip()]
+    test_files_order_list = parse_test_files(config_data)
 
     try:
         final_result = run_test_suite_wrapper(config_data, test_files_order_list)

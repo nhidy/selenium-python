@@ -1,11 +1,17 @@
 import os
 
-# CẤU HÌNH
-PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test' # Thay đường dẫn dự án của bạn
+# CẤU HÌNH VÀ XUẤT FILE DÙNG CHO NOTEBOOKLM
+# Step 1: Thay đường dẫn dự án của bạn
+PROJECT_PATH = r'D:\Tests\source-code\selenium-python\ui-test'
+# Step 2: Thay đường dẫn chứa các file đã chuyển đổi và prefix 'Source_Part' cho mỗi file name
 OUTPUT_PREFIX = 'merged\Source_Part'
-MAX_FILE_SIZE_MB = 0.4  # Giới hạn mỗi file khoảng 0.5 MB (an toàn cho NotebookLM)
-EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache', 'reports', 'logs', 'backup'}
-ALLOWED_EXTENSIONS = {'.py', '.ini', '.yaml', '.json', '.sql', '.txt'} # Chỉ lấy các file code cần thiết
+# Step 2: Giới hạn mỗi file khoảng 0.5 MB (an toàn cho NotebookLM)
+MAX_FILE_SIZE_MB = 0.4
+# Không lấy các file và folder không cần thiết
+EXCLUDED_DIRS = {'.git', '.idea', '__pycache__', 'venv', 'env', '.pytest_cache', 'reports', 'logs', 'backup', 'test_history', 'build', 'lib', 'webui_test.egg-info'}
+# Chỉ lấy các file code cần thiết
+ALLOWED_EXTENSIONS = {'.py', '.ini', '.yaml', '.json', '.sql', '.txt'}
+# Run: py merge_project_to_text.py
 
 def split_project_to_text(root_dir, output_prefix, max_size_mb):
     max_bytes = max_size_mb * 1024 * 1024

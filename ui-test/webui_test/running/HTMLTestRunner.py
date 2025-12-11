@@ -136,6 +136,7 @@ class _TestResult(TestResult):
 		self.case_end_time = None 
 	
 	def startTest(self, test): 
+		TestResult.startTest(self, test)
 		self.case_start_time = time.time() 
 		test.imgs = getattr(test, "imgs", []) 
 		test.runtime = getattr(test, "runtime", None) 

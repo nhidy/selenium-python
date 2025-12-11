@@ -7,7 +7,6 @@ from inspect import cleandoc
 from time import sleep
 from webui_test.jwebui_action import *
 from webui_test.logging import log
-# from webui_test.wrapper import DriverWrapper
 from webui_test.wrapper import *
 
 from webui_test.running.config import BrowserConfig, WaitConfig, F8Config
@@ -90,27 +89,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
     def get_url(self):
         return
 
-    # def go_to(self, url):
-    #     log.debug("1. Go to 'go_to'")
-    #     # self.driver = get_driver()
-    #     # log.debug(f'1.2 Set value fo self.driver: {self.driver}')
-    #     BrowserConfig.url_env = url
-    #     if self.driver:
-    #         log.debug('2. vao if self.driver')
-    #         if BrowserConfig.headless:
-    #             log.debug(f'Headless: [{BrowserConfig.headless}]')
-    #             self.driver.set_window_size(1920, 1080)
-    #         else:
-    #             log.debug(f'NO Headless: [{BrowserConfig.headless}]')
-    #             # self.driver.maximize_window()
-    #             self.driver.set_window_size(1920, 1080)
-    #         size = self.driver.get_window_size()
-    #         log.debug(f'3. window size: {size}')
-    #         self.driver.get(url)
-    #         log.debug(f"4. Go to 'go_to' method, url: {url}")
-    #     else:
-    #         log.error("self.driver is NULL.")
-
     def restart_browser(self):
         global _TEST_BROWSER
         type(self).driver = restart_driver()
@@ -118,19 +96,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
         self.driver = get_driver()
         self.go_to(BrowserConfig.url_env)
         self.wait_page_login()
-
-    # def screen_size(self):
-    #     width = self.driver.get_window_size()['width']
-    #     if width > 996:
-    #         return 'desktop'
-    #     elif width > 768:
-    #         return 'desktop_small'
-    #     elif width > 575:
-    #         return 'tablet'
-    #     elif width > 350:
-    #         return 'mobile'
-    #     else:
-    #         return 'mobile_small'
 
     def get_value_excel(self, sheet, column, row, filename=None):
         return get_value_from_excel(sheet, column, row, filename)
@@ -414,8 +379,37 @@ class TestCase(DriverWrapper, unittest.TestCase):
         self.assert_actions(expected_actions=expected_actions, row=row)
 
 # ================================= handle common methods =================================
+    def search_stock(self, stock_prefix=None, from_serial=None, to_serial=None, stock_type=None, from_serial_to=None, to_serial_from=None):
+        self.close_all_form()
+        self.click_menu('Deposit', 'Stock Inventory')
+        self.wait_for_button_available('Add')
+        self.assert_form_title('DPT-Stock Inventory-Search')
+        if stock_prefix:
+            self.adv_search_text('Stock prefix', stock_prefix)
+        if from_serial:
+            if len(from_serial) != 6:
+                from_serial = self.get_serial_number_no_refix(from_serial)
+            self.adv_search_group('From serial from', from_serial)
+        if from_serial_to:
+            if len(from_serial_to) != 6:
+                from_serial_to = self.get_serial_number_no_refix(from_serial_to)
+            self.adv_search_group('From serial to', from_serial_to)
+        if to_serial_from:
+            if len(to_serial_from) != 6:
+                to_serial_from = self.get_serial_number_no_refix(to_serial_from)
+            self.adv_search_group('To serial from', to_serial_from)
+        if to_serial:
+            if len(to_serial) != 6:
+                to_serial = self.get_serial_number_no_refix(to_serial)
+            self.adv_search_group('To serial to', to_serial)
+        self.key_escape()
+        if stock_type:
+            self.adv_search_select('Stock type', stock_type)
+        self.click_button_search_advanced()
+        self.wait_loading()
+
     def check_serial_number_from_to_not_exist(self, generated_number_from, generated_number_to, prefix, s_type=None):
-        self.stock_inventory_advanced_search(prefix, generated_number_from, generated_number_to, s_type)
+        self.search_stock(prefix, generated_number_from, generated_number_to, s_type)
         if (self.get_text_notification(timeout=5) == 'Data not found'):
             return True
         else:
@@ -430,7 +424,7 @@ class TestCase(DriverWrapper, unittest.TestCase):
         # print(f"Bắt đầu kiểm tra số serial từ {generated_number_from} đến {generated_number_to}")
 
         # Check 1: "From serial from" and "From serial to"
-        self.stock_inventory_advanced_search(
+        self.search_stock(
             stock_prefix=prefix,
             from_serial=generated_number_from,
             from_serial_to=generated_number_to,
@@ -441,7 +435,7 @@ class TestCase(DriverWrapper, unittest.TestCase):
             return False
 
         # Check 2: "To serial from" and "To serial to"
-        self.stock_inventory_advanced_search(
+        self.search_stock(
             stock_prefix=prefix,
             to_serial_from=generated_number_from,
             to_serial=generated_number_to,
@@ -452,7 +446,7 @@ class TestCase(DriverWrapper, unittest.TestCase):
             return False
         
         # Check 3: "From serial from" and "To serial to"
-        self.stock_inventory_advanced_search(
+        self.search_stock(
             stock_prefix=prefix,
             from_serial=generated_number_from,
             to_serial=generated_number_to,
@@ -1064,14 +1058,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"'{label_name}' NOT available. Exception: {e}")
 
-    # def key_escape(self):
-    #     actions = ActionChains(self.driver)
-    #     actions.send_keys(Keys.ESCAPE).perform()
-
-    # def key_tab(self):
-    #     actions = ActionChains(self.driver)
-    #     actions.send_keys(Keys.TAB).perform()
-
     def choose_item(self, title, value, fieldset_xpath):
         title_xpath = f"{fieldset_xpath}preceding-sibling::input"
         value_xpath = f"{fieldset_xpath}following-sibling::div//label[@title='{value}']"
@@ -1177,32 +1163,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
         if BrowserConfig.is_old == 'Y':
             icon_xpath = f"//div[@class='malibu-desktop-uInput-icon']/i[@class='material-icons-outlined' and text()='{icon}']"
         self.common(xpath=icon_xpath, method='visibility', action='click', info="Clicked icon.", error=f"Click icon '{icon}' failed.")
-
-    # def scroll_down(self, pixels=1000):
-    #     self.driver.execute_script(f"window.scrollBy(0, {pixels});")
-
-    # def scroll_up(self, pixels=1000):
-    #     self.driver.execute_script(f"window.scrollBy(0, -{pixels});")
-
-    # def switch_to_core_banking(self):
-    #     for handle in self.driver.window_handles: # Iterate over all open windows
-    #         self.driver.switch_to.window(handle)
-    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-    #             return  # Stop once we've switched to 'Core Banking'
-    #     # If no window has 'Core Banking' in its title, you can raise an exception or handle the case
-    #     raise Exception("No window with title 'Core Banking' found")
-
-    # def close_voucher(self):
-    #     core_banking_window = None # Store the window handle of the 'Core Banking' window, if found
-    #     # Iterate over all open windows
-    #     for handle in self.driver.window_handles:
-    #         self.driver.switch_to.window(handle)
-    #         if 'Core Banking' in self.driver.title: # Check if the current window is 'Core Banking'
-    #             core_banking_window = handle  # Save this handle to avoid closing it
-    #         else:
-    #             self.driver.close() # Close all windows that are not 'Core Banking'
-    #     if core_banking_window: # Switch back to 'Core Banking' window if it's found
-    #         self.driver.switch_to.window(core_banking_window)
 
     def click_clear_search(self):
         clear_search_xpath = "//div[@class='malibu-desktop-uHeaderMoreOption-search-clear']/i"
@@ -1375,38 +1335,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
             self.wait_loading()
         self.close_popup()
 
-    def write_search_table_column(self, text, into, index=0, css='malibu-desktop-uTable-info', press_right=0):
-        # screen_type = screen_size()
-        # if screen_type == 'desktop' or screen_type == 'desktop_small' or screen_type == 'tablet' :	
-        #     css = css
-        # else:
-        #     css = 'malibu-mobile-uTable-info'
-        # table = self.get_tables_with_css(css)[index]
-        # heads = table.find_elements(By.XPATH, './thead/tr/th')
-        # for i in range(len(heads)):
-        #     caption = heads[i].find_elements(By.XPATH, './/*[contains(text(), "{}")]'.format(into))
-        #     if len(caption) > 0:
-        #         # find if input already show or not
-        #         if press_right > 0 :
-        #             click(table)
-        #             self.wait()
-        #             tab_count = 1
-        #             while (tab_count <= press_right):
-        #                 press(ARROW_RIGHT)
-        #                 tab_count = tab_count + 1
-
-        #         input = heads[i].find_elements(By.XPATH, './/input[contains(@class, "show")]')
-        #         if len(input) == 0:
-                    
-        #             # find search icon then click 
-        #             span = heads[i].find_elements(By.XPATH, './/*[contains(text(), "search")]')
-        #             if len(span) > 0:
-        #                 click(span[0])
-        #         input = heads[i].find_elements(By.XPATH, './/input')
-        #         input[0].send_keys(text)
-                
-                return
-
 # ================= handle notification =================
     def get_text_notification(self, timeout=None):
         if timeout is None:
@@ -1434,11 +1362,10 @@ class TestCase(DriverWrapper, unittest.TestCase):
             raise AssertionError("The assertion message cannot be empty.")
         actual_message = self.get_text_notification(5)
         if expected_message==actual_message:
-            # log.info(f'Expected message [{expected_message}] equal actual message [{actual_message}]')
             return
         else:
             print(f'Check notification: Expected [{expected_message}]. Actual [{actual_message}].')
-            log.error(f'Expected message [{expected_message}] NOT equal actual message [{actual_message}]')
+            log.warn(f'Expected message [{expected_message}] NOT equal actual message [{actual_message}]')
 
 # ================= handle special functions =================
     def open_app(self, app_name):
@@ -1552,7 +1479,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
         xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header']/i"
         if BrowserConfig.is_old == 'Y':
             xpath = "//div[@class='malibu-desktop-uModal-background' and not(@style='display: none;')]//div[@class='malibu-desktop-form-uModalHeader-header']/div[@class='malibu-desktop-form-uModalHeader-header-close']/i"
-        # self.common(xpath=xpath, method='visibility', action='click', info=f"Clicked close popup.", error=f"Click close popup failed.")
         try:
             close_popup_element = self.driver.find_element(By.XPATH, xpath)
             if close_popup_element:
@@ -1674,20 +1600,20 @@ class TestCase(DriverWrapper, unittest.TestCase):
         self.assert_search_not_found()
         self.click_close_notification()
 
-    def assert_element_enable(self, element):
+    def assert_element_enable(self, element: WebElement):
         try:
             self.assertFalse(element.get_attribute('disabled'), "Element '{}' is not enabled".format(element))
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_element_enable for element '{element}' failed. Exception: '{e}'")
     
-    def assert_checkbox_enable(self, element):
+    def assert_checkbox_enable(self, element: WebElement):
         try:
             css_class = element.get_attribute('class')
             self.assertTrue('disable' not in css_class, "Checkbox '{}' is not enabled".format(element))
         except (NoSuchElementException, ElementNotInteractableException) as e:
             log.error(f"Check assert_checkbox_enable for checkbox element '{element}' failed. Exception: '{e}'")
 
-    def assert_checkbox_disable(self, element):
+    def assert_checkbox_disable(self, element: WebElement):
         try:
             css_class = element.get_attribute('class')
             self.assertTrue('disable' in css_class, "Checkbox {} is not disabled".format(element))
@@ -2269,6 +2195,7 @@ class TestCase(DriverWrapper, unittest.TestCase):
         self.common(xpath=sign_icon_xpath, method='unobscured', action='click', info='Clicked signature icon.', error='Click signature icon failed.')
 
     def close_all_form(self):
+        self.close_popup()
         close_all_xpath = "//div[@title='Close all']/i"
         try:
             close_all_element = self.driver.find_element(By.XPATH, close_all_xpath)
@@ -3848,47 +3775,6 @@ class TestCase(DriverWrapper, unittest.TestCase):
 
     def fo_write_text_multi_line(self, title, value, clear_text="Y"):
         return self.write_text_textarea_multi_line(title, value, clear_text=clear_text)
-
-# ================= handle clear_text field =================
-    # def clear_text(self, element_input):
-    #     """Clear text for element 'input'"""
-    #     self.key_escape()
-    #     self.switch_to_core_banking()
-    #     self.driver.execute_script("arguments[0].focus();", element_input)
-    #     self.wait(0.1)
-    #     try:
-    #         actions = ActionChains(self.driver)
-    #         actions.click(element_input).key_down(Keys.CONTROL).send_keys('a').key_up(Keys.CONTROL).send_keys(Keys.BACKSPACE).perform()
-    #         # log.warn(f"Cleared value.")
-    #     except (NoSuchElementException, ElementNotInteractableException) as e:
-    #         log.error(f"Clear value failed. Exception: {e}")
-
-# ================= handle check attribute =================
-    # def check_disable(self, element):
-    #     """Check attribute disable for 'element'"""
-    #     try:
-    #         css_class = element.get_attribute('class')
-    #         if 'disable' in css_class:
-    #             # log.info(f"Attribute 'disable' in class '{css_class}'.")
-    #             return True
-    #         else:
-    #             # log.warn(f"Attribute 'disable' NOT in class '{css_class}'.")
-    #             return False
-    #     except:
-    #         log.error(f"Check attribute 'disable' for element '{element}' failed.")
-
-    # def check_disabled_field(self, element):
-    #     """Check attribute disabled for 'element' is field"""
-    #     try:
-    #         css_class = element.get_attribute('class')
-    #         if 'disabled' in css_class:
-    #             # log.info(f"Attribute 'disabled' in class '{css_class}'.")
-    #             return True
-    #         else:
-    #             # log.warn(f"Attribute 'disabled' NOT in class '{css_class}'.")
-    #             return False
-    #     except:
-    #         log.error(f"Check attribute 'disabled' for element '{element}' failed.")
 
     def click_input_non_tab(self, title):
         """Click of 'input' in screen non tab"""

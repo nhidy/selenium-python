@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 from fastapi.responses import FileResponse
@@ -27,7 +27,15 @@ if not python_executable:
 
 app = FastAPI(
     title="Selenium Test Runner API",
-    description="API to run Selenium test cases in a specified order.",
+    description="""
+    # Hướng dẫn sử dụng
+    Đây là API để chạy các test case Selenium tự động.
+    
+    ## Cách dùng:
+    1. Gọi API `/run_test` với các tham số cấu hình.
+    2. Lấy `run_id` trả về.
+    3. Kiểm tra trạng thái qua `/get_test_status/{run_id}`.
+    """,
     version="1.0.0"
 )
 running_tasks = {}
@@ -45,34 +53,31 @@ DEFAULT_LOGS_DIR = os.path.join(os.getcwd(), "logs")
 LOGS_DIR = os.environ.get("LOGS_PATH", DEFAULT_LOGS_DIR)
 
 class TestRunRequest(BaseModel):
-    test_files: list[str]
-    release_version: str = ""
-    server_name: str = ""
-    run_on_url: str = ""
-    username_login: str = ""
-    password_login: str = ""
-    one_app: Optional[str] = None
-    browser: Optional[str] = None
-    headless: Optional[str] = None
-    customer_code: str = ""
-    customer_code_corporate: str = ""
-    username_approve: str = ""
-    password_approve: str = ""
-    username_reverse: str = ""
-    password_reverse: str = ""
-    report_name: str = ""
-    f8_config: Optional[str] = None
-    debug_mode: Optional[str] = None
-    hour_to_run: Optional[int] = None
-    minute_to_run: Optional[int] = None
-    username_login_other_branch: Optional[str] = None
-    password_login_other_branch: Optional[str] = None
-    username_approve_other_branch: Optional[str] = None
-    password_approve_other_branch: Optional[str] = None
-    username_reverse_other_branch: Optional[str] = None
-    password_reverse_other_branch: Optional[str] = None
-    app_name: Optional[str] = None
-    folder_name: Optional[str] = None
+    release_version: str = Field("", description="Phiên bản release cần test, ex: Core-4.15.1.")
+    server_name: str = Field("", description="Tên server chạy test, ex: 117.")
+    run_on_url: str = Field("", description="URL để chạy test, ex: https://demo-cbs.finasit.jits.digital/.")
+    username_login: str = Field("", description="Username đăng nhập, ex: autoteller.")
+    password_login: str = Field("", description="Password đăng nhập, ex: 12345678.")
+    browser: Optional[str] = Field("chrome", description="Trình duyệt sử dụng (chrome, firefox, edge).")
+    headless: Optional[str] = Field("N", description="Chạy ẩn trình duyệt (Y/N).")
+    customer_code: str = Field("", description="Mã khách hàng (cá nhân), ex: 1-1-056854.")
+    customer_code_corporate: str = Field("", description="Mã khách hàng (doanh nghiệp), ex: 3-6-000024.")
+    username_approve: str = Field("", description="Username duyệt giao dịch, ex: automanager.")
+    password_approve: str = Field("", description="Password duyệt giao dịch, ex: 12345678.")
+    username_reverse: str = Field("", description="Username reverse giao dịch, ex: automanager.")
+    password_reverse: str = Field("", description="Password reverse giao dịch, ex: 12345678.")
+    report_name: str = Field("", description="Tên báo cáo, ex: shwebank_regression.")
+    f8_config: Optional[str] = Field("S", description="Cấu hình search F8 (S: Status, N: Normal).")
+    username_login_other_branch: Optional[str] = Field("", description="Username đăng nhập chi nhánh khác, ex: autoteller005.")
+    password_login_other_branch: Optional[str] = Field("", description="Password đăng nhập chi nhánh khác, ex: 12345678.")
+    username_approve_other_branch: Optional[str] = Field("", description="Username duyệt chi nhánh khác, ex: automanager005.")
+    password_approve_other_branch: Optional[str] = Field("", description="Password duyệt chi nhánh khác, ex: 12345678.")
+    username_reverse_other_branch: Optional[str] = Field("", description="Username reverse chi nhánh khác, ex: automanager005.")
+    password_reverse_other_branch: Optional[str] = Field("", description="Password reverse chi nhánh khác, ex: 12345678.")
+    one_app: Optional[str] = Field("Y", description="user login được phân quyền chỉ có một app. `Y`: một app; `N`: nhiều app.")
+    app_name: Optional[str] = Field("Shwebank", description="Tên ứng dụng, ex: Demo Bank.")
+    folder_name: Optional[str] = Field("shwebank_run_by_api", description="Tên thư mục chứa script test, ex: shwebank_bo_approval.")
+    test_files: list[str] = Field(..., description='Danh sách tên file test cần chạy (không cần đuôi .py), ex: ["check_env", "test_01_customer", "test_02_deposit_01_current", "test_02_deposit_02_s1_savings"]')
 
 @app.get("/")
 def read_root():
@@ -115,52 +120,24 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
     # From main.py, relative path is tests/run_by_api.py
     script_path = os.path.join(os.path.dirname(__file__), 'tests', 'run_by_api.py')
     
-    command = [sys.executable, script_path]
+    # Create a temporary config file
+    config_file_path = os.path.join(os.path.dirname(__file__), 'tests', f'config_{run_id}.json')
+    try:
+        with open(config_file_path, 'w', encoding='utf-8') as f:
+            # Convert Pydantic model to dict
+            json.dump(request_data.dict(), f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"[{run_id}] Error creating config file: {e}", file=sys.stderr)
+        test_run_results[run_id] = {
+            "status": "failed",
+            "passed": False,
+            "output_log": f"Error creating config file: {e}"
+        }
+        test_run_status[run_id] = "failed"
+        save_test_history()
+        return
 
-    command.extend(["--release-version", request_data.release_version])
-    command.extend(["--server-name", request_data.server_name])
-    command.extend(["--run-on-url", request_data.run_on_url])
-    command.extend(["--username-login", request_data.username_login])
-    command.extend(["--password-login", request_data.password_login])
-    if request_data.one_app is not None:
-        command.extend(["--one-app", request_data.one_app])
-    if request_data.browser is not None:
-        command.extend(["--browser", request_data.browser])
-    if request_data.headless is not None:
-        command.extend(["--headless", str(request_data.headless).lower()])
-    command.extend(["--customer-code", request_data.customer_code])
-    command.extend(["--customer-code-corporate", request_data.customer_code_corporate])
-    command.extend(["--username-approve", request_data.username_approve])
-    command.extend(["--password-approve", request_data.password_approve])
-    command.extend(["--username-reverse", request_data.username_reverse])
-    command.extend(["--password-reverse", request_data.password_reverse])
-    if request_data.test_files:
-        command.extend(["--test-files-order", ",".join(request_data.test_files)])
-    command.extend(["--report-name", request_data.report_name])
-    if request_data.debug_mode is not None:
-        command.extend(["--debug-mode", str(request_data.debug_mode).lower()])
-    if request_data.hour_to_run is not None:
-        command.extend(["--hour-to-run", str(request_data.hour_to_run)])
-    if request_data.minute_to_run is not None:
-        command.extend(["--minute-to-run", str(request_data.minute_to_run)])
-    if request_data.username_login_other_branch is not None:
-        command.extend(["--username-login-other-branch", request_data.username_login_other_branch])
-    if request_data.password_login_other_branch is not None:
-        command.extend(["--password-login-other-branch", request_data.password_login_other_branch])
-    if request_data.username_approve_other_branch is not None:
-        command.extend(["--username-approve-other-branch", request_data.username_approve_other_branch])
-    if request_data.password_approve_other_branch is not None:
-        command.extend(["--password-approve-other-branch", request_data.password_approve_other_branch])
-    if request_data.username_reverse_other_branch is not None:
-        command.extend(["--username-reverse-other-branch", request_data.username_reverse_other_branch])
-    if request_data.password_reverse_other_branch is not None:
-        command.extend(["--password-reverse-other-branch", request_data.password_reverse_other_branch])
-    if request_data.f8_config is not None:
-        command.extend(["--f8-config", request_data.f8_config])
-    if request_data.app_name is not None:
-        command.extend(["--app-name", request_data.app_name])
-    if request_data.folder_name is not None:
-        command.extend(["--folder-name", request_data.folder_name])
+    command = [sys.executable, script_path, "--config-file", config_file_path]
 
     try:
         process = subprocess.run(command, capture_output=True, text=True, check=False)
@@ -201,6 +178,12 @@ def run_tests_in_background(run_id: str, request_data: TestRunRequest):
         print(f"[{run_id}] Exception while trying to run subprocess: {e}\n{full_traceback}")
     finally:
         save_test_history()
+        # Clean up config file
+        if os.path.exists(config_file_path):
+            try:
+                os.remove(config_file_path)
+            except Exception as e:
+                print(f"[{run_id}] Warning: Could not remove config file {config_file_path}: {e}", file=sys.stderr)
 
 @app.post("/run_test")
 async def run_test(request: TestRunRequest):

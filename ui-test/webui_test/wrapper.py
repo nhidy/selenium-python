@@ -503,6 +503,7 @@ class DriverWrapper:
                 element = get_element()
                 if element is None:
                     if error:
+                        print(f'[ERROR]: {error}')
                         log.error(error)
                     if warn:
                         log.warn(warn)
@@ -555,13 +556,15 @@ class DriverWrapper:
                 break 
             except StaleElementReferenceException:
                 if attempt < max_retries - 1:
-                    log.debug(f"Encountered StaleElementReferenceException. Retrying... (Times {attempt + 1})")
+                    log.debug(f'Encountered StaleElementReferenceException. Retrying... (Times {attempt + 1})')
                     self.wait(0.5)
                     continue
                 else:
-                    log.error(f"Unable to operate on element due to Stale error after {max_retries} attempts.")
+                    print(f'[StaleElementReferenceException]: Unable to operate on element due to Stale error after {max_retries} attempts.')
+                    log.error(f'Unable to operate on element due to Stale error after {max_retries} attempts.')
                     return None
             except Exception as e:
+                print(f'[Exception]: {e}')
                 log.error(f"Exception: {str(e)}")
                 return None
         return None
