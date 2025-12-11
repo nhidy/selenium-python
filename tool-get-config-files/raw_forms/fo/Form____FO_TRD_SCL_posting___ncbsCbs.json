@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:45.3645798Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"23/02/2024 01:07:41 PM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"FO_TRD_SCL_posting\",\"bodata\":\"\",\"data\":\"\",\"des\":\"FO_TRD_SCL_posting\",\"flow_layout\":[],\"form_code\":\"FO_TRD_SCL_posting\",\"key_form\":\"\",\"lang_form\":{},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"Posting\",\"des\":\"Posting\",\"class\":\"\",\"codeHidden\":\"9c9f62eedf51a184\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"lang\":{},\"code\":\"code\",\"class\":\"col-md-6 col-sm-12 \",\"codeHidden\":\"cbc85eefe8610f4a\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Debit\",\"code\":\"postings_debit\",\"class\":\"col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"6cfe880d0ff85ea2\"},\"config\":{\"structable\":\"FO_TRD_SCL.postings_debit\",\"query_data\":\"FO_TRD_SCL.postings_debit\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"postings_debit.accounting_entry_group\\\",\\n        \\\"title\\\": \\\"Group\\\",\\n        \\\"inputtype\\\": \\\"ColumnNumber\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"postings_debit.account_number\\\",\\n        \\\"title\\\": \\\"Account number\\\",\\n        \\\"inputtype\\\": \\\"columnMask\\\",\\n        \\\"config\\\": {\\n            \\\"mask\\\": \\\"$FO_ACNO_POSTING$\\\"\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"postings_debit.amount\\\",\\n        \\\"title\\\": \\\"Amount\\\",\\n        \\\"inputtype\\\": \\\"columnCurrency\\\",\\n        \\\"config\\\": {\\n            \\\"decimal\\\": 2\\n        }\\n    }\\n]\",\"hasPaging\":\"false\",\"onTable\":\"\",\"hasSystemColumnCheck\":\"false\",\"isMoveColumn\":\"false\",\"isResize\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":{\"mode\":\"DEFAULT\"}},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{},\"property\":{},\"validate\":{},\"lang\":{\"vi\":{},\"en\":{}},\"configAVD\":{},\"inputtype\":\"jTableForm\"}]},{\"name\":\"\",\"lang\":{},\"code\":\"code\",\"class\":\"col-md-6 col-sm-12 \",\"codeHidden\":\"7b43df2be7e7b1d1\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Credit\",\"code\":\"postings_credit\",\"class\":\"col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"a1f900b0238b3b6f\"},\"config\":{\"structable\":\"FO_TRD_SCL.postings_credit\",\"query_data\":\"FO_TRD_SCL.postings_credit\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"postings_credit.accounting_entry_group\\\",\\n        \\\"title\\\": \\\"Group\\\",\\n        \\\"inputtype\\\": \\\"ColumnNumber\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"postings_credit.account_number\\\",\\n        \\\"title\\\": \\\"Account number\\\",\\n        \\\"inputtype\\\": \\\"columnMask\\\",\\n        \\\"config\\\": {\\n            \\\"mask\\\": \\\"$FO_ACNO_POSTING$\\\"\\n        }\\n    },\\n    {\\n        \\\"code\\\": \\\"postings_credit.amount\\\",\\n        \\\"title\\\": \\\"Amount\\\",\\n        \\\"inputtype\\\": \\\"columnCurrency\\\",\\n        \\\"config\\\": {\\n            \\\"decimal\\\": 2\\n        }\\n    }\\n]\",\"hasPaging\":\"false\",\"onTable\":\"\",\"hasSystemColumnCheck\":\"false\",\"isMoveColumn\":\"false\",\"isResize\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":{\"mode\":\"DEFAULT\"}},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{},\"property\":{},\"validate\":{},\"lang\":{\"vi\":{},\"en\":{}},\"configAVD\":{},\"inputtype\":\"jTableForm\"}]}]}]",
+        "react_txt": "",
+        "form_id": "FO_TRD_SCL_posting",
+        "app": "ncbsCbs",
+        "id": 24415
+      }
+    ]
+  }
+]

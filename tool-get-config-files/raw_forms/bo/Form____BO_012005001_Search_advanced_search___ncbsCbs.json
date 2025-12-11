@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.6263436Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_012005001_Search_advanced_search\",\"des\":\"BO_012005001_Search_advanced_search\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_012005001_Search_advanced_search\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_012005001_Search_advanced_search\",\"ruleStrong\":[{\"code\":\"visibility\",\"inUse\":true,\"isStart\":true,\"isStatus\":-1,\"order\":1,\"config\":{\"component_action\":\"\",\"component_result\":\"learn_api_mapping\",\"view_result\":\"\",\"condition\":\"\",\"visible\":\"false\",\"ena_dis\":\"true\",\"component_event\":\"all\",\"list_config\":[]},\"isDidStart\":false,\"isOpenFromOther\":false}],\"app\":\"ncbsCbs\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"ffb23f1b7ea799b8\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"5e808326a70c4f17\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"muti.group_id\",\"structable_read\":\"muti.group_id\",\"data_default\":\"\",\"format\":\"#\",\"decimal_length\":\"0\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"cdlist\":\"\",\"readOnly\":\"\",\"isLabel\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"0\",\"max\":\"\",\"max_length\":\"8\"},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"jCurrency\",\"default\":{\"name\":\"Accounting group\",\"code\":\"grpid\",\"class\":\"                                                                                                                                                                                                                col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"12472e4dd244a7e4\"}},{\"default\":{\"name\":\"Module name\",\"code\":\"mdlname\",\"class\":\"                                                                                                                                                                                                                col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"bf02769aa2499f80\"},\"config\":{\"structable\":\"muti.module\",\"structable_read\":\"muti.module\",\"cdlist\":{\"cdgrp\":\"ADM\",\"cdname\":\"CDGRP\"},\"data_default\":\"\",\"data_mode\":\"cdlist\",\"query_data\":\"\",\"is_multi_select\":\"false\",\"is_multi_col\":\"false\",\"get_data_format\":\"c_cdlist.cdid\",\"selected_view_format\":\"@c_cdlist.caption\",\"table_format\":\"[\\n        {\\n            \\\"title\\\": \\\"Name\\\",\\n            \\\"code\\\": \\\"col.col_name\\\"\\n        },\\n        {\\n            \\\"title\\\": \\\"ID\\\",\\n            \\\"code\\\": \\\"col.col_id\\\"\\n        }\\n    ]\",\"index_view_value\":\"0\",\"col_format\":\"@c_cdlist.caption\",\"json_data\":\"[]\",\"key_selected\":\"c_cdlist.cdid\",\"useAction\":\"false\",\"isAutoDefault\":\"true\",\"isLabel\":\"false\",\"isHasDataNull\":\"true\"},\"role\":{\"disabled\":\"\",\"visible\":\"\",\"other\":\"\",\"other2\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"jSelect\"},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.account_group_def\",\"structable_read\":\"muti.account_group_def\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":50,\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Group name\",\"code\":\"acgrpdef\",\"class\":\"                                                                                                                                                                                                                col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"cf8d17a61f02ff0d\"}},{\"default\":{\"name\":\"Mapping api\",\"code\":\"learn_api_mapping\",\"class\":\"col-sm-12 col-md-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"d934859327c6c63a\"},\"config\":{\"structable\":\"muti.learn_api_mapping\",\"structable_read\":\"muti.learn_api_mapping\",\"data_default\":\"{\\\"group_id\\\":\\\"MapS.dataNNull(muti.group_id)\\\",\\\"module\\\":\\\"MapS.dataSelectNull(muti.module)\\\",\\\"account_group_def\\\":\\\"MapS.dataS(muti.account_group_def)\\\"}\",\"isjson\":\"false\",\"parent\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"true\"},\"validate\":{},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTextArea\"}]},{\"name\":\"button search\",\"code\":\"code\",\"codeHidden\":\"8eca24bc725eeff3\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n  {\\n    \\\"txcode\\\": \\\"fo-search-advancedAPI\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"\\\",\\n      \\\"table_code\\\": \\\"muti\\\",\\n      \\\"workflow_id\\\":\\\"ACT_ACGRPDEF_SER_ADVANCE\\\",\\n\\\"api_map_code\\\":\\\"BO_012005001_Search\\\",\\n\\\"learn_api\\\":\\\"ncbsCBS_workflow_execute_new\\\"\\n    }\\n  }\\n]\",\"isMasterData\":\"false\",\"tableMasterData\":\"learn_sql\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"advanced_search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"0a95af153c7792ca\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_012005001_Search_advanced_search",
+        "app": "ncbsCbs",
+        "id": 180
+      }
+    ]
+  }
+]

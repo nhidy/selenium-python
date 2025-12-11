@@ -1,0 +1,146 @@
+-- =============== C1: PERSONAL - SINGLE ===============
+-- Declare parameters
+DECLARE @CustomerCode NVARCHAR(10) = '11000001';
+DECLARE @Categories NVARCHAR(50) = 'C1';
+DECLARE @DepositAccount NVARCHAR(50) = '120077856632';
+DECLARE @CatalogCode NVARCHAR(50) = 'CAEUR0000';
+DECLARE @BranchCode NVARCHAR(10) = '007';
+DECLARE @CurrencyCode NVARCHAR(10) = '03';
+-- Query 1: SingleCustomer
+SELECT Categories, * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode;
+-- Query 2: DepositAccount
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccount WHERE AccountNumber = @DepositAccount;
+-- Query 3: DepositExtensionAccountOfGroupDefinition
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition WHERE CatalogCode = @CatalogCode AND Categories = @Categories;
+-- Query 4: DepositAccountGLs
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs WHERE DepositAccount = @DepositAccount;
+-- Comparison Query
+SELECT 
+    CASE 
+        WHEN (SELECT GLAccount 
+              FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs 
+              WHERE DepositAccount = @DepositAccount) = 
+             (SELECT CONCAT(@BranchCode, ReplaceBy, @CurrencyCode) 
+              FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition 
+              WHERE CatalogCode = @CatalogCode AND Categories = @Categories)
+        THEN 'The values are equal'
+        ELSE 'The values are not equal'
+    END AS ComparisonResult;
+
+-- =============== C1: PERSONAL - LINKAGE ===============
+-- Declare parameters
+DECLARE @CustomerCode NVARCHAR(10) = '11000003';
+DECLARE @Categories NVARCHAR(50) = 'C1';
+DECLARE @DepositAccount NVARCHAR(50) = '310075523235';
+DECLARE @CatalogCode NVARCHAR(50) = 'BSMMK0000';
+DECLARE @BranchCode NVARCHAR(10) = '007';
+DECLARE @CurrencyCode NVARCHAR(10) = '01';
+-- Query 1: SingleCustomer
+SELECT Categories, * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode;
+-- Query 2: DepositAccount
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccount WHERE AccountNumber = @DepositAccount;
+-- Query 3: DepositExtensionAccountOfGroupDefinition
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition WHERE CatalogCode = @CatalogCode AND Categories = @Categories;
+-- Query 4: DepositAccountGLs
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs WHERE DepositAccount = @DepositAccount;
+-- Comparison Query
+SELECT 
+    CASE 
+        WHEN (SELECT GLAccount 
+              FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs 
+              WHERE DepositAccount = @DepositAccount) = 
+             (SELECT CONCAT(@BranchCode, ReplaceBy, @CurrencyCode) 
+              FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition 
+              WHERE CatalogCode = @CatalogCode AND Categories = @Categories)
+        THEN 'The values are equal'
+        ELSE 'The values are not equal'
+    END AS ComparisonResult;
+
+-- =============== C2: SME - SINGLE ===============
+-- Declare parameters
+DECLARE @CustomerCode NVARCHAR(10) = '24000001';
+DECLARE @Categories NVARCHAR(50) = 'C2';
+DECLARE @DepositAccount NVARCHAR(50) = '350072686368';
+DECLARE @CatalogCode NVARCHAR(50) = 'SCMMK0000';
+DECLARE @BranchCode NVARCHAR(10) = '007';
+DECLARE @CurrencyCode NVARCHAR(10) = '01';
+-- Query 1: SingleCustomer
+SELECT Categories, * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode;
+-- Query 2: DepositAccount
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccount WHERE AccountNumber = @DepositAccount;
+-- Query 3: DepositExtensionAccountOfGroupDefinition
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition WHERE CatalogCode = @CatalogCode AND Categories = @Categories;
+-- Query 4: DepositAccountGLs
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs WHERE DepositAccount = @DepositAccount;
+-- Comparison Query
+SELECT 
+    CASE 
+        WHEN (SELECT GLAccount 
+              FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs 
+              WHERE DepositAccount = @DepositAccount) = 
+             (SELECT CONCAT(@BranchCode, ReplaceBy, @CurrencyCode) 
+              FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition 
+              WHERE CatalogCode = @CatalogCode AND Categories = @Categories)
+        THEN 'The values are equal'
+        ELSE 'The values are not equal'
+    END AS ComparisonResult;
+
+
+-- =============== C3: CORPORATE - GROUP ===============
+-- Declare parameters
+DECLARE @CustomerCode NVARCHAR(10) = '37000001';
+DECLARE @Categories NVARCHAR(50) = 'C3';
+DECLARE @DepositAccount NVARCHAR(50) = '310072847435';
+DECLARE @CatalogCode NVARCHAR(50) = 'BSMMK0000';
+DECLARE @BranchCode NVARCHAR(10) = '007';
+DECLARE @CurrencyCode NVARCHAR(10) = '01';
+-- Query 1: SingleCustomer
+SELECT Categories, * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode;
+-- Query 2: DepositAccount
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccount WHERE AccountNumber = @DepositAccount;
+-- Query 3: DepositExtensionAccountOfGroupDefinition
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition WHERE CatalogCode = @CatalogCode AND Categories = @Categories;
+-- Query 4: DepositAccountGLs
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs WHERE DepositAccount = @DepositAccount;
+-- Comparison Query
+SELECT 
+    CASE 
+        WHEN (SELECT GLAccount 
+              FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs 
+              WHERE DepositAccount = @DepositAccount) = 
+             (SELECT CONCAT(@BranchCode, ReplaceBy, @CurrencyCode) 
+              FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition 
+              WHERE CatalogCode = @CatalogCode AND Categories = @Categories)
+        THEN 'The values are equal'
+        ELSE 'The values are not equal'
+    END AS ComparisonResult;
+
+
+-- =============== C4: INSTITUTIONAL - SINGLE ===============
+-- Declare parameters
+DECLARE @CustomerCode NVARCHAR(10) = '48000001';
+DECLARE @Categories NVARCHAR(50) = 'C4';
+DECLARE @DepositAccount NVARCHAR(50) = '110078450338';
+DECLARE @CatalogCode NVARCHAR(50) = 'CAMMK0000';
+DECLARE @BranchCode NVARCHAR(10) = '007';
+DECLARE @CurrencyCode NVARCHAR(10) = '01';
+-- Query 1: SingleCustomer
+SELECT Categories, * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode;
+-- Query 2: DepositAccount
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccount WHERE AccountNumber = @DepositAccount;
+-- Query 3: DepositExtensionAccountOfGroupDefinition
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition WHERE CatalogCode = @CatalogCode AND Categories = @Categories;
+-- Query 4: DepositAccountGLs
+SELECT * FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs WHERE DepositAccount = @DepositAccount;
+-- Comparison Query
+SELECT 
+    CASE 
+        WHEN (SELECT GLAccount 
+              FROM [27.3.1.199].o9deposit.dbo.DepositAccountGLs 
+              WHERE DepositAccount = @DepositAccount) = 
+             (SELECT CONCAT(@BranchCode, ReplaceBy, @CurrencyCode) 
+              FROM [27.3.1.199].o9deposit.dbo.DepositExtensionAccountOfGroupDefinition 
+              WHERE CatalogCode = @CatalogCode AND Categories = @Categories)
+        THEN 'The values are equal'
+        ELSE 'The values are not equal'
+    END AS ComparisonResult;

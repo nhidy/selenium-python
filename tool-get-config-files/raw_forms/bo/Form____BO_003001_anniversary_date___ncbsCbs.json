@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.3975526Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_003001_anniversary_date\",\"des\":\"BO_003001_anniversary_date\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_003001_anniversary_date\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_003001_anniversary_date\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"5539f33d72aeee39\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"3768455e2b4fdaca\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"muti.M\",\"structable_read\":\"muti.M\",\"data_default\":\"\",\"data_type\":\"edit\",\"mask_format\":\"DD/MM/YYYY\",\"mask_data_format\":\"\",\"value_type\":\"number\",\"mask_mode\":\"date\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jMaskInput\",\"default\":{\"name\":\"Married date\",\"code\":\"m\",\"codeHidden\":\"8c5cd911e4fca919\",\"class\":\"                        col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"structable\":\"muti.G\",\"structable_read\":\"muti.G\",\"data_default\":\"\",\"data_type\":\"edit\",\"mask_format\":\"DD/MM/YYYY\",\"mask_data_format\":\"\",\"value_type\":\"number\",\"mask_mode\":\"date\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jMaskInput\",\"default\":{\"name\":\"Graduation date\",\"code\":\"g\",\"codeHidden\":\"8422b887b8a7e910\",\"class\":\"                        col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"structable\":\"muti.B\",\"structable_read\":\"muti.B\",\"data_default\":\"\",\"data_type\":\"edit\",\"mask_format\":\"DD/MM/YYYY\",\"mask_data_format\":\"\",\"value_type\":\"number\",\"mask_mode\":\"date\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jMaskInput\",\"default\":{\"name\":\"Starting date of company\",\"code\":\"b\",\"codeHidden\":\"80f94389e1cc3915\",\"class\":\"                        col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_003001_anniversary_date",
+        "app": "ncbsCbs",
+        "id": 17
+      }
+    ]
+  }
+]

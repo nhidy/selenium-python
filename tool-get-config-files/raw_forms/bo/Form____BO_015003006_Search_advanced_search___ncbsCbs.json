@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.8647351Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_015003006_Search_advanced_search\",\"des\":\"BO_015003006_Search_advanced_search\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_015003006_Search_advanced_search\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_015003006_Search_advanced_search\",\"ruleStrong\":[{\"code\":\"visibility\",\"inUse\":true,\"isStart\":true,\"isStatus\":-1,\"order\":1,\"config\":{\"component_action\":\"\",\"component_result\":\"learn_api_mapping\",\"view_result\":\"\",\"condition\":\"\",\"visible\":\"false\",\"ena_dis\":\"true\",\"component_event\":\"all\",\"list_config\":[]},\"isDidStart\":false,\"isOpenFromOther\":false}],\"app\":\"ncbsCbs\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"122ad8ede9da2893\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"0f66fa4c24ea1a00\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"muti.id\",\"structable_read\":\"muti.id\",\"data_default\":\"\",\"format\":\"#\",\"decimal_length\":\"0\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"cdlist\":\"\",\"readOnly\":\"\",\"isLabel\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"0\",\"max\":\"\",\"max_length\":\"5\"},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"jCurrency\",\"default\":{\"name\":\"Policy id\",\"code\":\"policyid\",\"class\":\"          col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"b2705246d1ff7cec\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.descr\",\"structable_read\":\"muti.descr\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0,\"max\":50},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Desciption of policy\",\"code\":\"descr\",\"codeHidden\":\"f95f8706f23eb2fe\",\"class\":\"          col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"structable\":\"muti.effective_from\",\"structable_read\":\"muti.effective_from\",\"data_default\":\"\",\"data_type\":\"edit\",\"component_title\":\"\",\"mask_mode_time\":\"time_zone_c\",\"mask_format\":\"DD/MM/YYYY\",\"mask_data_format\":\"\",\"value_type\":\"string\",\"auto_delete\":\"true\",\"mask_mode\":\"date\",\"isLookup\":\"false\",\"callform\":\"O9_APPROVE_ACCEPT\",\"callform_detail\":\"O9_APPROVE_ACCEPT\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"status\":\"\",\"reg_remove\":\"\",\"content_style\":\"\",\"isLabel\":\"false\",\"format_value_type_string\":\"YYYY-MM-DDTHH:mm:ss\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"jMaskInput\",\"default\":{\"name\":\"Effective from\",\"code\":\"effrom\",\"class\":\"col-sm-6 col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"EFFROM\",\"class_ofgroup\":\"col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"codeHidden\":\"019f126c0c783f7a\"}},{\"config\":{\"structable\":\"muti.effective_to\",\"structable_read\":\"muti.effective_to\",\"data_default\":\"\",\"data_type\":\"edit\",\"component_title\":\"\",\"mask_mode_time\":\"time_zone_c\",\"mask_format\":\"DD/MM/YYYY\",\"mask_data_format\":\"\",\"value_type\":\"string\",\"auto_delete\":\"true\",\"mask_mode\":\"date\",\"isLookup\":\"false\",\"callform\":\"O9_APPROVE_ACCEPT\",\"callform_detail\":\"O9_APPROVE_ACCEPT\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"status\":\"\",\"reg_remove\":\"\",\"content_style\":\"\",\"isLabel\":\"false\",\"format_value_type_string\":\"YYYY-MM-DDTHH:mm:ss\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"jMaskInput\",\"default\":{\"name\":\"Effective to\",\"code\":\"efto\",\"class\":\"col-sm-6 col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"EFFROM\",\"class_ofgroup\":\"col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"codeHidden\":\"7c31400860dd982d\"}},{\"default\":{\"name\":\"Mapping api\",\"code\":\"learn_api_mapping\",\"class\":\"col-sm-12 col-md-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ebd1a5bf41c176f5\"},\"config\":{\"structable\":\"muti.learn_api_mapping\",\"structable_read\":\"muti.learn_api_mapping\",\"data_default\":\"{\\\"id\\\":\\\"MapS.dataNNull(muti.id)\\\",\\\"descr\\\":\\\"MapS.dataS(muti.descr)\\\",\\\"effective_from\\\":\\\"MapS.dataSNull(muti.effective_from)\\\",\\\"effective_to\\\":\\\"MapS.dataSNull(muti.effective_to)\\\"}\",\"isjson\":\"false\",\"parent\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"true\"},\"validate\":{},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTextArea\"}]},{\"name\":\"button search\",\"code\":\"code\",\"codeHidden\":\"9d75898dedfd4f7a\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[{\\\"txcode\\\":\\\"fo-search-advancedAPI\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"\\\",\\\"table_code\\\":\\\"muti\\\",\\n      \\\"workflow_id\\\":\\\"ADM_ADVANCED_SEARCH_USER_POLICY\\\",\\n\\\"learn_api\\\":\\\"ncbsCBS_workflow_execute_new\\\",\\n\\\"api_map_code\\\":\\\"BO_015003006_Search\\\"}}]\",\"isMasterData\":\"false\",\"tableMasterData\":\"learn_sql\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"advanced_search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"c82477262134e22f\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_015003006_Search_advanced_search",
+        "app": "ncbsCbs",
+        "id": 430
+      }
+    ]
+  }
+]

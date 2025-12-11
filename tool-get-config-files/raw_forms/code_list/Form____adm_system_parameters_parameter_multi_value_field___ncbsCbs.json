@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-10-21T02:18:35.3439847Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"Adm_system_parameters_parameter_multi_value_field\",\"des\":\"Adm_system_parameters_parameter_multi_value_field\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"Adm_system_parameters_parameter_multi_value_field\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"adm_system_parameters_parameter_multi_value_field\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"ae02b189a4549696\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"b10c4d277ba746c5\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"action\":\"\",\"structable\":\"muti.V1\",\"structable_read\":\"muti.V1\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 1\",\"code\":\"value_1\",\"codeHidden\":\"c223002af36d24df\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.V2\",\"structable_read\":\"muti.V2\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 2\",\"code\":\"value_2\",\"codeHidden\":\"188f579968050d17\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.V3\",\"structable_read\":\"muti.V3\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 3\",\"code\":\"value_3\",\"codeHidden\":\"81e0cff9cd9a8f3a\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.V4\",\"structable_read\":\"muti.V4\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 4\",\"code\":\"value_4\",\"codeHidden\":\"9a79901e64f6107f\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.V5\",\"structable_read\":\"muti.V5\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 5\",\"code\":\"value_5\",\"codeHidden\":\"f3e4e819ae864234\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.V6\",\"structable_read\":\"muti.V6\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"max\":64},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Value 6\",\"code\":\"value_6\",\"codeHidden\":\"4cae87475a97c9b8\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "adm_system_parameters_parameter_multi_value_field",
+        "app": "ncbsCbs",
+        "id": 611
+      }
+    ]
+  }
+]

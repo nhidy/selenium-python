@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.6356284Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_012002_other_name\",\"des\":\"BO_012002_other_name\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_012002_other_name\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_012002_other_name\",\"ruleStrong\":[],\"app\":\"ncbsCbs\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"44ab7042025118e5\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"c38e29d5f35d1bbd\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.laos_name\",\"structable_read\":\"muti.laos_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Laos name\",\"code\":\"l\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ee69c66d727be2e4\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.thai_name\",\"structable_read\":\"muti.thai_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Thai name\",\"code\":\"t\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"26d1d4d737108f4b\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.khmer_name\",\"structable_read\":\"muti.khmer_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Khmer name\",\"code\":\"k\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"483b5f14c80c4b35\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.vietnamese_name\",\"structable_read\":\"muti.vietnamese_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Vietnamese name\",\"code\":\"v\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"065d1c650a1e1554\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_012002_other_name",
+        "app": "ncbsCbs",
+        "id": 188
+      }
+    ]
+  }
+]

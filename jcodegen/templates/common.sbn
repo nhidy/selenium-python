@@ -1,0 +1,998 @@
+{{~
+func choose_method(field_method)
+    method = ""
+    case field_method
+        when "bgv"
+            method = "bo_get_value"
+        when "bgvs"
+            method = "bo_get_value_single"
+        when "bgvg"
+            method = "bo_get_value_group"
+        when "bgvgs"
+            method = "bo_get_value_group_single"
+        when "bgvm"
+            method = "bo_get_value_multi"
+        when "bgvb"
+            method = "bo_get_value_border"
+        when "bgvd"
+            method = "bo_get_value_data"
+        when "bgd"
+            method = "bo_get_date"
+        when "bgds"
+            method = "bo_get_date_single"
+        when "bgdg"
+            method = "bo_get_date_group"
+        when "bgs"
+            method = "bo_get_select"
+        when "bgss"
+            method = "bo_get_select_single"
+        when "bgsg"
+            method = "bo_get_select_group"
+        when "bgsgs"
+            method = "bo_get_select_group_single"
+        when "bgsm"
+            method = "bo_get_select_multi"
+        when "bgt"
+            method = "bo_get_text"
+        when "bgts"
+            method = "bo_get_text_single"
+        when "bgtg"
+            method = "bo_get_text_group"
+        when "bgtgs"
+            method = "bo_get_text_group_single"
+        when "bgtm"
+            method = "bo_get_text_multi"
+        when "bgtb"
+            method = "bo_get_text_border"
+        when "bgtml"
+            method = "bo_get_text_multi_line"
+        when "bgtd"
+            method = "bo_get_text_data"
+        when "bgtt"
+            method = "bo_get_text_table"
+        when "bgtti"
+            method = "bo_get_text_table_index"
+        when "bav"
+            method = "bo_assert_value"
+        when "bavs"
+            method = "bo_assert_value_single"
+        when "bavg"
+            method = "bo_assert_value_group"
+        when "bavgs"
+            method = "bo_assert_value_group_single"
+        when "bavm"
+            method = "bo_assert_value_multi"
+        when "bavb"
+            method = "bo_assert_value_border"
+        when "bavd"
+            method = "bo_assert_value_data"
+        when "bad"
+            method = "bo_assert_date"
+        when "bads"
+            method = "bo_assert_date_single"
+        when "badg"
+            method = "bo_assert_date_group"
+        when "bas"
+            method = "bo_assert_select"
+        when "bass"
+            method = "bo_assert_select_single"
+        when "basg"
+            method = "bo_assert_select_group"
+        when "basgs"
+            method = "bo_assert_select_group_single"
+        when "basm"
+            method = "bo_assert_select_multi"
+        when "bat"
+            method = "bo_assert_text"
+        when "bats"
+            method = "bo_assert_text_single"
+        when "batg"
+            method = "bo_assert_text_group"
+        when "batgs"
+            method = "bo_assert_text_group_single"
+        when "batm"
+            method = "bo_assert_text_multi"
+        when "batb"
+            method = "bo_assert_text_border"
+        when "batml"
+            method = "bo_assert_text_multi_line"
+        when "batd"
+            method = "bo_assert_text_data"
+        when "batt"
+            method = "bo_assert_text_table"
+        when "batti"
+            method = "bo_assert_text_table_index"
+        when "battgl"
+            method = "bo_assert_text_table_account_gls"
+        when "battifc"
+            method = "bo_assert_text_table_ifc_gls"
+        when "bw"
+            method = "bo_write"
+        when "bwdt"
+            method = "bo_write_data"
+        when "bws"
+            method = "bo_write_single"
+        when "bwg"
+            method = "bo_write_group"
+        when "bwgs"
+            method = "bo_write_group_single"
+        when "bwm"
+            method = "bo_write_multi"
+        when "bwms"
+            method = "bo_write_multi_single"
+        when "bwt"
+            method = "bo_write_text"
+        when "bwtd"
+            method = "bo_write_text_data"
+        when "bwts"
+            method = "bo_write_text_single"
+        when "bwtg"
+            method = "bo_write_text_group"
+        when "bwtgs"
+            method = "bo_write_text_group_single"
+        when "bwtm"
+            method = "bo_write_text_multi"
+        when "bwtms"
+            method = "bo_write_text_multi_single"
+        when "bwtb"
+            method = "bo_write_text_border"
+        when "bwtml"
+            method = "bo_write_text_multi_line"
+        when "bwd"
+            method = "bo_write_date"
+        when "bwds"
+            method = "bo_write_date_single"
+        when "bwn"
+            method = "bo_write_number"
+        when "bwns"
+            method = "bo_write_number_single"
+        when "bwng"
+            method = "bo_write_number_group"
+        when "bwngs"
+            method = "bo_write_number_group_single"
+        when "bs"
+            method = "bo_select"
+        when "bsd"
+            method = "bo_select_data"
+        when "bss"
+            method = "bo_select_single"
+        when "bsg"
+            method = "bo_select_group"
+        when "bsgs"
+            method = "bo_select_group_single"
+        when "bsc"
+            method = "bo_select_collap"
+        when "bsb"
+            method = "bo_select_border"
+        when "bsm"
+            method = "bo_select_multi"
+        when "bct"
+            method = "bo_click_tab"
+        when "bcc"
+            method = "bo_click_checkbox"
+        when "bccs"
+            method = "bo_click_checkbox_single"
+        when "bccm"
+            method = "bo_click_checkbox_multi"
+        when "bcs"
+            method = "bo_click_signature"
+        when "bccl"
+            method = "bo_click_collap"
+        when "bccls"
+            method = "bo_click_collap_single"
+        when "bsv"
+            method = "bo_set_value"
+        when "bst"
+            method = "bo_set_text"
+        when "bcf"
+            method = "bo_choose_file"
+        when "fgv"
+            method = "fo_get_value"
+        when "fgvg"
+            method = "fo_get_value_group"
+        when "fgvm"
+            method = "fo_get_value_multi"
+        when "fgvb"
+            method = "fo_get_value_border"
+        when "fgvd"
+            method = "fo_get_value_data"
+        when "fgd"
+            method = "fo_get_date"
+        when "fgs"
+            method = "fo_get_select"
+        when "fgsg"
+            method = "fo_get_select_group"
+        when "fgsm"
+            method = "fo_get_select_multi"
+        when "fgt"
+            method = "fo_get_text"
+        when "fgtg"
+            method = "fo_get_text_group"
+        when "fgtm"
+            method = "fo_get_text_multi"
+        when "fgtb"
+            method = "fo_get_text_border"
+        when "fgtml"
+            method = "fo_get_text_multi_line"
+        when "fgtd"
+            method = "fo_get_text_data"
+        when "fgtt"
+            method = "fo_get_text_table"
+        when "fgtti"
+            method = "fo_get_text_table_index"
+        when "fav"
+            method = "fo_assert_value"
+        when "favg"
+            method = "fo_assert_value_group"
+        when "favm"
+            method = "fo_assert_value_multi"
+        when "favb"
+            method = "fo_assert_value_border"
+        when "favd"
+            method = "fo_assert_value_data"
+        when "fad"
+            method = "fo_assert_date"
+        when "fas"
+            method = "fo_assert_select"
+        when "fasg"
+            method = "fo_assert_select_group"
+        when "fasm"
+            method = "fo_assert_select_multi"
+        when "fat"
+            method = "fo_assert_text"
+        when "fatg"
+            method = "fo_assert_text_group"
+        when "fatm"
+            method = "fo_assert_text_multi"
+        when "fatb"
+            method = "fo_assert_text_border"
+        when "fatml"
+            method = "fo_assert_text_multi_line"
+        when "fatd"
+            method = "fo_assert_text_data"
+        when "fatt"
+            method = "fo_assert_text_table"
+        when "fatti"
+            method = "fo_assert_text_table_index"
+        when "fw"
+            method = "fo_write"
+        when "fwg"
+            method = "fo_write_group"
+        when "fwm"
+            method = "fo_write_multi"
+        when "fwb"
+            method = "fo_write_border"
+        when "fwd"
+            method = "fo_write_date"
+        when "fwdb"
+            method = "fo_write_date_border"
+        when "fwn"
+            method = "fo_write_number"
+        when "fwng"
+            method = "fo_write_number_group"
+        when "fwnb"
+            method = "fo_write_number_border"
+        when "fwt"
+            method = "fo_write_text"
+        when "fwtg"
+            method = "fo_write_text_group"
+        when "fwtm"
+            method = "fo_write_text_multi"
+        when "fwtb"
+            method = "fo_write_text_border"
+        when "fwtml"
+            method = "fo_write_text_multi_line"
+        when "fs"
+            method = "fo_select"
+        when "fsc"
+            method = "fo_select_collap"
+        when "fsb"
+            method = "fo_select_border"
+        when "fsm"
+            method = "fo_select_multi"
+        when "fsd"
+            method = "fo_select_data"
+        when "fcc"
+            method = "fo_click_checkbox"
+        when "fcs"
+            method = "fo_click_signature"
+        when "fccl"
+            method = "fo_click_collap"
+        when "fcf"
+            method = "fo_choose_file"
+        when "fsv"
+            method = "fo_set_value"
+        when "fst"
+            method = "fo_set_text"
+        when "bac"
+            method = "bo_assert_checkbox"
+        when "fac"
+            method = "fo_assert_checkbox"
+        when "bacm"
+            method = "bo_assert_checkbox_multi"
+        when "facm"
+            method = "fo_assert_checkbox_multi"
+    end
+    ret method
+end
+~}}
+{{~
+func choose_param(field_method, method, title, value, collap_name, border_name, is_replace, replace_by, mask_method)
+    param_string = ""
+    value_covert = ""
+    value_mask_covert = ""
+    if is_replace == "y"
+        value_covert = value_covert | string.append "str(" | string.append value | string.append ").replace('" | string.append replace_by | string.append "', '')"
+    else
+        value_covert = value
+    end
+    if mask_method != ""
+        value_mask_covert = value_mask_covert | string.append "self." | string.append mask_method | string.append "(" | string.append value | string.append ")"
+    else
+        value_mask_covert = value
+    end
+    case field_method
+        when "bgv", "bgvs", "bgvg", "bgvgs", "bgvd", "bgd", "bgds", "bgdg", "bgs", "bgss", "bgsm", "bgt", "bgts", "bgtg", "bgtgs", "bgtml", "bgtd", "bcc", "bccs", "fgv", "fgvg", "fgvd", "fgd", "fgs", "fgsm", "fgt", "fgtg", "fgtml", "fgtd", "fcc"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "')"
+        when "bw", "bwdt", "bws", "bwg", "bwgs", "bwt", "bwtd", "bwts", "bwtg", "bwtgs", "bwtml", "bwd", "bwds", "bwn", "bwns", "bwng", "bwngs", "bsv", "bst", "fw", "fwg", "fwd", "fwn", "fwng", "fwt", "fwtg", "fwtml", "fsv", "fst"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        when "bav", "bavs", "bavg", "bavgs", "bavd", "bad", "bads", "badg", "bas", "bass", "basg", "basgs", "basm", "bat", "bats", "batg", "batgs", "batml", "batd", "batd", "fav", "favg", "fad", "fas", "fasm", "fat", "fatg", "fatml", "fatd", "favd"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "', " | string.append value_mask_covert | string.append ")"
+        when "bgsg", "bgsgs", "fgsg"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "', '" | string.append title_front_select | string.append "')"
+        when "bgvb", "bgtb", "fgvb", "fgtb"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append border_name | string.append "', '" | string.append title | string.append "')"
+        when "bwtb", "fwb", "fwdb", "fwnb", "fwtb"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append border_name | string.append "', '" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        when "bavb", "batb", "favb", "fatb"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append border_name | string.append "', '" | string.append title | string.append "', " | string.append value_mask_covert | string.append ")"
+        when "bccl", "bccls", "fccl"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "')"
+        when "fgvm", "fgtm"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.fo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "')"
+        when "bgvm", "bgtm", "bccm"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.bo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "')"
+        when "fwm", "fsc", "fwtm"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.fo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        when "bwm", "bwms", "bwtm", "bwtms", "bsc"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.bo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        when "favm", "fatm"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.fo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "', " | string.append value_mask_covert | string.append ")"
+        when "bavm", "batm", "bacm", "facm"
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self.bo_click_collap('" | string.append collap_name | string.append "')\n    self." | string.append method | string.append "('" | string.append collap_name | string.append "', '" | string.append title | string.append "', " | string.append value_mask_covert | string.append ")"
+        when "bac", "fac"
+            param_string = param_string | string.append "if " | string.append value | string.append " is not None:\n    self." | string.append method | string.append "('" | string.append title | string.append "', " | string.append value_mask_covert | string.append ")"
+        when "bs", "bsd", "bss", "bsg", "bsgs", "bsm", "fs", "fsm", "fsd"
+            param_string = param_string | string.append "self.key_escape()\nif " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        when "bsb", "fsb"
+            param_string = param_string | string.append "self.key_escape()\nif " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append border_name | string.append "', '" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+        else
+            param_string = param_string | string.append "if " | string.append value | string.append ":\n    self." | string.append method | string.append "('" | string.append title | string.append "', '" | string.append title_front_select | string.append "', " | string.append value_covert | string.append ")"
+    end
+    ret param_string
+end
+~}}
+{{~
+func choose_name(transaction_code, form_name)
+    name_string = ""
+    if (transaction_code | string.ends_with "_Search")
+        name_string = form_name | string.append "_simple_search"
+    else if (transaction_code | string.ends_with "_advanced_search")
+        name_string = form_name | string.append "_advanced_search"
+    else if (transaction_code | string.ends_with "_Add")
+        name_string = form_name | string.append "_add"
+    else if (transaction_code | string.ends_with "_View")
+        name_string = form_name | string.append "_view"
+    else
+        name_string = form_name | string.append "_view"
+    end
+    ret name_string
+end
+~}}
+
+{{~
+func choose_name_code_list(transaction_code, form_name)
+    name_string = ""
+    if (transaction_code | string.ends_with "_search")
+        name_string = form_name | string.append "_simple_search"
+    else if (transaction_code | string.ends_with "_search_advanced")
+        name_string = form_name | string.append "_advanced_search"
+    else if (transaction_code | string.ends_with "_add")
+        name_string = form_name | string.append "_add"
+    else if (transaction_code | string.ends_with "_Add")
+        name_string = form_name | string.append "_add"
+    else if (transaction_code | string.ends_with "_View")
+        name_string = form_name | string.append "_view"
+    else
+        name_string = form_name | string.append "_view"
+    end
+    ret name_string
+end
+~}}
+{{~
+func bo_get_field_method(field_type, is_enable, is_group, is_multi, border_name, tab_name)
+    field_method = ""
+    if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bw"
+    else if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bws"
+    else if (field_type == "input" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwg"
+    else if (field_type == "input" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwgs"
+    else if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bwm"
+    else if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bwms"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bav"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bavs"
+    else if (field_type == "input" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bavg"
+    else if (field_type == "input" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bavgs"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        field_method = "bavb"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        field_method = "bavb"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwt"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwts"
+    else if (field_type == "text" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwtg"
+    else if (field_type == "text" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwtgs"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bwtm"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bwtms"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        field_method = "bwtb"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        field_method = "bwtb"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bat"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bats"
+    else if (field_type == "text" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "batg"
+    else if (field_type == "text" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "batgs"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "batm"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "batm"
+    else if (field_type == "text" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "batm"
+    else if (field_type == "text" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "batm"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        field_method = "batb"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        field_method = "batb"
+    else if (field_type == "text_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwtml"
+    else if (field_type == "text_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwtml"
+    else if (field_type == "text_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "batml"
+    else if (field_type == "text_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "batml"
+    else if (field_type == "date" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwd"
+    else if (field_type == "date" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwds"
+    else if (field_type == "date" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bad"
+    else if (field_type == "date" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bads"
+    else if (field_type == "date" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "date" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "number" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwn"
+    else if (field_type == "number" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwns"
+    else if (field_type == "number" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bwng"
+    else if (field_type == "number" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bwngs"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bav"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bavs"
+    else if (field_type == "number" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bavg"
+    else if (field_type == "number" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bavgs"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "number" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "number" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bs"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bss"
+    else if (field_type == "select" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bsg"
+    else if (field_type == "select" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bsgs"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bsc"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bsc"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        field_method = "bsb"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        field_method = "bsb"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bas"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bass"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "basg"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "basgs"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        field_method = "bavb"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        field_method = "bavb"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bavm"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        field_method = "bavm"
+    else if (field_type == "select_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bsm"
+    else if (field_type == "select_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bsm"
+    else if (field_type == "select_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "basm"
+    else if (field_type == "select_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "basm"
+    else if (field_type == "checkbox" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bcc"
+    else if (field_type == "checkbox" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bccs"
+    else if (field_type == "checkbox" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bccm"
+    else if (field_type == "checkbox" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        field_method = "bac"
+    else if (field_type == "checkbox" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        field_method = "bac"
+    else if (field_type == "checkbox" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        field_method = "bacm"
+    else
+        field_method = ""
+    end
+    ret field_method
+end
+~}}
+{{~
+func bo_get_out_method(field_type, is_group, is_multi, border_name, tab_name)
+    out_method = ""
+    if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgv"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgvs"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgvg"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgvgs"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        out_method = "bgvm"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        out_method = "bgvm"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        out_method = "bgvb"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        out_method = "bgvb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgv"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgvs"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgvg"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgvgs"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        out_method = "bgvm"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        out_method = "bgvm"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        out_method = "bgvb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        out_method = "bgvb"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgd"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgds"
+    else if (field_type == "date" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgdg"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgs"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgss"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgsg"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgsgs"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        out_method = "bgvb"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        out_method = "bgvb"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgsm"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgsm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgt"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgts"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgtg"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgtgs"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        out_method = "bgtm"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        out_method = "bgtm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        out_method = "bgtb"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        out_method = "bgtb"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        out_method = "bgtml"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        out_method = "bgtml"
+    end
+    ret out_method
+end
+~}}
+{{~
+func bo_get_view_method(field_type, is_group, is_multi, border_name, tab_name)
+    view_method = ""
+    if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bav"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bavs"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bavg"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bavgs"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        view_method = "bavb"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        view_method = "bavb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bav"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bavs"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bavg"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bavgs"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "number" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "number" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        view_method = "bavb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        view_method = "bavb"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bad"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bads"
+    else if (field_type == "date" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "badg"
+    else if (field_type == "date" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "date" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bas"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bass"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "basg"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "basgs"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        view_method = "bavb"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        view_method = "bavb"
+    else if (field_type == "select" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "select" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "select" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bavm"
+    else if (field_type == "select" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "bavm"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "basm"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "basm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bat"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bats"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "batg"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "batgs"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "batm"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "batm"
+    else if (field_type == "text" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "batm"
+    else if (field_type == "text" && is_group == "y" && is_multi == "y" && border_name == "" && tab_name == "")
+        view_method = "batm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "" && tab_name != "")
+        view_method = "batb"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "" && tab_name == "")
+        view_method = "batb"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "batml"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "batml"
+    else if (field_type == "checkbox" && is_group == "" && is_multi == "" && border_name == "" && tab_name != "")
+        view_method = "bac"
+    else if (field_type == "checkbox" && is_group == "" && is_multi == "" && border_name == "" && tab_name == "")
+        view_method = "bac"
+    else if (field_type == "checkbox" && is_group == "" && is_multi == "y" && border_name == "" && tab_name != "")
+        view_method = "bacm"
+    else
+        view_method = ""
+    end
+    ret view_method
+end
+~}}
+{{~
+func choose_advanced_search(title, value, field_type, is_group, is_replace, replace_by)
+    advanced_search_string = ""
+    value_covert = ""
+    if is_replace == "y"
+        value_covert = value_covert | string.append "str(" | string.append value | string.append ").replace('" | string.append replace_by | string.append "', '')"
+    else
+        value_covert = value
+    end
+    if (field_type == "input" && is_group == "")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "date" && is_group == "")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "number" && is_group == "")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "text" && is_group == "")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search_text('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "select" && is_group == "")
+        advanced_search_string = "self.key_escape()\nif " | string.append value | string.append ":\n    self.adv_search_select('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "checkbox" && is_group == "")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_click_checkbox('" | string.append title | string.append "')"
+    else if (field_type == "input" && is_group == "y")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search_group('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "date" && is_group == "y")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search_group('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "number" && is_group == "y")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search_group('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "text" && is_group == "y")
+        advanced_search_string = "if " | string.append value | string.append ":\n    self.adv_search_text_group('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    else if (field_type == "select" && is_group == "y")
+        advanced_search_string = "self.key_escape()\nif " | string.append value | string.append ":\n    self.adv_search_select_group('" | string.append title | string.append "', " | string.append value_covert | string.append ")"
+    end
+    ret advanced_search_string
+end
+~}}
+{{~
+func fo_get_field_method(field_type, is_enable, is_group, is_multi, border_name)
+    field_method = ""
+    if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fw"
+    else if (field_type == "input" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fwg"
+    else if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "fwm"
+    else if (field_type == "input" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fwb"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fav"
+    else if (field_type == "input" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "favg"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "favm"
+    else if (field_type == "input" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "favb"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fwt"
+    else if (field_type == "text" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fwtg"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "fwtm"
+    else if (field_type == "text" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fwtb"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fat"
+    else if (field_type == "text" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fatg"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "fatm"
+    else if (field_type == "text" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fatb"
+    else if (field_type == "text_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fwtml"
+    else if (field_type == "text_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fatml"
+    else if (field_type == "date" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fwd"
+    else if (field_type == "date" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fwdb"
+    else if (field_type == "date" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fad"
+    else if (field_type == "number" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fwn"
+    else if (field_type == "number" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fwng"
+    else if (field_type == "number" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fwnb"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fav"
+    else if (field_type == "number" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "favg"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "favm"
+    else if (field_type == "number" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "favb"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fs"
+    else if (field_type == "select" && is_enable == "y" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fsd"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "fsc"
+    else if (field_type == "select" && is_enable == "y" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "fsb"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fas"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "" && border_name == "")
+        field_method = "fasg"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "" && border_name != "")
+        field_method = "favb"
+    else if (field_type == "select" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "favm"
+    else if (field_type == "select" && is_enable == "n" && is_group == "y" && is_multi == "y" && border_name == "")
+        field_method = "favm"
+    else if (field_type == "select_multi" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fsm"
+    else if (field_type == "select_multi" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fasm"
+    else if (field_type == "checkbox" && is_enable == "y" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fcc"
+    else if (field_type == "checkbox" && is_enable == "y" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "fccm"
+    else if (field_type == "checkbox" && is_enable == "n" && is_group == "" && is_multi == "" && border_name == "")
+        field_method = "fac"
+    else if (field_type == "checkbox" && is_enable == "n" && is_group == "" && is_multi == "y" && border_name == "")
+        field_method = "facm"
+    else
+        field_method = ""
+    end
+    ret field_method
+end
+~}}
+{{~
+func fo_get_out_method(field_type, is_group, is_multi, border_name)
+    out_method = ""
+    if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgv"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "")
+        out_method = "fgvg"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "")
+        out_method = "fgvm"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "")
+        out_method = "fgvb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgv"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "")
+        out_method = "fgvg"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "")
+        out_method = "fgvm"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "")
+        out_method = "fgvb"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgd"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgs"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "")
+        out_method = "fgsg"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name != "")
+        out_method = "fgvb"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgsm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgt"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "")
+        out_method = "fgtg"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "")
+        out_method = "fgtm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "")
+        out_method = "fgtb"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "")
+        out_method = "fgtml"
+    end
+    ret out_method
+end
+~}}
+{{~
+func fo_get_view_method(field_type, is_group, is_multi, border_name)
+    view_method = ""
+    if (field_type == "input" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fav"
+    else if (field_type == "input" && is_group == "y" && is_multi == "" && border_name == "")
+        view_method = "favg"
+    else if (field_type == "input" && is_group == "" && is_multi == "y" && border_name == "")
+        view_method = "favm"
+    else if (field_type == "input" && is_group == "" && is_multi == "" && border_name != "")
+        view_method = "favb"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fav"
+    else if (field_type == "number" && is_group == "y" && is_multi == "" && border_name == "")
+        view_method = "favg"
+    else if (field_type == "number" && is_group == "" && is_multi == "y" && border_name == "")
+        view_method = "favm"
+    else if (field_type == "number" && is_group == "y" && is_multi == "y" && border_name == "")
+        view_method = "favm"
+    else if (field_type == "number" && is_group == "" && is_multi == "" && border_name != "")
+        view_method = "favb"
+    else if (field_type == "date" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fad"
+    else if (field_type == "select" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fas"
+    else if (field_type == "select" && is_group == "y" && is_multi == "" && border_name == "")
+        view_method = "fasg"
+    else if (field_type == "select_multi" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fasm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fat"
+    else if (field_type == "text" && is_group == "y" && is_multi == "" && border_name == "")
+        view_method = "fatg"
+    else if (field_type == "text" && is_group == "" && is_multi == "y" && border_name == "")
+        view_method = "fatm"
+    else if (field_type == "text" && is_group == "y" && is_multi == "y" && border_name == "")
+        view_method = "fatm"
+    else if (field_type == "text" && is_group == "" && is_multi == "" && border_name != "")
+        view_method = "fatb"
+    else if (field_type == "text_multi" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fatml"
+    else if (field_type == "checkbox" && is_group == "" && is_multi == "" && border_name == "")
+        view_method = "fac"
+    else if (field_type == "checkbox" && is_group == "" && is_multi == "y" && border_name == "")
+        view_method = "facm"
+    else
+        view_method = ""
+    end
+    ret view_method
+end
+~}}

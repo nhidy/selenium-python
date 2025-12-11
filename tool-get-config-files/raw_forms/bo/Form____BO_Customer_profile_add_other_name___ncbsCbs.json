@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.7947762Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_Customer_profile_add_other_name\",\"des\":\"BO_Customer_profile_add_other_name\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_Customer_profile_add_other_name\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_Customer_profile_add_other_name\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"999bb0b8df495c96\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"e1aa69283101aa62\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"action\":\"\",\"structable\":\"muti.G\",\"structable_read\":\"muti.G\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Shareholder name\",\"code\":\"g\",\"codeHidden\":\"61ed897461caf438\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.T\",\"structable_read\":\"muti.T\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Mother name\",\"code\":\"t\",\"codeHidden\":\"c95952f2adce82d1\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.N\",\"structable_read\":\"muti.N\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Nick name\",\"code\":\"n\",\"codeHidden\":\"e4cbde7664c0f7ae\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.F\",\"structable_read\":\"muti.F\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"First\",\"code\":\"f\",\"codeHidden\":\"11be176799968d46\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.M\",\"structable_read\":\"muti.M\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Middle\",\"code\":\"m\",\"codeHidden\":\"4789df0693955d4d\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.L\",\"structable_read\":\"muti.L\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Last\",\"code\":\"l\",\"codeHidden\":\"ba7a23fd4bbb29a6\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"structable\":\"muti.J\",\"structable_read\":\"muti.J\",\"data_default\":\"\",\"data_mode\":\"cdlist\",\"cdlist\":{\"query\":\"select c_cdlist.cdid,c_cdlist.cdname,c_cdlist.caption,c_cdlist.cdval,c_cdlist.cdidx from c_cdlist where wf.c_cdlist.cdgrp==='CTM'&&wf.c_cdlist.cdname==='JOBTITLE'\",\"cdgrp\":\"CTM\",\"cdname\":\"JOBTITLE\"},\"is_multi_select\":\"false\",\"is_multi_col\":\"false\",\"get_data_format\":\"c_cdlist.cdid\",\"selected_view_format\":\"@c_cdlist.caption\",\"col_format\":\"@c_cdlist.caption\",\"table_format\":\"[\\n                {\\n                    \\\"title\\\": \\\"Name\\\",\\n                    \\\"code\\\": \\\"c_cdlist.caption\\\"\\n                },\\n                {\\n                    \\\"title\\\": \\\"ID\\\",\\n                    \\\"code\\\": \\\"c_cdlist.cdid\\\"\\n                }\\n            ]\",\"key_selected\":\"c_cdlist.cdid\",\"json_data\":\"[]\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"0\",\"max\":\"\"},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jSelect\",\"default\":{\"name\":\"Job-title\",\"code\":\"j\",\"codeHidden\":\"125910416070a781\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.O\",\"structable_read\":\"muti.O\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Other\",\"code\":\"o\",\"codeHidden\":\"227fe305d5bab31f\",\"class\":\"                   col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_Customer_profile_add_other_name",
+        "app": "ncbsCbs",
+        "id": 353
+      }
+    ]
+  }
+]

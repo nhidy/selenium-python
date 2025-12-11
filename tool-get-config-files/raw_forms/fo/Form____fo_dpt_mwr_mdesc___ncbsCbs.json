@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.4161442Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"24/02/2023 03:55:12 PM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"fo_dpt_mwr_mdesc\",\"bodata\":\"\",\"data\":\"\",\"des\":\"fo_dpt_mwr_mdesc\",\"flow_layout\":[],\"form_code\":\"fo_dpt_mwr_mdesc\",\"key_form\":\"\",\"lang_form\":{\"en\":\"fo_dpt_mwr_mdesc\"},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"e9119e71cf243096\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"e7cb050230540c61\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.home\",\"structable_read\":\"muti.home\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\",\"my\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Mobile phone\",\"code\":\"home\",\"class\":\"        col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"d8579edd2984633f\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.office\",\"structable_read\":\"muti.office\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\",\"my\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"NRC\",\"code\":\"office\",\"class\":\"        col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"a3d9a361fd0bcfbc\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "fo_dpt_mwr_mdesc",
+        "app": "ncbsCbs",
+        "id": 916
+      }
+    ]
+  }
+]

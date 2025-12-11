@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.6935794Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\r\n        \"title\": \"FO_PMT_OITTctxg4_lookup\",\r\n        \"des\": \"FO_PMT_OITTctxg4_lookup\",\r\n        \"data\": \"\",\r\n        \"learnapi\": \"FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4\",\r\n        \"learnsql\": \"\",\r\n        \"openOne\": \"false\",\r\n        \"node_position\": [],\r\n        \"flow_layout\": [],\r\n        \"form_code\": \"FO_PMT_OITTctxg4\",\r\n        \"ruleStrong\": [{\r\n                \"code\": \"runFo\",\r\n                \"config\": {\r\n                    \"component_action\": \"search_input\",\r\n                    \"component_result\": \"\",\r\n                    \"component_event\": \"enter\",\r\n                    \"txFoActions\": \"\",\r\n                    \"txFo\": \"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"FO_PMT_OITTctxg4\\\",\\\"learn_api\\\":\\\"FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4\\\"}}]\",\r\n                    \"useAction\": \"false\",\r\n                    \"condition\": \"\"\r\n                },\r\n                \"inUse\": true,\r\n                \"order\": 1,\r\n                \"isStart\": true\r\n            }\r\n        ],\r\n        \"key_form\": \"FO_PMT_OITTctxg4\",\r\n        \"ofModal\": false,\r\n        \"bodata\": \"\"\r\n    }",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"6dbd9d74579955f2\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"070b36758c650a11\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Search\",\"code\":\"search_input\",\"class\":\"    col-xl-4 col-lg-4 col-md-5 col-sm-6\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"01df544303b8bc4a\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"lookup.search_input\",\"structable_read\":\"lookup.search_input\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":false,\"isSearch\":true,\"readOnly\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"FO_PMT_OITTctxg4\\\",\\\"learn_api\\\":\\\"FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4\\\"}}]\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ed4481f418acd092\"}},{\"default\":{\"name\":\"\",\"code\":\"view\",\"codeHidden\":\"c9608bc66ea2281f\",\"class\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12col-md-12\",\"role\":\"\"},\"config\":{\"action\":\"\",\"txFoActions\":\"[{\\\"function\\\":\\\"\\\",\\\"status\\\":\\\"A\\\",\\\"para\\\":[]}]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-lookup-selectData\\\",\\\"input\\\":{}}]\",\"useAction\":\"false\",\"icon\":\"fa-hand-o-right\",\"color\":\"info\",\"onTable\":\"table_name\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"\"},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cButton\"}]},{\"name\":\"Search\",\"code\":\"code\",\"codeHidden\":\"dd1609abf5feb41e\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"\",\"structable_read\":\"\",\"query_data\":\"select * from FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4\",\"columns\":\"[{\\\"code\\\":\\\"FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4.0\\\",\\\"title\\\":\\\"Code\\\",\\\"inputtype\\\":\\\"ColumnString\\\",\\\"config\\\":{}},{\\\"code\\\":\\\"FO_PMT_OITT_api_rulefunc_pmt_oitt_lkp_data_ctx4.1\\\",\\\"title\\\":\\\"Name\\\",\\\"inputtype\\\":\\\"ColumnString\\\",\\\"config\\\":{}}]\",\"paging_mode\":\"MIN\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTableDefault\",\"default\":{\"name\":\"\",\"code\":\"table_name\",\"codeHidden\":\"b997cd621fda22d4\",\"class\":\"col-12\",\"condition\":\"\",\"role\":\"\"}}]}]}]",
+        "react_txt": null,
+        "form_id": "FO_PMT_OITTctxg4",
+        "app": "ncbsCbs",
+        "id": 1323
+      }
+    ]
+  }
+]

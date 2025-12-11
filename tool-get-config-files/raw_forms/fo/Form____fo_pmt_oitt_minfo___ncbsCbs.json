@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.6925017Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\r\n        \"title\": \"fo_pmt_oitt_minfo\",\r\n        \"des\": \"fo_pmt_oitt_minfo\",\r\n        \"data\": \"\",\r\n        \"learnapi\": \"\",\r\n        \"learnsql\": \"\",\r\n        \"openOne\": \"false\",\r\n        \"node_position\": [],\r\n        \"flow_layout\": [],\r\n        \"form_code\": \"fo_pmt_oitt_minfo\",\r\n        \"ruleStrong\": [],\r\n        \"key_form\": \"fo_pmt_oitt_minfo\",\r\n        \"ofModal\": false,\r\n        \"bodata\": \"\"\r\n    }",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"2258ff0cb094381a\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"16a26621a3b01def\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"muti.goods_type\",\"structable_read\":\"muti.goods_type\",\"data_default\":\"\",\"data_mode\":\"cdlist\",\"cdlist\":{\"query\":\"select c_cdlist.cdid,c_cdlist.cdname,c_cdlist.caption,c_cdlist.cdval,c_cdlist.cdidx from c_cdlist where wf.c_cdlist.cdgrp==='PMT'&&wf.c_cdlist.cdname==='GOODTYPE'\",\"cdgrp\":\"PMT\",\"cdname\":\"GOODTYPE\"},\"is_multi_select\":\"false\",\"is_multi_col\":\"false\",\"get_data_format\":\"c_cdlist.cdid\",\"selected_view_format\":\"@c_cdlist.caption\",\"col_format\":\"@c_cdlist.caption\",\"table_format\":\"[\\n                {\\n                    \\\"title\\\": \\\"Name\\\",\\n                    \\\"code\\\": \\\"c_cdlist.caption\\\"\\n                },\\n                {\\n                    \\\"title\\\": \\\"ID\\\",\\n                    \\\"code\\\": \\\"c_cdlist.cdid\\\"\\n                }\\n            ]\",\"key_selected\":\"c_cdlist.cdid\",\"json_data\":\"[]\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"0\",\"max\":\"\"},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jSelect\",\"default\":{\"name\":\"Goods type\",\"code\":\"goods_type\",\"codeHidden\":\"32614ecfd99474f4\",\"class\":\"        col-12\",\"condition\":\"\",\"role\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.goods_list\",\"structable_read\":\"muti.goods_list\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":\"\",\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Goods list\",\"code\":\"goods_list\",\"codeHidden\":\"a6350635d5ade4fa\",\"class\":\"        col-12\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "fo_pmt_oitt_minfo",
+        "app": "ncbsCbs",
+        "id": 1321
+      }
+    ]
+  }
+]

@@ -1,0 +1,235 @@
+-- Check cash - gl
+select a.branchcode, a.balance + b.balance amountdiff from (
+select branchcode, SUM(balance) balance, currencycode 
+from o9accounting.dbo.AccountBalance where SUBSTRING(AccountNumber, 4, 13) = '1010301000101' 
+group by branchcode, currencycode) a inner join 
+(
+select b.BranchCode, a.currencycode, SUM(CurrentBalance) balance from o9cash.[dbo].[CashList] a
+  inner join o9admin.dbo.UserAccount b on a.CashierCode = b.UserCode
+group by  b.BranchCode, a.currencycode) b on a.branchcode = b.branchcode and a.currencycode = b.currencycode
+where a.balance + b.balance != 0;
+
+-- Check cân account balance
+SELECT SUM(Balance) FROM o9accounting.dbo.AccountBalance
+
+-- Check cân account statement
+SELECT SUM(CASE WHEN TransCode = 'C' THEN Amount ELSE -Amount END) FROM o9accounting.dbo.AccountStatement
+
+-- Check cân GL Entries
+SELECT SUM(CASE WHEN DorC = 'C' THEN Amount ELSE -Amount END) FROM o9accounting.dbo.GLEntries
+
+-- check master detail
+select b.AccountNumber, b.Balance - a.DPTBALANCE diff from 
+(select  SUM(CurrentBalance) DPTBALANCE, b.GLAccount
+from o9deposit.dbo.depositAccount a
+	inner join o9deposit.dbo.depositAccountGLs b on a.AccountNumber = b.DepositAccount
+where CurrentBalance > 0
+group by b.GLAccount) a
+inner join o9Accounting.dbo.AccountBalance b on a.GLAccount=b.AccountNumber
+where b.Balance != a.DPTBALANCE;
+
+-- check master detail với OD 
+
+select d.Balance, e.*, f.AccountName, Balance+TotalCredit from o9accounting.dbo.AccountBalance d 
+inner join o9accounting.dbo.AccountChart f on d.AccountNumber = f.AccountNumber
+inner join (select GLAccount, sum (OverDraftBalance) TotalCredit from 
+(select a.*, 
+case b.ClassificationStatus
+when 'N' then 'CREDIT0' 
+when 'P' then 'CREDIT1'
+when 'O' then 'CREDIT2'
+when 'D' then 'CREDIT3'
+when 'L' then 'CREDIT4'
+end NPLGroup, b.OverDraftBalance
+from o9deposit.dbo.OverdraftContractGLs a left join o9deposit.dbo.OverdraftContract b on a.ODContract = b.ContractNumber) c
+where NPLGroup = SysAccountName
+group by  GLAccount) e on d.AccountNumber = e.GLAccount
+where Balance + TotalCredit != 0;
+
+-- Check Duplicate
+-- Duplicate
+-- Deposit
+/*
+SELECT '' DepositTransDetails, RefId, Entity, FieldName, EntityId, COUNT(*) [Count]
+FROM o9deposit.dbo.TransactionDetails WHERE [Status] = 'N'
+GROUP BY RefId, Entity, FieldName, EntityId
+HAVING COUNT(*) > 1
+*/
+
+SELECT '' DepositStatement, a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount, COUNT(*) [Count]
+FROM o9deposit.dbo.DepositStatement a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE StatementStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount
+HAVING COUNT(*) > 1
+
+SELECT '' DepositGLEntries, a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount, COUNT(*) [Count]
+FROM o9deposit.dbo.GLEntries a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE TransactionStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount
+HAVING COUNT(*) > 1 ORDER BY a.TransactionNumber
+
+SELECT '' DepositHistory, RefId, AccountNumber, TransactionCode, DorC, Amount, COUNT(*) [Count]
+FROM o9deposit.dbo.DepositHistory WHERE DepositHistoryStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY RefId, AccountNumber, TransactionCode, DorC, Amount
+HAVING COUNT(*) > 1
+
+SELECT '' DepositAccountTrans, TransactionNumber, DepositAccount, TransCode, Amount, COUNT(*) [Count]
+FROM o9deposit.dbo.DepositAccountTrans WHERE TransactionStatus = 'N'
+GROUP BY TransactionNumber, DepositAccount, TransCode, Amount
+HAVING COUNT(*) > 1 ORDER BY TransactionNumber
+
+-- Cash
+SELECT '' CashTransDetails, TransactionNumber, CashierCode, Amount, TransCode, COUNT(*) [Count]
+FROM o9cash.dbo.CashTransaction WHERE TransactionStatus = 'N'
+GROUP BY TransactionNumber, CashierCode, Amount, TransCode
+HAVING COUNT(*) > 1
+
+/*
+SELECT '' CashTransDetails, RefId, Entity, FieldName, EntityId, COUNT(*) [Count]
+FROM o9cash.dbo.TransactionDetails WHERE [Status] = 'N'
+GROUP BY RefId, Entity, FieldName, EntityId
+HAVING COUNT(*) > 1
+*/
+
+SELECT '' CashGLEntries, TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, COUNT(*) [Count]
+FROM o9cash.dbo.GLEntries WHERE TransactionStatus = 'N'
+GROUP BY TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup
+HAVING COUNT(*) > 1
+
+-- Accounting
+/*
+SELECT '' AccountingTransDetails, RefId, Entity, FieldName, EntityId, COUNT(*) [Count]
+FROM o9accounting.dbo.TransactionDetails WHERE [Status] = 'N'
+GROUP BY RefId, Entity, FieldName, EntityId
+HAVING COUNT(*) > 1
+*/
+
+SELECT '' AccountStatement, a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount, COUNT(*) [Count]
+FROM o9accounting.dbo.AccountStatement a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE StatementStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount
+HAVING COUNT(*) > 1
+
+SELECT '' AccountStatementDone, a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount, COUNT(*) [Count]
+FROM o9accounting.dbo.AccountStatementDone a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE StatementStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, AccountNumber, StatementCode, TransCode, Amount
+HAVING COUNT(*) > 1 ORDER BY a.TransactionNumber
+
+SELECT '' AccountingGLEntries, a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount, COUNT(*) [Count]
+FROM o9accounting.dbo.GLEntries a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE TransactionStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount
+HAVING COUNT(*) > 1 ORDER BY a.TransactionNumber
+
+SELECT '' AccountingGLEntriesDone, a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount, COUNT(*) [Count]
+FROM o9accounting.dbo.GLEntriesDone a JOIN o9admin.dbo.TransactionJournalDone b ON a.TransactionNumber = b.TransactionNumber
+WHERE TransactionStatus = 'N' AND TransactionCode NOT LIKE 'B_%'
+GROUP BY a.TransactionNumber, GLAccount, DorC, TransTableName, SysAccountName, AccountingGroup, Amount
+HAVING COUNT(*) > 1 ORDER BY a.TransactionNumber
+
+-- Check Status Detail Fail
+
+-- Check Status Fail
+-- Deposit
+SELECT DISTINCT '' DepositTransDetails, a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status] FROM o9admin.dbo.TransactionJournalDone a
+JOIN o9deposit.dbo.TransactionDetails b ON a.RefId = b.RefId
+WHERE (a.[Status] NOT IN ('C','N') AND b.[Status] = 'N') ORDER BY a.TransactionDate
+
+-- Credit
+SELECT '' CreditTransDetails, a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status], b.* FROM o9admin.dbo.TransactionJournalDone a
+JOIN o9credit.dbo.TransactionDetails b ON a.RefId = b.RefId
+WHERE (a.[Status] NOT IN ('C','N') AND b.[Status] = 'N') ORDER BY a.TransactionDate
+
+-- Cash
+SELECT '' CashTransaction, a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status], b.* FROM o9admin.dbo.TransactionJournalDone a
+JOIN o9cash.dbo.CashTransaction b ON a.TransactionNumber = b.TransactionNumber
+WHERE (a.[Status] NOT IN ('C','N') AND b.TransactionStatus = 'N') ORDER BY a.TransactionDate
+
+-- Accounting
+DECLARE @actIgnore TABLE(TransactionNumber VARCHAR(32))
+INSERT @actIgnore VALUES ('20230925000000146968'),('20230926000000156221'),('20230928000000185258'),('20230928000000187398'),('20230928000000190206'),('20230929000000218511'),('20231003000000264903'),('20231004000000270207')
+
+SELECT '' AccountingTransDetails, a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status], b.* FROM o9admin.dbo.TransactionJournalDone a
+JOIN o9accounting.dbo.TransactionDetails b ON a.RefId = b.RefId
+WHERE (a.[Status] NOT IN ('C','N') AND b.[Status] = 'N') AND a.TransactionDate <> '2023-09-11' AND a.TransactionNumber NOT IN (SELECT TransactionNumber FROM @actIgnore) ORDER BY a.TransactionDate
+
+-- Check Status Success
+-- Deposit
+SELECT '' DepositTransDetails, b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId, SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) CountSuccess, SUM(CASE WHEN a.[Status] <> 'N' THEN 1 ELSE 0 END) CountFail
+FROM o9deposit.dbo.TransactionDetails a
+JOIN
+(
+	SELECT DISTINCT a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status] FROM o9admin.dbo.TransactionJournalDone a
+	JOIN o9deposit.dbo.TransactionDetails b ON a.RefId = b.RefId
+	WHERE a.[Status] in ('C','N') AND b.[Status] <> 'N' --AND b.RefId NOT IN (SELECT RefId FROM @ignoreDptDetails)
+) b ON a.RefId =  b.RefId
+GROUP BY b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId
+HAVING SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) = 0 AND b.TransactionDate >= '2023-10-19' ORDER BY b.TransactionDate
+
+-- Credit
+SELECT '' CreditTransDetails, b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId, SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) CountSuccess, SUM(CASE WHEN a.[Status] <> 'N' THEN 1 ELSE 0 END) CountFail
+FROM o9credit.dbo.TransactionDetails a
+JOIN
+(
+	SELECT DISTINCT a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status] FROM o9admin.dbo.TransactionJournalDone a
+	JOIN o9credit.dbo.TransactionDetails b ON a.RefId = b.RefId
+	WHERE a.[Status] in ('C','N') AND b.[Status] <> 'N'
+) b ON a.RefId =  b.RefId
+GROUP BY b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId
+HAVING SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) <> 1 ORDER BY b.TransactionDate
+
+-- Cash
+SELECT '' CashTransDetails, b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId, SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) CountSuccess, SUM(CASE WHEN a.[Status] <> 'N' THEN 1 ELSE 0 END) CountFail
+FROM o9cash.dbo.TransactionDetails a
+JOIN
+(
+	SELECT DISTINCT a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status] FROM o9admin.dbo.TransactionJournalDone a
+	JOIN o9cash.dbo.TransactionDetails b ON a.RefId = b.RefId
+	WHERE a.[Status] in ('C','N') AND b.[Status] <> 'N'
+) b ON a.RefId =  b.RefId
+GROUP BY b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId
+HAVING SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) <> 1 AND b.TransactionDate >= '2023-10-19' ORDER BY b.TransactionDate
+
+-- Accounting
+SELECT '' AccountingTransDetails, b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId, SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) CountSuccess, SUM(CASE WHEN a.[Status] <> 'N' THEN 1 ELSE 0 END) CountFail
+FROM o9accounting.dbo.TransactionDetails a
+JOIN
+(
+	SELECT DISTINCT a.TransactionNumber, a.RefId, a.TransactionCode, a.TransactionDate, a.[Status] FROM o9admin.dbo.TransactionJournalDone a
+	JOIN o9accounting.dbo.TransactionDetails b ON a.RefId = b.RefId
+	WHERE a.[Status] in ('C','N') AND b.[Status] <> 'N'
+) b ON a.RefId = b.RefId
+GROUP BY b.TransactionNumber, b.RefId, b.TransactionCode, b.TransactionDate, b.[Status], a.Entity, a.FieldName, a.EntityId
+HAVING SUM(CASE WHEN a.[Status] = 'N' THEN 1 ELSE 0 END) <> 1 AND b.TransactionDate >= '2023-10-19' ORDER BY b.TransactionDate
+
+-- Check master detail bỏ qua OD
+
+SELECT CASE WHEN b.AccountNumber = '002202030201010101' THEN 'Remember to subtract 150k' END DepositMasterDetails,
+b.AccountNumber, c.AccountName, a.Balance - b.Balance [Deposit - Accounting]
+FROM 
+(
+	SELECT b.GLAccount, SUM(a.CurrentBalance + ISNULL(c.OverDraftBalance,0)) Balance
+	FROM o9deposit.dbo.DepositAccount a JOIN o9deposit.dbo.DepositAccountGLs b ON a.AccountNumber = b.DepositAccount LEFT JOIN
+	(
+		SELECT AccountNumber, OverDraftBalance FROM o9deposit.dbo.OverdraftContract WHERE ContractStatus = 0
+	) c ON a.AccountNumber = c.AccountNumber
+	GROUP BY b.GLAccount
+) a
+JOIN o9Accounting.dbo.AccountBalance b ON a.GLAccount = b.AccountNumber
+JOIN o9Accounting.dbo.AccountChart c ON b.AccountNumber = c.AccountNumber
+WHERE a.Balance != b.Balance
+
+--check duplicate mortgage history
+
+SELECT '' MortgageHistory, ReferenceId, AccountNumber, TransactionCode, DorC, Amount, COUNT(*) [Count]
+FROM o9mortgage.dbo.MortgageHistory WHERE TransactionCode NOT LIKE 'B_%'
+GROUP BY ReferenceId, AccountNumber, TransactionCode, DorC, Amount
+HAVING COUNT(*) > 1
+
+--check duplicate mortgage transaction
+
+SELECT '' MortgageTransaction, ReferenceId, AccountNumber, TransactionCode, TransactionStatus, Amount, COUNT(*) [Count]
+FROM o9mortgage.dbo.MortgageTransaction WHERE TransactionCode NOT LIKE 'B_%'
+GROUP BY ReferenceId, AccountNumber, TransactionCode, TransactionStatus, Amount
+HAVING COUNT(*) > 1

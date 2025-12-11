@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.6537574Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"05/12/2022 04:45:37 PM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"BO_012006_Add_lookup_mapid\",\"bodata\":\"\",\"data\":\"\",\"des\":\"BO_012006_Add_lookup_mapid\",\"flow_layout\":[],\"form_code\":\"BO_012006_Add_lookup_mapid\",\"key_form\":\"\",\"lang_form\":{\"en\":\"BO_012006_Add_lookup_mapid\"},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[{\"code\":\"visibility\",\"inUse\":true,\"isStart\":true,\"isStatus\":-1,\"order\":1,\"config\":{\"component_action\":\"\",\"component_result\":\"search_name;search_code\",\"view_result\":\"\",\"condition\":\"\",\"visible\":\"false\",\"ena_dis\":\"false\",\"component_event\":\"on_change\",\"list_config\":[]},\"isDidStart\":false,\"isOpenFromOther\":false},{\"code\":\"runFo\",\"config\":{\"component_action\":\"search_name\",\"component_event\":\"enter\",\"txFo\":\"[\\n  {\\n    \\\"txcode\\\": \\\"fo-search-advanced-lookup\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"*\\\",\\n      \\\"table_code\\\": \\\"ACT_ACCHRT_LOOKUP\\\",\\n      \\\"learn_api\\\": \\\"ACT_ACCHRT_LOOKUP\\\"\\n    }\\n  }\\n]\",\"txFoActions\":\"\",\"useAction\":\"false\",\"condition\":\"JSON.parse('@{table_name}').total_paging===0\",\"component_result\":\"\"},\"inUse\":true,\"order\":1,\"isStart\":true,\"isStatus\":-1,\"isDidStart\":false,\"isOpenFromOther\":false}],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"3c5161ee561f47be\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"2b5a22cb1db54827\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Code\",\"code\":\"search_code\",\"class\":\"col-xl-5 col-lg-5 col-md-5 col-sm-5 offset-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"6d183a10174c5a82\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"act_clearing_account_definition_addaccount_number.search_code\",\"structable_read\":\"act_clearing_account_definition_addaccount_number.search_code\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Name\",\"code\":\"search_name\",\"class\":\"col-xl-5 col-lg-5 col-md-5 col-sm-5 offset-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"73fa79181170ae0e\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"act_clearing_account_definition_addaccount_number.search_name\",\"structable_read\":\"act_clearing_account_definition_addaccount_number.search_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[]\",\"txFo\":\"[\\n  {\\n    \\\"txcode\\\": \\\"fo-search-advanced-lookup\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"*\\\",\\n      \\\"table_code\\\": \\\"ACT_ACCHRT_LOOKUP\\\",\\n      \\\"learn_api\\\": \\\"ACT_ACCHRT_LOOKUP\\\"\\n    }\\n  }\\n]\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"en\":\"\",\"vi\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ed4481f418acd092\"}}]},{\"name\":\"Search\",\"code\":\"code\",\"codeHidden\":\"b4391a74e880d3cd\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"\",\"code\":\"view\",\"codeHidden\":\"b13c190b8c343b13\",\"class\":\"\",\"condition\":\"\",\"ofgroup\":\"false\",\"class_ofgroup\":\"col-sm-12col-md-12\",\"role\":\"\"},\"config\":{\"action\":\"\",\"txFoActions\":\"[{\\\"function\\\":\\\"\\\",\\\"status\\\":\\\"A\\\",\\\"para\\\":[]}]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-lookup-selectData\\\",\\\"input\\\":{}}]\",\"useAction\":\"false\",\"icon\":\"fa-hand-o-right\",\"color\":\"info\",\"onTable\":\"table_name\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"\"},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cButton\"},{\"config\":{\"structable\":\"\",\"query_data\":\"select * from ACT_ACCHRT_LOOKUP\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"ACT_ACCHRT_LOOKUP.account_number\\\",\\n        \\\"title\\\": \\\"Code\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"ACT_ACCHRT_LOOKUP.account_name\\\",\\n        \\\"title\\\": \\\"Name\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    }\\n]\",\"onTable\":\"\",\"isLoadDataStart\":\"true\",\"hasSystemColumnCheck\":\"false\",\"isMoveColumn\":\"false\",\"isResize\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":\"checked\"},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"en\":{},\"vi\":{}},\"configAVD\":{},\"inputtype\":\"cTableDefault\",\"default\":{\"name\":\"\",\"code\":\"table_name\",\"class\":\"col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"b3d787d9c9b9c6c9\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_012006_Add_lookup_mapid",
+        "app": "ncbsCbs",
+        "id": 1253
+      }
+    ]
+  }
+]

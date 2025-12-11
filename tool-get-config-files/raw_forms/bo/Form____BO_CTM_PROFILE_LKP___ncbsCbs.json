@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.4017952Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"18/05/2023 09:08:41 AM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"Customer Legal Local Address\",\"bodata\":\"\",\"data\":\"\",\"des\":\"Customer Legal Local Address\",\"flow_layout\":[],\"form_code\":\"BO_CTM_PROFILE_LKP\",\"key_form\":\"\",\"lang_form\":{\"en\":\"Customer Legal Local Address\"},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"1\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"979b18f53bbde3cf\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"class\":\"col-sm-12 col-md-12\",\"code\":\"code\",\"isTab\":\"false\",\"lang\":{\"vi\":\"\",\"en\":\"\"},\"inputtype\":\"cView\",\"viewUI\":\"\",\"list_input\":[{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.line1\",\"structable_read\":\"muti.line1\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"BO_CTM_PROFILE_LKPc\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"SQL_SUBSEARCH_PROVINCE.caption\",\"data_value\":\"SQL_SUBSEARCH_PROVINCE.code_id\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":true,\"min\":0,\"max\":\"100\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Home\",\"code\":\"line1\",\"class\":\" col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-4-right offset-lg-4-right offset-md-4-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"c\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"d4611c9be4eb94e5\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.line2\",\"structable_read\":\"muti.line2\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"BO_CTM_PROFILE_LKPw\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"BO_CTM_PROFILE_LKP_api_rulefunc_bo_ctm_addr_lkp_data_district.caption\",\"data_value\":\"BO_CTM_PROFILE_LKP_api_rulefunc_bo_ctm_addr_lkp_data_district.code_id\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":true,\"min\":0,\"max\":\"100\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Street\",\"code\":\"line2\",\"class\":\" col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"w\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"be800ca1ac0d6127\"}},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.line3\",\"structable_read\":\"muti.line3\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":true,\"min\":0,\"max\":\"100\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Ward\",\"code\":\"line3\",\"class\":\"col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-8-right offset-lg-8-right offset-md-7-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"774229bec1481d1b\"}},{\"default\":{\"name\":\"Township\",\"code\":\"line4\",\"class\":\"col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-4-right offset-lg-4-right offset-md-4-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"d\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"282988fc38fab273\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.line4\",\"structable_read\":\"muti.line4\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"BO_CTM_PROFILE_LKPd\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"BO_CTM_PROFILE_LKP_api_rulefunc_bo_ctm_addr_lkp_data_subdistrict.caption\",\"data_value\":\"BO_CTM_PROFILE_LKP_api_rulefunc_bo_ctm_addr_lkp_data_subdistrict.code_id\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":true,\"min\":\"\",\"max\":\"100\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.line5\",\"structable_read\":\"muti.line5\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"true\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"BO_CTM_PROFILE_LKP_line4\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"SQL_SUBSEARCH_PROVINCE.caption\",\"data_value\":\"SQL_SUBSEARCH_PROVINCE.caption\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":0,\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Province\",\"code\":\"line5\",\"class\":\"col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"t\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"591996f791cb4fe6\"}}],\"codeHidden\":\"359461ba344e8531\",\"isBorder\":\"false\"}]}]",
+        "react_txt": "",
+        "form_id": "BO_CTM_PROFILE_LKP",
+        "app": "ncbsCbs",
+        "id": 21
+      }
+    ]
+  }
+]

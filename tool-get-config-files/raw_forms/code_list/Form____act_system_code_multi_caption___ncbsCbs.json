@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-10-21T02:18:35.9241788Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"22/08/2025 01:54:30 PM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"act_system_code_multi_caption\",\"bodata\":\"\",\"data\":\"\",\"des\":\"act_system_code_multi_caption\",\"flow_layout\":[],\"form_code\":\"act_system_code_multi_caption\",\"key_form\":\"\",\"lang_form\":{\"en\":\"\"},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"1f93657ae27561ff\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"\",\"codeHidden\":\"7dceccb8b93852d8\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"English\",\"code\":\"en\",\"class\":\"col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"90901fd014c8a1f7\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.english\",\"structable_read\":\"muti.english\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\",\"hasSuggest\":\"false\",\"keyLoadCache\":\"false\",\"trimText\":\"false\"},\"role\":{\"disabled\":\"false\",\"visible\":\"false\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Vietnamese\",\"code\":\"vi\",\"class\":\"col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"c0bdc65626e1d687\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.vietnamese\",\"structable_read\":\"muti.vietnamese\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\",\"hasSuggest\":\"false\",\"keyLoadCache\":\"false\",\"trimText\":\"false\"},\"role\":{\"disabled\":\"false\",\"visible\":\"false\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Laothian\",\"code\":\"lo\",\"class\":\"col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"641861b4451d9894\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.laothian\",\"structable_read\":\"muti.laothian\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\",\"hasSuggest\":\"false\",\"keyLoadCache\":\"false\",\"trimText\":\"false\"},\"role\":{\"disabled\":\"false\",\"visible\":\"false\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Khmer\",\"code\":\"km\",\"class\":\"col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"179590790e721e77\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.khmer\",\"structable_read\":\"muti.khmer\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\",\"hasSuggest\":\"false\",\"keyLoadCache\":\"false\",\"trimText\":\"false\"},\"role\":{\"disabled\":\"false\",\"visible\":\"false\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Myanmar\",\"code\":\"mn\",\"class\":\"col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"6757ffe32fb5af40\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.myanmar\",\"structable_read\":\"muti.myanmar\",\"data_default\":\"\",\"form_evaluation\":\"\",\"isLookup\":\"false\",\"isEvaluation\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\",\"hasSuggest\":\"false\",\"keyLoadCache\":\"false\",\"trimText\":\"false\"},\"role\":{\"disabled\":\"false\",\"visible\":\"false\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"}]}]}]",
+        "react_txt": "",
+        "form_id": "act_system_code_multi_caption",
+        "app": "ncbsCbs",
+        "id": 24347
+      }
+    ]
+  }
+]

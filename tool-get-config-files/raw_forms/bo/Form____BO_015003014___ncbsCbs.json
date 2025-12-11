@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.7799655Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"11/10/2022 06:05:50 PM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"ADM - Cash limit position\",\"bodata\":\"\",\"data\":\"\",\"des\":\"ADM - Cash limit position\",\"flow_layout\":[],\"form_code\":\"BO_015003014\",\"key_form\":\"\",\"lang_form\":{\"en\":\"ADM - Cash limit position\",\"vi\":\"ctm-Nh?m kh?ch h?ng-add\"},\"learnapi\":\"a83a27488dbef1ec\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"true\",\"ruleStrong\":[{\"code\":\"visibility\",\"inUse\":true,\"isStart\":true,\"isStatus\":-1,\"order\":1,\"config\":{\"component_action\":\"\",\"component_result\":\"learn_api_mapping\",\"view_result\":\"\",\"condition\":\"\",\"visible\":\"false\",\"ena_dis\":\"true\",\"component_event\":\"on_change\",\"list_config\":[]},\"isDidStart\":false,\"isOpenFromOther\":false}],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"class\":\"\",\"des\":\"\",\"lang\":{\"vi\":\"\",\"en\":\"\"},\"lang_des\":{\"vi\":\"\",\"en\":\"\"},\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"Button\",\"class\":\"\",\"code\":\"\",\"isTab\":\"false\",\"lang\":{\"vi\":\"\",\"en\":\"\"},\"inputtype\":\"cView\",\"viewUI\":\"\",\"list_input\":[{\"default\":{\"name\":\"Save\",\"code\":\"save\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"CSH_LIMIT_POSITION_MODIFY\"},\"config\":{\"onTable\":\"\",\"icon\":\"fa-save\",\"color\":\"success\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n  {\\n    \\\"txcode\\\": \\\"fo-create-dataAPI\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"\\\",\\n      \\\"table_code\\\": \\\"BO_15003014\\\",\\n      \\\"learn_api\\\": \\\"ncbsCBS_workflow_execute_new\\\",\\n      \\\"workflow_id\\\": \\\"CSH_LIMIT_POSITION_MODIFY\\\"\\n    }\\n  }\\n]\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"\"},\"validate\":{\"request\":false},\"lang\":{\"en\":\"\",\"vi\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\"},{\"default\":{\"name\":\"M?u component\",\"code\":\"learn_api_mapping\",\"class\":\"col-sm-12 col-md-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"1f715dd18cf05328\"},\"config\":{\"structable\":\"BO_15003014.learn_api_mapping\",\"structable_read\":\"BO_15003014.learn_api_mapping\",\"data_default\":\"{\\n\\\"cash_limits\\\":\\\"MapS.arrayJson(adm_csh_limit.role_list_unlimit|{\\\\\\\"role_id\\\\\\\":\\\\\\\"MapS.dataI(role_list_unlimit.role_id)\\\\\\\",\\\\\\\"amount\\\\\\\":\\\\\\\"MapS.dataNNull(role_list_unlimit.amount)\\\\\\\"})\\\"\\n}\",\"isjson\":\"false\",\"parent\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"true\"},\"validate\":{},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTextArea\"}],\"codeHidden\":\"cf869abc3cff8e96\",\"isBorder\":\"false\"},{\"name\":\"Limit amount in base currency\",\"class\":\"\",\"code\":\"\",\"isTab\":\"false\",\"lang\":{\"vi\":\"\",\"en\":\"\"},\"inputtype\":\"cView\",\"viewUI\":\"\",\"list_input\":[{\"default\":{\"name\":\"Limit amount in base currency\",\"code\":\"tab_list\",\"class\":\"col-sm-12 col-md-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"CSH_LIMIT_POSITION_VIEWALL\"},\"config\":{\"structable\":\"adm_csh_limit.role_list_unlimit\",\"query_data\":\"role_list_unlimit\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"role_list_unlimit.role_id\\\",\\n        \\\"title\\\": \\\"Role id\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"role_list_unlimit.role_name\\\",\\n        \\\"title\\\": \\\"Role name\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"role_list_unlimit.amount\\\",\\n        \\\"title\\\": \\\"Amount\\\",\\n        \\\"inputtype\\\": \\\"columnInputEdit\\\",\\n        \\\"config\\\": {\\n            \\\"columnEditType\\\": \\\"number\\\"\\n        }\\n    }\\n]\",\"onTable\":\"\",\"hasSystemColumnCheck\":\"false\",\"isMoveColumn\":\"false\",\"isResize\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":\"checked\"},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{},\"property\":{},\"validate\":{},\"lang\":{\"en\":{},\"vi\":{}},\"configAVD\":{},\"inputtype\":\"jTableForm\"}],\"codeHidden\":\"fa1bffcc2acea849\",\"isBorder\":\"false\"}],\"codeHidden\":\"246f3498b39f0636\"}]",
+        "react_txt": "",
+        "form_id": "BO_015003014",
+        "app": "ncbsCbs",
+        "id": 339
+      }
+    ]
+  }
+]

@@ -1,0 +1,3023 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <style>body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.log {
+  background-color: #e6e6e6;
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  height: 230px;
+  overflow-y: scroll;
+  padding: 5px;
+  white-space: pre-wrap;
+}
+.log:only-child {
+  height: inherit;
+}
+
+div.image {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.image img {
+  width: 320px;
+}
+
+div.video {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.video video {
+  overflow: hidden;
+  width: 320px;
+  height: 240px;
+}
+
+.collapsed {
+  display: none;
+}
+
+.expander::after {
+  content: " (show details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.collapser::after {
+  content: " (hide details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+
+.sort-icon {
+  font-size: 0px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 5px;
+  /*triangle*/
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+.inactive .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #E6E6E6;
+}
+.asc.active .sort-icon {
+  /*finish triangle*/
+  border-bottom: 8px solid #999;
+}
+.desc.active .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #999;
+}
+</style></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>test_05_sp_dpt_cwr_results.html</h1>
+    <p>Report generated on 24-Dec-2024 at 12:46:31 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19041-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"bdd": "4.1.0", "html": "3.1.1", "metadata": "1.11.0", "repeat": "0.9.1"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.1</td></tr></table>
+    <h2>Summary</h2>
+    <p>18 tests ran in 37.09 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">18 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_001_success_saving_account_status_normal</td>
+          <td class="col-duration">6.56</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> -------------------------------Captured log setup------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:971 Starting new HTTPS connection (1): 27.3.1.104:5001
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/auth/get-token HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/8cc892e507cb4bb88e2592831fcfc0ab HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/8cc892e507cb4bb88e2592831fcfc0ab HTTP/1.1&quot; 200 None<br/> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;310031599342&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;BSMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Bonus savings account  in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Savings&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S2&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [
+            {
+                &quot;id&quot;: 2,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;310031599342&quot;,
+                &quot;ifc_code&quot;: 102,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 7.0,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;id&quot;: 3,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;310031599342&quot;,
+                &quot;ifc_code&quot;: 103,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 8.0,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030201020201&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109895&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:45:58.514Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:45:58.5578058Z&quot;,
+        &quot;reference_id&quot;: &quot;20a901a3-302a-421b-8d02-37cea93218c9&quot;,
+        &quot;ref_id&quot;: &quot;443e58fe41694336a7d24d100b6d22b5&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;20a901a3-302a-421b-8d02-37cea93218c9\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;BSMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Bonus savings account  in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Savings\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;S2\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;BSMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Bonus savings account  in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Savings\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;S2\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;310031599342&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;BSMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Bonus savings account  in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;S&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S2&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109896&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:45:59.633Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:45:59.679168Z&quot;,
+        &quot;reference_id&quot;: &quot;63dcf6e1-4fc6-4224-a8bb-5edad4c209e2&quot;,
+        &quot;ref_id&quot;: &quot;51aaa64409d44864a9c6fd95110ce37e&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;310031599342&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109897&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:01.467Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:01.5041788Z&quot;,
+        &quot;reference_id&quot;: &quot;a40885be-955f-4289-a66c-1f76b420e761&quot;,
+        &quot;ref_id&quot;: &quot;c05e07482439459d8f6e29cc7dee44e1&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;310031599342&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;current_balance&quot;: null,
+        &quot;available_balance&quot;: null,
+        &quot;withdraw_amount&quot;: 100000.45,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;withdrawer_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;withdrawer_id&quot;: &quot;11001706&quot;,
+        &quot;withdrawer_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;withdrawer_description&quot;: {
+            &quot;home&quot;: null,
+            &quot;office&quot;: null
+        },
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_of_deposit_account&quot;: &quot;MMK&quot;,
+        &quot;exchange_rate_debit_account_bcy&quot;: 1.0,
+        &quot;amount_debit_account_bcy&quot;: 0.0,
+        &quot;interest_from_earlywdr&quot;: 0.0,
+        &quot;due_date&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;interest_prepaid&quot;: 0.0,
+        &quot;total_vat_for_cash&quot;: 0,
+        &quot;account_linkage&quot;: &quot;&quot;,
+        &quot;amount_linkage&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;total_ifc_fee_cash&quot;: 0.0,
+        &quot;total_ifc_fee_deposit&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;passbook_number&quot;: &quot;&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [
+            {
+                &quot;account_number&quot;: &quot;310031599342&quot;,
+                &quot;amount&quot;: 100000.45,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency&quot;: &quot;MMK&quot;,
+                &quot;available_balance&quot;: 9850000.0,
+                &quot;transaction_number&quot;: &quot;20230913000001109899&quot;,
+                &quot;transaction_date&quot;: &quot;2024-12-24T05:46:02.657Z&quot;,
+                &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+            }
+        ],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109899&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:02.657Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:02.6987785Z&quot;,
+        &quot;reference_id&quot;: &quot;37e9a809-f2d4-4b07-90c7-4d406e81659a&quot;,
+        &quot;ref_id&quot;: &quot;6b7c75cfcde649f8854ba1a5d8c7f2ed&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;DPT_CWR&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109899&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;41340f70b5c7418c83f0d7b99af15cc1&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030201020201&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222228
+    }
+]
+[
+    {
+        &quot;account_number&quot;: &quot;310031599342&quot;,
+        &quot;amount&quot;: 100000.45,
+        &quot;debit_or_credit&quot;: &quot;D&quot;,
+        &quot;currency&quot;: &quot;MMK&quot;,
+        &quot;available_balance&quot;: 9850000.0,
+        &quot;transaction_number&quot;: &quot;20230913000001109899&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:02.657Z&quot;,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+    }
+]
+Data response available for step code &#x27;CSH_UPDATE_CASH&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;list_cash&quot;: [
+            {
+                &quot;amount_cash_change&quot;: 100000.45,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;C&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 1,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;amount_cash_change&quot;: 0.0,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 2,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;list_cash_from_response&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109899&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;CSH_UPDATE_CASH&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:03.033Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:03.0696694Z&quot;,
+        &quot;reference_id&quot;: &quot;37e9a809-f2d4-4b07-90c7-4d406e81659a&quot;,
+        &quot;ref_id&quot;: &quot;6b7c75cfcde649f8854ba1a5d8c7f2ed&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;CSH_UPDATE_CASH&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109899&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;41340f70b5c7418c83f0d7b99af15cc1&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030201020201&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222228
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109899&quot;,
+        &quot;TransTableName&quot;: &quot;CashList&quot;,
+        &quot;TransId&quot;: &quot;042f5475f8144eb0938998fdbadd6654&quot;,
+        &quot;SysAccountName&quot;: &quot;CASH&quot;,
+        &quot;GLAccount&quot;: &quot;003101030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 11459
+    }
+]
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/443e58fe41694336a7d24d100b6d22b5 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/443e58fe41694336a7d24d100b6d22b5 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/51aaa64409d44864a9c6fd95110ce37e HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/51aaa64409d44864a9c6fd95110ce37e HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/c05e07482439459d8f6e29cc7dee44e1 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/c05e07482439459d8f6e29cc7dee44e1 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6b7c75cfcde649f8854ba1a5d8c7f2ed HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6b7c75cfcde649f8854ba1a5d8c7f2ed HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_002_success_saving_account_status_normal_add_fee</td>
+          <td class="col-duration">4.63</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;320034681677&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;PSMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Premier savings deposit account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Savings&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S3&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [
+            {
+                &quot;id&quot;: 4,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;320034681677&quot;,
+                &quot;ifc_code&quot;: 104,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 7.0,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;id&quot;: 5,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;320034681677&quot;,
+                &quot;ifc_code&quot;: 105,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 8.2,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030201030301&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109901&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:03.829Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:03.8636801Z&quot;,
+        &quot;reference_id&quot;: &quot;2f48dca6-890e-4256-b81d-03f44dbacb2a&quot;,
+        &quot;ref_id&quot;: &quot;a026c932de3f4c54b4a475ca51de7c9f&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;2f48dca6-890e-4256-b81d-03f44dbacb2a\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;PSMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Premier savings deposit account in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Savings\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;S3\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;PSMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Premier savings deposit account in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Savings\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;S3\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;320034681677&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;PSMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Premier savings deposit account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;S&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S3&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109902&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:04.956Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:04.989351Z&quot;,
+        &quot;reference_id&quot;: &quot;5911604e-4d98-4cab-a511-1a09722819b5&quot;,
+        &quot;ref_id&quot;: &quot;4efd82ce09054ca5a3c53252988afe6a&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;320034681677&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109903&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:06.082Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:06.1210657Z&quot;,
+        &quot;reference_id&quot;: &quot;b58264f0-32c3-460a-8405-c1fa30c723e6&quot;,
+        &quot;ref_id&quot;: &quot;2ee97ab06f7246b68e1647311ab14df4&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;320034681677&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;current_balance&quot;: null,
+        &quot;available_balance&quot;: null,
+        &quot;withdraw_amount&quot;: 100000.45,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;withdrawer_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;withdrawer_id&quot;: &quot;11001706&quot;,
+        &quot;withdrawer_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;withdrawer_description&quot;: {
+            &quot;home&quot;: null,
+            &quot;office&quot;: null
+        },
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_of_deposit_account&quot;: &quot;MMK&quot;,
+        &quot;exchange_rate_debit_account_bcy&quot;: 1.0,
+        &quot;amount_debit_account_bcy&quot;: 0.0,
+        &quot;interest_from_earlywdr&quot;: 0.0,
+        &quot;due_date&quot;: &quot;&quot;,
+        &quot;commission&quot;: 600.0,
+        &quot;interest_prepaid&quot;: 0.0,
+        &quot;total_vat_for_cash&quot;: 0,
+        &quot;account_linkage&quot;: &quot;&quot;,
+        &quot;amount_linkage&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;total_ifc_fee_cash&quot;: 600.0,
+        &quot;total_ifc_fee_deposit&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 600.0,
+        &quot;fee_currency_code&quot;: &quot;MMK&quot;,
+        &quot;passbook_number&quot;: &quot;&quot;,
+        &quot;fee_data&quot;: [
+            {
+                &quot;ifc_name&quot;: &quot;Withdrawal (MMK) For Same Region  (By Cash)&quot;,
+                &quot;share_fee&quot;: 0.0,
+                &quot;ifc_code&quot;: 308,
+                &quot;payrate&quot;: 100.0,
+                &quot;ifc_value&quot;: 100.0,
+                &quot;ifc_amount&quot;: 100.0,
+                &quot;currency_account_code&quot;: &quot;MMK&quot;,
+                &quot;floor_value&quot;: 0.0,
+                &quot;ceiling_value&quot;: 0.0,
+                &quot;share_rate&quot;: 0.0,
+                &quot;share_amount&quot;: 0.0,
+                &quot;round_rate&quot;: 0.0,
+                &quot;round_amount&quot;: 0.0,
+                &quot;currency_fee_code&quot;: &quot;MMK&quot;,
+                &quot;pay_source&quot;: &quot;CSH&quot;,
+                &quot;value_typect&quot;: null,
+                &quot;value_type&quot;: &quot;F&quot;
+            },
+            {
+                &quot;ifc_name&quot;: &quot;Withdrawal (MMK) For Same Region(By Cash)(Postage &amp; Fax Charges)&quot;,
+                &quot;share_fee&quot;: 0.0,
+                &quot;ifc_code&quot;: 342,
+                &quot;payrate&quot;: 100.0,
+                &quot;ifc_value&quot;: 500.0,
+                &quot;ifc_amount&quot;: 500.0,
+                &quot;currency_account_code&quot;: &quot;MMK&quot;,
+                &quot;floor_value&quot;: 0.0,
+                &quot;ceiling_value&quot;: 0.0,
+                &quot;share_rate&quot;: 0.0,
+                &quot;share_amount&quot;: 0.0,
+                &quot;round_rate&quot;: 0.0,
+                &quot;round_amount&quot;: 0.0,
+                &quot;currency_fee_code&quot;: &quot;MMK&quot;,
+                &quot;pay_source&quot;: &quot;CSH&quot;,
+                &quot;value_typect&quot;: null,
+                &quot;value_type&quot;: &quot;F&quot;
+            }
+        ],
+        &quot;account_balances&quot;: [
+            {
+                &quot;account_number&quot;: &quot;320034681677&quot;,
+                &quot;amount&quot;: 100000.45,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency&quot;: &quot;MMK&quot;,
+                &quot;available_balance&quot;: 9850000.0,
+                &quot;transaction_number&quot;: &quot;20230913000001109905&quot;,
+                &quot;transaction_date&quot;: &quot;2024-12-24T05:46:07.286Z&quot;,
+                &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+            }
+        ],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109905&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:07.286Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:07.3280117Z&quot;,
+        &quot;reference_id&quot;: &quot;688418f1-5619-4362-9ec5-2c34269a51e6&quot;,
+        &quot;ref_id&quot;: &quot;8cc30f06aae647c5ad441c33be8f2bef&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;DPT_CWR&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;30c9940fa8624da8a84e78e34fc6533e&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030201030301&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222230
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;dc65dd69565b41249bf44b6cc10a3d5d&quot;,
+        &quot;SysAccountName&quot;: &quot;IFCC&quot;,
+        &quot;GLAccount&quot;: &quot;003303030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100.0,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 2,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222231
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;dc65dd69565b41249bf44b6cc10a3d5d&quot;,
+        &quot;SysAccountName&quot;: &quot;IFCC&quot;,
+        &quot;GLAccount&quot;: &quot;003303030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 500.0,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 2,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222232
+    }
+]
+[
+    {
+        &quot;account_number&quot;: &quot;320034681677&quot;,
+        &quot;amount&quot;: 100000.45,
+        &quot;debit_or_credit&quot;: &quot;D&quot;,
+        &quot;currency&quot;: &quot;MMK&quot;,
+        &quot;available_balance&quot;: 9850000.0,
+        &quot;transaction_number&quot;: &quot;20230913000001109905&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:07.286Z&quot;,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+    }
+]
+Data response available for step code &#x27;CSH_UPDATE_CASH&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;list_cash&quot;: [
+            {
+                &quot;amount_cash_change&quot;: 100000.45,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;C&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 1,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;amount_cash_change&quot;: 600.0,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 2,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;list_cash_from_response&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109905&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;CSH_UPDATE_CASH&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:07.692Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:07.7242264Z&quot;,
+        &quot;reference_id&quot;: &quot;688418f1-5619-4362-9ec5-2c34269a51e6&quot;,
+        &quot;ref_id&quot;: &quot;8cc30f06aae647c5ad441c33be8f2bef&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;CSH_UPDATE_CASH&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;30c9940fa8624da8a84e78e34fc6533e&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030201030301&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222230
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;dc65dd69565b41249bf44b6cc10a3d5d&quot;,
+        &quot;SysAccountName&quot;: &quot;IFCC&quot;,
+        &quot;GLAccount&quot;: &quot;003303030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100.0,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 2,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222231
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;dc65dd69565b41249bf44b6cc10a3d5d&quot;,
+        &quot;SysAccountName&quot;: &quot;IFCC&quot;,
+        &quot;GLAccount&quot;: &quot;003303030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 500.0,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 2,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222232
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;CashList&quot;,
+        &quot;TransId&quot;: &quot;536694123f004a9a861e5d94bcb01752&quot;,
+        &quot;SysAccountName&quot;: &quot;CASH&quot;,
+        &quot;GLAccount&quot;: &quot;003101030100010101&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 600.0,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 2,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 11461
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109905&quot;,
+        &quot;TransTableName&quot;: &quot;CashList&quot;,
+        &quot;TransId&quot;: &quot;bc7c18d5f8834a549f573eea86bd7583&quot;,
+        &quot;SysAccountName&quot;: &quot;CASH&quot;,
+        &quot;GLAccount&quot;: &quot;003101030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 11462
+    }
+]
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a026c932de3f4c54b4a475ca51de7c9f HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a026c932de3f4c54b4a475ca51de7c9f HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4efd82ce09054ca5a3c53252988afe6a HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4efd82ce09054ca5a3c53252988afe6a HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/2ee97ab06f7246b68e1647311ab14df4 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/2ee97ab06f7246b68e1647311ab14df4 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/8cc30f06aae647c5ad441c33be8f2bef HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/8cc30f06aae647c5ad441c33be8f2bef HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_003_success_saving_account_status_dormant</td>
+          <td class="col-duration">5.66</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;330037608873&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;CDMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Call deposit account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Savings&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S4&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [
+            {
+                &quot;id&quot;: 6,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;330037608873&quot;,
+                &quot;ifc_code&quot;: 106,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 6.25,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030102010101&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109907&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:08.44Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:08.477498Z&quot;,
+        &quot;reference_id&quot;: &quot;befbb5fa-14c5-4063-816a-bdbde80e740c&quot;,
+        &quot;ref_id&quot;: &quot;68dc69a63dfa4dd0821f2330ae145dd6&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;befbb5fa-14c5-4063-816a-bdbde80e740c\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;CDMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Call deposit account in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Savings\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;S4\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;CDMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Call deposit account in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Savings\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;S4\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;330037608873&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;CDMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Call deposit account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;S&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S4&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109908&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:09.597Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:09.6293631Z&quot;,
+        &quot;reference_id&quot;: &quot;b040d208-6185-4de3-b233-5af6997c8502&quot;,
+        &quot;ref_id&quot;: &quot;80cfea232f404a39b31fb8a14a98ce15&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;330037608873&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109909&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:10.726Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:10.7743175Z&quot;,
+        &quot;reference_id&quot;: &quot;5bd94d0b-eb26-44b8-8e80-f22e8b76777c&quot;,
+        &quot;ref_id&quot;: &quot;4b31dcc65bff45489f8ba40b5f99fc10&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CAS&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;330037608873&quot;,
+        &quot;current_status&quot;: &quot;Normal&quot;,
+        &quot;new_status&quot;: &quot;D&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_CAS&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109911&quot;,
+        &quot;transaction_type&quot;: &quot;CAS&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CAS&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:11.873Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:11.919482Z&quot;,
+        &quot;reference_id&quot;: &quot;f523dc9d-7321-48fc-9f33-71d22eae62b1&quot;,
+        &quot;ref_id&quot;: &quot;5fa229a468994782987ea3c0fc859f6a&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;11841: Change account status&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;ApprovalRequired&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.HandleDormant(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 408\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.DoTransaction(String transactionNumber, WorkflowScheme workflow, Func`1 acquire, Boolean isReverse, Func`1 addInformation, Boolean removeSensitive, Boolean replacePosting, Boolean IsCompensated, Boolean useTransactionScope, Boolean isInquiry)\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.Invoke[TModel](WorkflowScheme workflow, Func`1 acquire, String keyName, Boolean removeSensitive, Boolean replacePosting, Boolean useTransactionScope, Boolean singleThread)\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.CashWithdraw(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 441\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;ApprovalRequired&quot;,
+    &quot;error_code&quot;: &quot;ApprovalRequired&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/68dc69a63dfa4dd0821f2330ae145dd6 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/68dc69a63dfa4dd0821f2330ae145dd6 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/80cfea232f404a39b31fb8a14a98ce15 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/80cfea232f404a39b31fb8a14a98ce15 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4b31dcc65bff45489f8ba40b5f99fc10 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4b31dcc65bff45489f8ba40b5f99fc10 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/5fa229a468994782987ea3c0fc859f6a HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/5fa229a468994782987ea3c0fc859f6a HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/0f8dc31a07ce4cefbd4ca4f0f86a98f8 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/0f8dc31a07ce4cefbd4ca4f0f86a98f8 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_004_error_account_number_is_empty</td>
+          <td class="col-duration">1.14</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Account number is required\nInvalid account number []&quot;,
+    &quot;error_code&quot;: &quot;NotEmptyValidator\n&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/55bf82e298e447a3891eaa09c49c4b04 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/55bf82e298e447a3891eaa09c49c4b04 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_005_error_account_number_is_null</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response for execute_status NOT &#x27;COMPLETED&#x27;
+{
+    &quot;time_in_miliseconds&quot;: 1,
+    &quot;status&quot;: &quot;ERROR&quot;,
+    &quot;description&quot;: &quot;Input is invalid.Field [account_number] violates IS_NULL rule.;&quot;,
+    &quot;error_code&quot;: null,
+    &quot;execution_id&quot;: null,
+    &quot;transaction_number&quot;: null,
+    &quot;transaction_date&quot;: null,
+    &quot;value_date&quot;: null,
+    &quot;data&quot;: null
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_006_error_account_number_not_exist</td>
+          <td class="col-duration">1.20</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Invalid account number [111111111111]&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/f2c7b5e0d6ab43d1a600c819a0d6bc88 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/f2c7b5e0d6ab43d1a600c819a0d6bc88 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_007_error_account_status_closed</td>
+          <td class="col-duration">1.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Invalid available balance [340034919619] of account. Available balance must be more than [100000.45] - en&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/d99c6d1f8cd9437eba5d3c01a8521d3c HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/d99c6d1f8cd9437eba5d3c01a8521d3c HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_008_error_account_status_block</td>
+          <td class="col-duration">1.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [Block]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckNotAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 260\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.DoTransaction(String transactionNumber, WorkflowScheme workflow, Func`1 acquire, Boolean isReverse, Func`1 addInformation, Boolean removeSensitive, Boolean replacePosting, Boolean IsCompensated, Boolean useTransactionScope, Boolean isInquiry)\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.Invoke[TModel](WorkflowScheme workflow, Func`1 acquire, String keyName, Boolean removeSensitive, Boolean replacePosting, Boolean useTransactionScope, Boolean singleThread)\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.CashWithdraw(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 441\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [Block]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a3a1256d45c640879f34ec043026bffa HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a3a1256d45c640879f34ec043026bffa HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_009_error_account_status_pending</td>
+          <td class="col-duration">1.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Invalid available balance [310030475906] of account. Available balance must be more than [100000.45] - en&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/f31118ff81d94ee4b6e014a3499891b1 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/f31118ff81d94ee4b6e014a3499891b1 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_010_error_account_status_new</td>
+          <td class="col-duration">1.13</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Invalid available balance [310030730191] of account. Available balance must be more than [100000.45] - en&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/88d6aff589514674854c74135d69bfea HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/88d6aff589514674854c74135d69bfea HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_011_success_current_account_status_normal</td>
+          <td class="col-duration">4.66</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;110038147355&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Current&quot;,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030101010101&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109919&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:21.061Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:21.1008332Z&quot;,
+        &quot;reference_id&quot;: &quot;cec7262b-0fc4-45a3-8c74-e53375382be6&quot;,
+        &quot;ref_id&quot;: &quot;9745749deebd4e3eae2282e638658de4&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;cec7262b-0fc4-45a3-8c74-e53375382be6\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;CAMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Current account in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Current\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;C1\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;CAMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Current account in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Current\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;C1\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110038147355&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;S&quot;,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109920&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:22.253Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:22.2866763Z&quot;,
+        &quot;reference_id&quot;: &quot;899d16ed-ca19-4a95-9354-868be4dd1f6b&quot;,
+        &quot;ref_id&quot;: &quot;705b75da55744bd09ffbfe8d1a1a0ff6&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110038147355&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109921&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:23.376Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:23.4152749Z&quot;,
+        &quot;reference_id&quot;: &quot;f550bbad-e0b2-4339-b932-1c2252c516ba&quot;,
+        &quot;ref_id&quot;: &quot;1e80037e7db34f788a0c51f39b4493d5&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110038147355&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;current_balance&quot;: null,
+        &quot;available_balance&quot;: null,
+        &quot;withdraw_amount&quot;: 100000.45,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;withdrawer_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;withdrawer_id&quot;: &quot;11001706&quot;,
+        &quot;withdrawer_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;withdrawer_description&quot;: {
+            &quot;home&quot;: null,
+            &quot;office&quot;: null
+        },
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_of_deposit_account&quot;: &quot;MMK&quot;,
+        &quot;exchange_rate_debit_account_bcy&quot;: 1.0,
+        &quot;amount_debit_account_bcy&quot;: 0.0,
+        &quot;interest_from_earlywdr&quot;: 0.0,
+        &quot;due_date&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;interest_prepaid&quot;: 0.0,
+        &quot;total_vat_for_cash&quot;: 0,
+        &quot;account_linkage&quot;: &quot;&quot;,
+        &quot;amount_linkage&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;total_ifc_fee_cash&quot;: 0.0,
+        &quot;total_ifc_fee_deposit&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;passbook_number&quot;: &quot;&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [
+            {
+                &quot;account_number&quot;: &quot;110038147355&quot;,
+                &quot;amount&quot;: 100000.45,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency&quot;: &quot;MMK&quot;,
+                &quot;available_balance&quot;: 9899000.0,
+                &quot;transaction_number&quot;: &quot;20230913000001109923&quot;,
+                &quot;transaction_date&quot;: &quot;2024-12-24T05:46:24.533Z&quot;,
+                &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+            }
+        ],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109923&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:24.533Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:24.576025Z&quot;,
+        &quot;reference_id&quot;: &quot;dc12e240-3e7d-4da2-882b-86b512ec01be&quot;,
+        &quot;ref_id&quot;: &quot;ff8f14150de7489fbe06dfdd0620b69b&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;DPT_CWR&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109923&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;fe498523db5a479880729fea82c4caf3&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030101010101&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222235
+    }
+]
+[
+    {
+        &quot;account_number&quot;: &quot;110038147355&quot;,
+        &quot;amount&quot;: 100000.45,
+        &quot;debit_or_credit&quot;: &quot;D&quot;,
+        &quot;currency&quot;: &quot;MMK&quot;,
+        &quot;available_balance&quot;: 9899000.0,
+        &quot;transaction_number&quot;: &quot;20230913000001109923&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:24.533Z&quot;,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;
+    }
+]
+Data response available for step code &#x27;CSH_UPDATE_CASH&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;list_cash&quot;: [
+            {
+                &quot;amount_cash_change&quot;: 100000.45,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;C&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 1,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;amount_cash_change&quot;: 0.0,
+                &quot;base_amount&quot;: 0.0,
+                &quot;debit_or_credit&quot;: &quot;D&quot;,
+                &quot;currency_code&quot;: &quot;MMK&quot;,
+                &quot;condition&quot;: null,
+                &quot;posting&quot;: false,
+                &quot;accounting_group&quot;: 2,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;list_cash_from_response&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CWR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109923&quot;,
+        &quot;transaction_type&quot;: &quot;CWR&quot;,
+        &quot;sub_code&quot;: &quot;CSH_UPDATE_CASH&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:24.959Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:24.9993928Z&quot;,
+        &quot;reference_id&quot;: &quot;dc12e240-3e7d-4da2-882b-86b512ec01be&quot;,
+        &quot;ref_id&quot;: &quot;ff8f14150de7489fbe06dfdd0620b69b&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1120: Cash withdrawal&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data postings available for step code &#x27;CSH_UPDATE_CASH&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109923&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;fe498523db5a479880729fea82c4caf3&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030101010101&quot;,
+        &quot;DorC&quot;: &quot;D&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 222235
+    },
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001109923&quot;,
+        &quot;TransTableName&quot;: &quot;CashList&quot;,
+        &quot;TransId&quot;: &quot;4403c464e28e4cdab632a7b3f29c5103&quot;,
+        &quot;SysAccountName&quot;: &quot;CASH&quot;,
+        &quot;GLAccount&quot;: &quot;003101030100010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 100000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 11465
+    }
+]
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/9745749deebd4e3eae2282e638658de4 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/9745749deebd4e3eae2282e638658de4 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/705b75da55744bd09ffbfe8d1a1a0ff6 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/705b75da55744bd09ffbfe8d1a1a0ff6 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/1e80037e7db34f788a0c51f39b4493d5 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/1e80037e7db34f788a0c51f39b4493d5 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/ff8f14150de7489fbe06dfdd0620b69b HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/ff8f14150de7489fbe06dfdd0620b69b HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_012_error_fixed_deposit_account_status_normal</td>
+          <td class="col-duration">1.14</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit type of account [430030589898]- en&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckDepositType(Object obj) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 316\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.DoTransaction(String transactionNumber, WorkflowScheme workflow, Func`1 acquire, Boolean isReverse, Func`1 addInformation, Boolean removeSensitive, Boolean replacePosting, Boolean IsCompensated, Boolean useTransactionScope, Boolean isInquiry)\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.Invoke[TModel](WorkflowScheme workflow, Func`1 acquire, String keyName, Boolean removeSensitive, Boolean replacePosting, Boolean useTransactionScope, Boolean singleThread)\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.CashWithdraw(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 441\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit type of account [430030589898]- en&quot;,
+    &quot;error_code&quot;: &quot;InvalidDpttype&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/7576a609aa4040048672dd8b6178dd0e HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/7576a609aa4040048672dd8b6178dd0e HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_013_error_pepaid_fixed_deposit_account_status_normal</td>
+          <td class="col-duration">1.13</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit type of account [460030177172]- en&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckDepositType(Object obj) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 316\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.&lt;&gt;c__DisplayClass45_0.&lt;&lt;CashWithdraw&gt;b__0&gt;d.MoveNext() in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 440\r\n--- End of stack trace from previous location ---\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.DoTransaction(String transactionNumber, WorkflowScheme workflow, Func`1 acquire, Boolean isReverse, Func`1 addInformation, Boolean removeSensitive, Boolean replacePosting, Boolean IsCompensated, Boolean useTransactionScope, Boolean isInquiry)\r\n   at Jits.Neptune.Web.Framework.Services.Queue.BaseQueueService.Invoke[TModel](WorkflowScheme workflow, Func`1 acquire, String keyName, Boolean removeSensitive, Boolean replacePosting, Boolean useTransactionScope, Boolean singleThread)\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.CashWithdraw(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 441\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit type of account [460030177172]- en&quot;,
+    &quot;error_code&quot;: &quot;InvalidDpttype&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/383d21b03ba446689a27b5a5669ba08e HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/383d21b03ba446689a27b5a5669ba08e HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_014_error_withdrawal_amount_is_minus</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response for execute_status NOT &#x27;COMPLETED&#x27;
+{
+    &quot;time_in_miliseconds&quot;: 1,
+    &quot;status&quot;: &quot;ERROR&quot;,
+    &quot;description&quot;: &quot;Input is invalid.Field [withdraw_amount] violates Minimum rule: Minimum value is 0.01;&quot;,
+    &quot;error_code&quot;: null,
+    &quot;execution_id&quot;: null,
+    &quot;transaction_number&quot;: null,
+    &quot;transaction_date&quot;: null,
+    &quot;value_date&quot;: null,
+    &quot;data&quot;: null
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_015_error_withdrawal_amount_is_empty</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response for execute_status NOT &#x27;COMPLETED&#x27;
+{
+    &quot;time_in_miliseconds&quot;: 2,
+    &quot;status&quot;: &quot;ERROR&quot;,
+    &quot;description&quot;: &quot;Input is invalid.Validate field [withdraw_amount]: value=[], datatype=[Number] with exception: [The input string &#x27;&#x27; was not in a correct format.].;&quot;,
+    &quot;error_code&quot;: null,
+    &quot;execution_id&quot;: null,
+    &quot;transaction_number&quot;: null,
+    &quot;transaction_date&quot;: null,
+    &quot;value_date&quot;: null,
+    &quot;data&quot;: null
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_016_error_withdrawal_amount_is_zero</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response for execute_status NOT &#x27;COMPLETED&#x27;
+{
+    &quot;time_in_miliseconds&quot;: 1,
+    &quot;status&quot;: &quot;ERROR&quot;,
+    &quot;description&quot;: &quot;Input is invalid.Field [withdraw_amount] violates Minimum rule: Minimum value is 0.01;&quot;,
+    &quot;error_code&quot;: null,
+    &quot;execution_id&quot;: null,
+    &quot;transaction_number&quot;: null,
+    &quot;transaction_date&quot;: null,
+    &quot;value_date&quot;: null,
+    &quot;data&quot;: null
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_017_error_withdrawal_amount_is_null</td>
+          <td class="col-duration">0.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response for execute_status NOT &#x27;COMPLETED&#x27;
+{
+    &quot;time_in_miliseconds&quot;: 1,
+    &quot;status&quot;: &quot;ERROR&quot;,
+    &quot;description&quot;: &quot;Input is invalid.Field [withdraw_amount] violates IS_NULL rule.;&quot;,
+    &quot;error_code&quot;: null,
+    &quot;execution_id&quot;: null,
+    &quot;transaction_number&quot;: null,
+    &quot;transaction_date&quot;: null,
+    &quot;value_date&quot;: null,
+    &quot;data&quot;: null
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_05_sp_dpt_cwr.py::Test_SP_DPT_CWR::test_05_sp_dpt_cwr_018_error_withdrawal_amount_bigger_available_balance</td>
+          <td class="col-duration">4.73</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;310039779188&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;BSMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Bonus savings account  in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Savings&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S2&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [
+            {
+                &quot;id&quot;: 2,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;310039779188&quot;,
+                &quot;ifc_code&quot;: 102,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 7.0,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            },
+            {
+                &quot;id&quot;: 3,
+                &quot;module_code&quot;: &quot;DPT&quot;,
+                &quot;account_number&quot;: &quot;310039779188&quot;,
+                &quot;ifc_code&quot;: 103,
+                &quot;value_base&quot;: &quot;I&quot;,
+                &quot;ifc_value&quot;: 8.0,
+                &quot;margin_value&quot;: 0.0,
+                &quot;amount&quot;: 0.0,
+                &quot;paid&quot;: 0.0,
+                &quot;lamt&quot;: 0.0,
+                &quot;ifc_status&quot;: &quot;N&quot;,
+                &quot;last_datetime&quot;: &quot;2023-09-13T00:00:00&quot;,
+                &quot;amtpbl&quot;: 0.0,
+                &quot;wdays&quot;: 0.0,
+                &quot;odays&quot;: 0.0,
+                &quot;next_datetime&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;transaction_code&quot;: null,
+                &quot;transaction_number&quot;: null,
+                &quot;transaction_type&quot;: null,
+                &quot;sub_code&quot;: null,
+                &quot;transaction_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;service_sys_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;reference_id&quot;: null,
+                &quot;ref_id&quot;: null,
+                &quot;reference_code&quot;: null,
+                &quot;business_code&quot;: null,
+                &quot;value_date&quot;: &quot;0001-01-01T00:00:00&quot;,
+                &quot;current_user_code&quot;: null,
+                &quot;current_branch_code&quot;: null,
+                &quot;current_username&quot;: null,
+                &quot;current_loginname&quot;: null,
+                &quot;user_approve&quot;: null,
+                &quot;status&quot;: null,
+                &quot;is_reverse&quot;: false,
+                &quot;amount1&quot;: 0.0,
+                &quot;description&quot;: null,
+                &quot;token&quot;: null,
+                &quot;is_transaction_reverse&quot;: false,
+                &quot;is_transaction_compensated&quot;: false
+            }
+        ],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030201020201&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109927&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:28.179Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:28.2174983Z&quot;,
+        &quot;reference_id&quot;: &quot;9fe247d9-4424-4c82-b24a-4d821acd32c9&quot;,
+        &quot;ref_id&quot;: &quot;7acc5a1d478240a79fb4ab998f05522c&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1MDE5MTU3IiwiZXhwIjoiMTczNTYyMzk1NyIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.PDI2QRTA-2XYwldE_bUhSYM3yuofY1KVELUQkUeX5xr7twpqSgf0F6ENdKysYPJHacWOmpAT8xpIMBJsfeGGp2B_NlWxyNWJ91eXrRBz0iY-hC7LUF1ibg-1SlLMIgyygnFEZRixxe7q1pnujtEUEOoqYVd_EIqzBNz9I1ntBLxVjlq3l6QMbMx5piZU-zXCGRKQhWMB-p3UpRBkN2svdlN8lUpxk71SmAsSoOtxPXSN_wkWErtSpWntSL5G4Ue7aMeaU5Q_ZVH79YYeX5vhJO5cY5XDwAEnQ22U9xX-jrPjyomvB47--1goHOzcVUH6xXY7liKvVLgVK-fvGuRlUw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;9fe247d9-4424-4c82-b24a-4d821acd32c9\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;BSMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Bonus savings account  in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Savings\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;S2\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;BSMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Bonus savings account  in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Savings\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;S2\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;310039779188&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;BSMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Bonus savings account  in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;S&quot;,
+        &quot;deposit_sub_type&quot;: &quot;S2&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109928&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:29.362Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:29.3931777Z&quot;,
+        &quot;reference_id&quot;: &quot;26690c45-7a0b-427a-a3f5-b640d8b50d9c&quot;,
+        &quot;ref_id&quot;: &quot;a25cecc3a74749deb0ce2f2b49ca8717&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;310039779188&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001109929&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-24T05:46:30.508Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-24T05:46:30.5441753Z&quot;,
+        &quot;reference_id&quot;: &quot;16a6f2f3-77a5-434c-b2a5-31a917f83828&quot;,
+        &quot;ref_id&quot;: &quot;4ee57f8e0d4c4bb5aa98dddb13858c39&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_CWR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Invalid available balance [310039779188] of account. Available balance must be more than [9950000.459999999] - en&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/7acc5a1d478240a79fb4ab998f05522c HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/7acc5a1d478240a79fb4ab998f05522c HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a25cecc3a74749deb0ce2f2b49ca8717 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a25cecc3a74749deb0ce2f2b49ca8717 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4ee57f8e0d4c4bb5aa98dddb13858c39 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/4ee57f8e0d4c4bb5aa98dddb13858c39 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/35fde50268094708ab40eaa067ab5735 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/35fde50268094708ab40eaa067ab5735 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody></table></body></html>

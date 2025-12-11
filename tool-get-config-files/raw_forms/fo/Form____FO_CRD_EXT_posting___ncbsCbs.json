@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.5595641Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"FO_CRD_EXT_posting\",\"des\":\"FO_CRD_EXT_posting\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"FO_CRD_EXT_posting\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"FO_CRD_EXT_posting\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"Posting\",\"des\":\"Posting\",\"class\":\"\",\"codeHidden\":\"9c9f62eedf51a184\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"lang\":{},\"code\":\"code\",\"class\":\"col-md-6 col-sm-12 \",\"codeHidden\":\"cbc85eefe8610f4a\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Debit\",\"code\":\"postings_debit\",\"codeHidden\":\"6cfe880d0ff85ea2\",\"class\":\"col-12\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"role\":\"\"},\"config\":{\"structable\":\"FO_CRD_EXT.postings_debit\",\"query_data\":\"FO_CRD_EXT.postings_debit\",\"paging_record\":\"5\",\"columns\":\"[{\\\"code\\\":\\\"postings_debit.accounting_entry_group\\\",\\\"title\\\":\\\"Group\\\",\\\"inputtype\\\":\\\"ColumnNumber\\\",\\\"config\\\":{}},{\\\"code\\\":\\\"postings_debit.account_number\\\",\\\"title\\\":\\\"Account number\\\",\\\"inputtype\\\":\\\"columnMask\\\",\\\"config\\\":{\\\"mask\\\":\\\"$FO_ACNO_POSTING$\\\"}},{\\\"code\\\":\\\"postings_debit.amount\\\",\\\"title\\\":\\\"Amount\\\",\\\"inputtype\\\":\\\"columnCurrency\\\",\\\"config\\\":{\\\"decimal\\\":2}}]\"},\"role\":{},\"property\":{},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jTableForm\"}]},{\"name\":\"\",\"lang\":{},\"code\":\"code\",\"class\":\"col-md-6 col-sm-12 \",\"codeHidden\":\"7b43df2be7e7b1d1\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Credit\",\"code\":\"postings_credit\",\"codeHidden\":\"a1f900b0238b3b6f\",\"class\":\"col-12\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"role\":\"\"},\"config\":{\"structable\":\"FO_CRD_EXT.postings_credit\",\"query_data\":\"FO_CRD_EXT.postings_credit\",\"paging_record\":\"5\",\"columns\":\"[{\\\"code\\\":\\\"postings_credit.accounting_entry_group\\\",\\\"title\\\":\\\"Group\\\",\\\"inputtype\\\":\\\"ColumnNumber\\\",\\\"config\\\":{}},{\\\"code\\\":\\\"postings_credit.account_number\\\",\\\"title\\\":\\\"Account number\\\",\\\"inputtype\\\":\\\"columnMask\\\",\\\"config\\\":{\\\"mask\\\":\\\"$FO_ACNO_POSTING$\\\"}},{\\\"code\\\":\\\"postings_credit.amount\\\",\\\"title\\\":\\\"Amount\\\",\\\"inputtype\\\":\\\"columnCurrency\\\",\\\"config\\\":{\\\"decimal\\\":2}}]\"},\"role\":{},\"property\":{},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"jTableForm\"}]}]}]",
+        "react_txt": "",
+        "form_id": "FO_CRD_EXT_posting",
+        "app": "ncbsCbs",
+        "id": 1128
+      }
+    ]
+  }
+]

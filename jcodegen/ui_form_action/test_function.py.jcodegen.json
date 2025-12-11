@@ -1,0 +1,581 @@
+{
+    "template": "ui_test/test_function.sbn",
+    "menu_01": "Front Office",
+    "menu_02": "FX Transaction",
+    "form_code": "ACT_ACT",
+    "form_title": "FOF-FX Transaction",
+    "field_list": [
+        {
+            "title": "Accounting Type",
+            "field_type": "fsb",
+            "value": "accounting_type_debit",
+            "border_name": "Debit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Account number",
+            "field_type": "fwb",
+            "value": "account_number_debit",
+            "border_name": "Debit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "y",
+            "is_replace": "y",
+            "replace_by": "-",
+            "value_default": ""
+        },
+        {
+            "title": "Account name debit",
+            "field_type": "fatb",
+            "value": "account_name_debit",
+            "border_name": "Debit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Currency",
+            "field_type": "favb",
+            "value": "currency_debit",
+            "border_name": "Debit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Type",
+            "field_type": "fsb",
+            "value": "type_debit",
+            "border_name": "Debit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Accounting Type",
+            "field_type": "fsb",
+            "value": "accounting_type_credit",
+            "border_name": "Credit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Account number ",
+            "field_type": "fwb",
+            "value": "account_number_credit",
+            "border_name": "Credit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "y",
+            "is_replace": "y",
+            "replace_by": "-",
+            "value_default": ""
+        },
+        {
+            "title": "Account name credit",
+            "field_type": "fatb",
+            "value": "account_name_credit",
+            "border_name": "Credit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Currency",
+            "field_type": "favb",
+            "value": "currency_credit",
+            "border_name": "Credit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Type",
+            "field_type": "fsb",
+            "value": "type_credit",
+            "border_name": "Credit",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "",
+            "value": "enter_side"
+        },
+        {
+            "title": "",
+            "value": "market_dr_rate"
+        },
+        {
+            "title": "",
+            "value": "cross_rate"
+        },
+        {
+            "title": "",
+            "value": "market_cr_rate"
+        },
+        {
+            "title": "",
+            "value": "debit_amount"
+        },
+        {
+            "title": "",
+            "value": "reverse_rate"
+        },
+        {
+            "title": "",
+            "value": "credit_amount"
+        },
+        {
+            "title": "",
+            "value": "fee_amount"
+        },
+        {
+            "title": "",
+            "value": "receive_amount"
+        },
+        {
+            "title": "Customer type",
+            "field_type": "fsb",
+            "value": "customer_type",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Customer code",
+            "field_type": "fwb",
+            "value": "customer_code",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Full name",
+            "field_type": "fwtb",
+            "value": "full_name",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Paper type",
+            "field_type": "fsb",
+            "value": "paper_type",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Paper number",
+            "field_type": "fwtb",
+            "value": "paper_number",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Telephone",
+            "field_type": "fwtb",
+            "value": "telephone",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Address",
+            "field_type": "fwtb",
+            "value": "address",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Nationality",
+            "field_type": "fsb",
+            "value": "nationality",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Description",
+            "field_type": "fwtb",
+            "value": "description",
+            "border_name": "Customer Information",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": "'AUTO TEST'"
+        },
+        {
+            "title": "",
+            "value": "ifc_codes"
+        },
+        {
+            "title": "",
+            "value": "values"
+        },
+        {
+            "title": "",
+            "value": "total_fee"
+        }
+
+    ],
+    "enter_list_debit": [
+        {
+            "title": "Debit Amount",
+            "field_type": "fwnb",
+            "value": "debit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "y",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Market DR Rate",
+            "field_type": "favb",
+            "value": "market_dr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Cross Rate",
+            "field_type": "favb",
+            "value": "cross_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Market CR Rate",
+            "field_type": "favb",
+            "value": "market_cr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Reverse Rate",
+            "field_type": "favb",
+            "value": "reverse_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Credit Amount",
+            "field_type": "favb",
+            "value": "credit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Fee Amount",
+            "field_type": "favb",
+            "value": "fee_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Receive Amount",
+            "field_type": "favb",
+            "value": "receive_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        }
+    ],
+    "enter_list_credit": [
+        {
+            "title": "Credit Amount",
+            "field_type": "fwnb",
+            "value": "credit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "y",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Debit Amount",
+            "field_type": "favb",
+            "value": "debit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Market DR Rate",
+            "field_type": "favb",
+            "value": "market_dr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Cross Rate",
+            "field_type": "favb",
+            "value": "cross_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Market CR Rate",
+            "field_type": "favb",
+            "value": "market_cr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Reverse Rate",
+            "field_type": "favb",
+            "value": "reverse_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Fee Amount",
+            "field_type": "favb",
+            "value": "fee_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Receive Amount",
+            "field_type": "favb",
+            "value": "receive_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        }
+    ],
+    "add_fee": "y",
+    "field_fee": [
+        {
+            "title": "Market DR Rate",
+            "field_type": "fav",
+            "value": "market_dr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Cross Rate",
+            "field_type": "fav",
+            "value": "cross_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Market CR Rate",
+            "field_type": "fav",
+            "value": "market_cr_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Debit Amount",
+            "field_type": "fav",
+            "value": "debit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Reverse Rate",
+            "field_type": "fav",
+            "value": "reverse_rate",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Credit Amount",
+            "field_type": "fav",
+            "value": "credit_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Fee Amount",
+            "field_type": "fav",
+            "value": "fee_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        },
+        {
+            "title": "Receive Amount",
+            "field_type": "fav",
+            "value": "receive_amount",
+            "border_name": "Rate",
+            "return": "",
+            "out_type": "",
+            "is_wait": "",
+            "is_replace": "",
+            "replace_by": "",
+            "value_default": ""
+        }
+    ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.8372263Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\r\n  \"title\": \"BO_007022ifccd_lookup\",\r\n  \"des\": \"BO_007022ifccd_lookup\",\r\n  \"data\": \"\",\r\n  \"learnapi\": \"BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD\",\r\n  \"learnsql\": \"\",\r\n  \"bodata\": \"\",\r\n  \"openOne\": \"false\",\r\n  \"url_input\": \"\",\r\n  \"lang_form\": {\r\n    \"en\": \"BO_007022ifccd_lookup\"\r\n  },\r\n  \"mode_form\": {\r\n    \"mode\": \"\",\r\n    \"col_text\": \"\",\r\n    \"col_input\": \"\"\r\n  },\r\n  \"form_code\": \"BO_007022ifccd\",\r\n  \"ruleStrong\": [\r\n    {\r\n      \"code\": \"runFo\",\r\n      \"config\": {\r\n        \"component_action\": \"search_input\",\r\n        \"component_event\": \"enter\",\r\n        \"txFo\": \"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"BO_007022ifccd\\\",\\\"learn_api\\\":\\\"BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD\\\"}}]\",\r\n        \"txFoActions\": \"\",\r\n        \"useAction\": \"false\",\r\n        \"condition\": \"\",\r\n        \"component_result\": \"\"\r\n      },\r\n      \"inUse\": true,\r\n      \"order\": 1,\r\n      \"isStart\": false,\r\n      \"isStatus\": -1,\r\n      \"isDidStart\": true,\r\n      \"isOpenFromOther\": false\r\n    }\r\n  ],\r\n  \"app\": \"ncbsCbs\"\r\n}",
+        "list_layout": "[\r\n  {\r\n    \"name\": \"\",\r\n    \"des\": \"\",\r\n    \"class\": \"\",\r\n    \"codeHidden\": \"094c4836e63038b8\",\r\n    \"inputtype\": \"cLayout\",\r\n    \"list_view\": [\r\n      {\r\n        \"name\": \"\",\r\n        \"code\": \"code\",\r\n        \"codeHidden\": \"9b001362be18f4dd\",\r\n        \"inputtype\": \"cView\",\r\n        \"isTab\": \"false\",\r\n        \"list_input\": [\r\n          {\r\n            \"default\": {\r\n              \"name\": \"\",\r\n              \"code\": \"view\",\r\n              \"codeHidden\": \"9b879c1d1ed1e505\",\r\n              \"class\": \"\",\r\n              \"condition\": \"\",\r\n              \"ofgroup\": \"false\",\r\n              \"class_ofgroup\": \"col-sm-12col-md-12\",\r\n              \"role\": \"\"\r\n            },\r\n            \"config\": {\r\n              \"action\": \"\",\r\n              \"txFoActions\": \"[{\\\"function\\\":\\\"\\\",\\\"status\\\":\\\"A\\\",\\\"para\\\":[]}]\",\r\n              \"txFo\": \"[{\\\"txcode\\\":\\\"#sys:fo-lookup-selectData\\\",\\\"input\\\":{}}]\",\r\n              \"useAction\": \"false\",\r\n              \"icon\": \"fa-hand-o-right\",\r\n              \"color\": \"info\",\r\n              \"onTable\": \"table_name\",\r\n              \"isMasterData\": \"false\",\r\n              \"tableMasterData\": \"\",\r\n              \"privateKeyTableMasterData\": \"\"\r\n            },\r\n            \"role\": {\r\n              \"visible\": \"\",\r\n              \"disabled\": \"\"\r\n            },\r\n            \"property\": {\r\n              \"danger\": \"\",\r\n              \"warning\": \"\"\r\n            },\r\n            \"validate\": {},\r\n            \"lang\": {},\r\n            \"configAVD\": {},\r\n            \"inputtype\": \"cButton\"\r\n          },\r\n          {\r\n            \"default\": {\r\n              \"name\": \"Search\",\r\n              \"code\": \"search_input\",\r\n              \"class\": \"col-xl-9 col-lg-9 col-md-8 col-sm-8\",\r\n              \"role\": \"\",\r\n              \"condition\": \"\",\r\n              \"ofgroup\": \"\",\r\n              \"class_ofgroup\": \"col-sm-12 col-md-12\",\r\n              \"codeHidden\": \"01df544303b8bc4a\"\r\n            },\r\n            \"config\": {\r\n              \"useAction\": \"true\",\r\n              \"txFoActions\": \"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\r\n              \"txFo\": \"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\r\n              \"structable\": \"lookup.search_input\",\r\n              \"structable_read\": \"lookup.search_input\",\r\n              \"data_default\": \"\",\r\n              \"isLookup\": \"false\",\r\n              \"is_upperCase\": \"false\",\r\n              \"callform\": \"\",\r\n              \"callform_detail\": \"\",\r\n              \"callform_detail_mode\": \"modal\",\r\n              \"data_view\": \"\",\r\n              \"data_value\": \"\",\r\n              \"is_password\": \"false\",\r\n              \"is_upper\": \"false\",\r\n              \"action\": \"\",\r\n              \"autoWrap\": \"false\",\r\n              \"isSearch\": \"true\"\r\n            },\r\n            \"role\": {\r\n              \"visible\": \"\",\r\n              \"disabled\": \"\"\r\n            },\r\n            \"property\": {},\r\n            \"validate\": {\r\n              \"request\": false,\r\n              \"min\": \"\",\r\n              \"max\": \"\",\r\n              \"regex_format\": \"\",\r\n              \"validate_html\": \"true\"\r\n            },\r\n            \"lang\": {\r\n              \"vi\": \"\",\r\n              \"en\": \"\"\r\n            },\r\n            \"configAVD\": {},\r\n            \"inputtype\": \"cTextInput\"\r\n          },\r\n          {\r\n            \"config\": {\r\n              \"onTable\": \"\",\r\n              \"icon\": \"fa-search\",\r\n              \"color\": \"primary\",\r\n              \"action\": \"\",\r\n              \"useAction\": \"false\",\r\n              \"txFoActions\": \"[]\",\r\n              \"txFo\": \"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"BO_007022ifccd\\\",\\\"learn_api\\\":\\\"BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD\\\"}}]\",\r\n              \"isMasterData\": \"false\",\r\n              \"tableMasterData\": \"\",\r\n              \"privateKeyTableMasterData\": \"\",\r\n              \"isLookup\": \"\",\r\n              \"cmd\": \"\",\r\n              \"callform\": \"\",\r\n              \"uploadfile\": {\r\n                \"active\": \"false\",\r\n                \"filetype\": \"\"\r\n              }\r\n            },\r\n            \"role\": {\r\n              \"visible\": \"\",\r\n              \"disabled\": \"\"\r\n            },\r\n            \"property\": {},\r\n            \"validate\": {\r\n              \"request\": false\r\n            },\r\n            \"lang\": {\r\n              \"vi\": \"\",\r\n              \"en\": \"\"\r\n            },\r\n            \"configAVD\": {},\r\n            \"inputtype\": \"cButton\",\r\n            \"default\": {\r\n              \"name\": \"Search\",\r\n              \"code\": \"search_button\",\r\n              \"class\": \"\",\r\n              \"role\": \"\",\r\n              \"condition\": \"\",\r\n              \"ofgroup\": \"\",\r\n              \"class_ofgroup\": \"col-sm-12 col-md-12\",\r\n              \"codeHidden\": \"ed4481f418acd092\"\r\n            }\r\n          }\r\n        ]\r\n      },\r\n      {\r\n        \"name\": \"Search\",\r\n        \"code\": \"code\",\r\n        \"codeHidden\": \"e28b25cdc11d0f6d\",\r\n        \"inputtype\": \"cView\",\r\n        \"isTab\": \"false\",\r\n        \"list_input\": [\r\n          {\r\n            \"config\": {\r\n              \"structable\": \"\",\r\n              \"structable_read\": \"\",\r\n              \"query_data\": \"select * from BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD\",\r\n              \"columns\": \"[{\\\"code\\\":\\\"BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD.0\\\",\\\"title\\\":\\\"Code\\\",\\\"inputtype\\\":\\\"ColumnString\\\",\\\"config\\\":{}},{\\\"code\\\":\\\"BO_007022api_rulefunc_CRD_IFC_AUTO_FEE_LKP_DATA_IFCCD.1\\\",\\\"title\\\":\\\"Name\\\",\\\"inputtype\\\":\\\"ColumnString\\\",\\\"config\\\":{}}]\",\r\n              \"paging_mode\": \"MIN\"\r\n            },\r\n            \"role\": {\r\n              \"visible\": \"\",\r\n              \"disabled\": \"\"\r\n            },\r\n            \"property\": {},\r\n            \"validate\": {\r\n              \"request\": false\r\n            },\r\n            \"lang\": {},\r\n            \"configAVD\": {},\r\n            \"inputtype\": \"cTableDefault\",\r\n            \"default\": {\r\n              \"name\": \"\",\r\n              \"code\": \"table_name\",\r\n              \"codeHidden\": \"e38e612e0fa2b533\",\r\n              \"class\": \"col-12\",\r\n              \"condition\": \"\",\r\n              \"role\": \"\"\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n]",
+        "react_txt": "",
+        "form_id": "BO_007022ifccd",
+        "app": "ncbsCbs",
+        "id": 1502
+      }
+    ]
+  }
+]

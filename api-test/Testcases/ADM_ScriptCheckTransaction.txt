@@ -1,0 +1,44 @@
+DECLARE @Trans TABLE (
+TransactionNumber varchar(100)
+);
+
+INSERT @Trans
+VALUES ('20231103000000014976')
+--o9admin
+select * from o9admin.dbo.TransactionJournalDone where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+select * from o9admin.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+--o9deposit
+
+select * from o9deposit.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+select * from o9deposit.dbo.TransactionDetails where RefId in (
+select RefId from o9deposit.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans))
+
+select * from o9deposit.dbo.DepositAccountTrans where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+select * from o9deposit.dbo.GLEntries where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+select * from o9deposit.dbo.DepositHistory where RefId in (
+select RefId from o9deposit.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans))
+
+select * from o9deposit.dbo.DepositStatement where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+-- o9cash
+select * from o9cash.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+select * from o9cash.dbo.GLEntries where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+select * from o9cash.dbo.CashList where CashierCode in (select UserCode from o9cash.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans)) and CurrencyCode = 'MMK'
+
+select * from o9cash.dbo.CashTransaction where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+--o9accounting
+select * from o9accounting.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+select * from o9accounting.dbo.TransactionDetails where RefId in (
+    select RefId from o9accounting.dbo.[Transaction] where TransactionNumber in (SELECT TransactionNumber FROM @Trans))
+
+select * from o9accounting.dbo.GLEntries where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+
+select * from o9accounting.dbo.AccountBalance where AccountNumber in (select GLAccount from o9accounting.dbo.GLEntries where TransactionNumber in (SELECT TransactionNumber FROM @Trans)
+)
+
+select * from o9accounting.dbo.AccountStatement where TransactionNumber in (SELECT TransactionNumber FROM @Trans)

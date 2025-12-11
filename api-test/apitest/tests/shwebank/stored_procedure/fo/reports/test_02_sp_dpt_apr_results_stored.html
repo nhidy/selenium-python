@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <style>body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.log {
+  background-color: #e6e6e6;
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  height: 230px;
+  overflow-y: scroll;
+  padding: 5px;
+  white-space: pre-wrap;
+}
+.log:only-child {
+  height: inherit;
+}
+
+div.image {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.image img {
+  width: 320px;
+}
+
+div.video {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.video video {
+  overflow: hidden;
+  width: 320px;
+  height: 240px;
+}
+
+.collapsed {
+  display: none;
+}
+
+.expander::after {
+  content: " (show details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.collapser::after {
+  content: " (hide details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+
+.sort-icon {
+  font-size: 0px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 5px;
+  /*triangle*/
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+.inactive .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #E6E6E6;
+}
+.asc.active .sort-icon {
+  /*finish triangle*/
+  border-bottom: 8px solid #999;
+}
+.desc.active .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #999;
+}
+</style></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>test_02_sp_dpt_apr_results_stored.html</h1>
+    <p>Report generated on 31-Dec-2024 at 17:23:47 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19041-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"bdd": "4.1.0", "html": "3.1.1", "metadata": "1.11.0", "repeat": "0.9.1"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.1</td></tr></table>
+    <h2>Summary</h2>
+    <p>8 tests ran in 12.53 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">8 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_001_success</td>
+          <td class="col-duration">3.73</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> -------------------------------Captured log setup------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:971 Starting new HTTPS connection (1): 27.3.1.198:5001
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/auth/get-token HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/bb0e172283294fc5a7877c52853ac259 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/bb0e172283294fc5a7877c52853ac259 HTTP/1.1&quot; 200 None<br/> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Current&quot;,
+        &quot;master_f_d_account&quot;: null,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;customer_info&quot;: {
+            &quot;CustomerCode&quot;: &quot;11001706&quot;,
+            &quot;Sector&quot;: null,
+            &quot;Categories&quot;: &quot;C1&quot;,
+            &quot;CustomerSize&quot;: &quot;S&quot;,
+            &quot;InternationalId&quot;: &quot;&quot;,
+            &quot;Resident&quot;: &quot;R&quot;,
+            &quot;PaperNumber&quot;: &quot;1/MaKaNa(N)098765&quot;,
+            &quot;Email&quot;: &quot;&quot;
+        },
+        &quot;relationship_manager&quot;: &quot;&quot;,
+        &quot;account_number&quot;: &quot;110034179169&quot;,
+        &quot;account_chart_number&quot;: [
+            &quot;003202030101020201&quot;
+        ],
+        &quot;id&quot;: 1616,
+        &quot;master_fd_account&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: &quot;003&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzM1NjQwNjE1IiwiZXhwIjoiMTczNjI0NTQxNSIsIlVzZXJJZCI6IjM0NiIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.DJna7piT9g3J7vMawuJSg-COyxty2wzEAP-UVFLOTOV5ftsZVRVe1TMutlB1cD44vZE1gnOb1uWge4laDhe-85T-Od5O7MLLEQ9l2uFMgHO0oMOJdffAxVAYelkKiNiQJzg5-24UvWhyZZkN6Upmc4ExKqz0Ov21XMaYFTDVjYsKh7Wags5UY_qEWdTUu-Jefc2yKbJP5n8cEJ0QUWtHkwbhLO6kCohM7pp0sD-kc34vInlVvu2F0x0jOFtb2YygU2YEZNoSNmXfSMi40itLwA8eya54_ozmkLXvSs_pOkJ9MZKqDbtFtb7IRbIaTMWpX6pgI4SITuEN-VQCIPn7Wg\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;ccdb7f9b-1caf-4d98-980e-094db88e3620\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;CAMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Current account in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Current\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;C1\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CatalogCode\&quot;:\&quot;CAMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Current account in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Current\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;C1\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;ReasonOfAccountOpening\&quot;:null,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;},\&quot;CustomerInfo\&quot;:{\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;Sector\&quot;:null,\&quot;Categories\&quot;:\&quot;C1\&quot;,\&quot;CustomerSize\&quot;:\&quot;S\&quot;,\&quot;InternationalId\&quot;:\&quot;\&quot;,\&quot;Resident\&quot;:\&quot;R\&quot;,\&quot;PaperNumber\&quot;:\&quot;1/MaKaNa(N)098765\&quot;,\&quot;Email\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;ifc_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20240413000000009624&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-31T10:23:37.001Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-31T10:23:37.0786113Z&quot;,
+        &quot;reference_id&quot;: &quot;ccdb7f9b-1caf-4d98-980e-094db88e3620&quot;,
+        &quot;ref_id&quot;: &quot;fd06d6b0501e40009f3e79afeb984aa0&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2024-04-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110034179169&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;catalogue_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;C&quot;,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20240413000000009625&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-31T10:23:38.27Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-31T10:23:38.3201527Z&quot;,
+        &quot;reference_id&quot;: &quot;0a6cc36e-cf38-48b6-9a7c-7e9f63db8b8e&quot;,
+        &quot;ref_id&quot;: &quot;625705b11b984c589565231db4481db9&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2024-04-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Compare results of table:  [o9deposit].[dbo].[DepositAccount]
++---------------------+----------------------------+----------------------------+
+| Column              | Before                     | After                      |
++=====================+============================+============================+
+| LastTransactionDate | 2024-04-12 00:00:00        | 2024-04-13 00:00:00        |
++---------------------+----------------------------+----------------------------+
+| DepositStatus       | P                          | W                          |
++---------------------+----------------------------+----------------------------+
+| Psts                |                            | P                          |
++---------------------+----------------------------+----------------------------+
+| UserApproved        |                            | cashier003                 |
++---------------------+----------------------------+----------------------------+
+| UpdatedOnUtc        | 2024-12-31 10:23:37.920000 | 2024-12-31 10:23:39.153333 |
++---------------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;UpdatedOnUtc&#x27;, &#x27;DepositStatus&#x27;, &#x27;Psts&#x27;, &#x27;LastTransactionDate&#x27;, &#x27;UserApproved&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/fd06d6b0501e40009f3e79afeb984aa0 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/fd06d6b0501e40009f3e79afeb984aa0 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/625705b11b984c589565231db4481db9 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/625705b11b984c589565231db4481db9 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_002_error_deposit_account_not_same_branch</td>
+          <td class="col-duration">1.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Only the branch holding the deposit account can be made&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckAllowBranch(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1387\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Only the branch holding the deposit account can be made&quot;,
+    &quot;error_code&quot;: &quot;BranchNotAllow&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/49fa00b73fc244438078104cb234d920 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/49fa00b73fc244438078104cb234d920 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_003_error_deposit_account_empty</td>
+          <td class="col-duration">1.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: null,
+    &quot;error_message&quot;: &quot;Account number is required&quot;,
+    &quot;error_code&quot;: &quot;NotEmptyValidator&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/faa83c280a1f4283b98b7936c55deb7d HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/faa83c280a1f4283b98b7936c55deb7d HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_004_error_deposit_account_normal</td>
+          <td class="col-duration">1.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [Normal]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 233\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [Normal]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/ff5a7b8a0d424ad2b06cc85f9b44d2e2 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/ff5a7b8a0d424ad2b06cc85f9b44d2e2 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_005_error_deposit_account_new</td>
+          <td class="col-duration">1.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [New]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 233\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [New]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/f87b2fd51e64425cb5409c330aa90272 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/f87b2fd51e64425cb5409c330aa90272 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_006_error_deposit_account_closed</td>
+          <td class="col-duration">1.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [Closed]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 233\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [Closed]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/b3c1f2dcea2149f78079b06275a4421f HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/b3c1f2dcea2149f78079b06275a4421f HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_007_error_deposit_account_block</td>
+          <td class="col-duration">1.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [Block]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckNotAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 260\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [Block]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/a89af2b656b24bc185054216450a9158 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/a89af2b656b24bc185054216450a9158 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/fo/test_02_sp_dpt_apr.py::Test_SP_DPT_APR::test_02_sp_dpt_apr_008_error_deposit_account_dormant</td>
+          <td class="col-duration">1.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 1,
+    &quot;data&quot;: {
+        &quot;error_message&quot;: {
+            &quot;ClassName&quot;: &quot;Jits.Neptune.Core.NeptuneException&quot;,
+            &quot;Message&quot;: &quot;Invalid deposit status [Dormant]&quot;,
+            &quot;Data&quot;: null,
+            &quot;InnerException&quot;: null,
+            &quot;HelpURL&quot;: null,
+            &quot;StackTraceString&quot;: &quot;   at Jits.Neptune.Web.Deposit.Services.ValidatorService.Error(BaseValidatorModel model, String errorCode, String message, String master, Object[] args) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 1707\r\n   at Jits.Neptune.Web.Deposit.Services.ValidatorService.CheckAllowedDepositStatus(Object data) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\ValidatorService.cs:line 233\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync(String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Deposit.Services.TransactionRulesService.Validate(Object model, String workflowId, Boolean isReverse) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Services\\TransactionRulesService.cs:line 200\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Web.Deposit.Services.FOQueueService.ApproveDepositAccountSP(WorkflowScheme workflow) in C:\\cbs-shwe\\src\\Jits.Neptune.Web.Deposit\\Services\\Workflow\\FOQueueService.cs:line 1277\r\n   at Jits.Neptune.Core.ReflectionHelper.DynamicInvokeAsync[T](String fullClassName, String methodName, Object[] parameters)\r\n   at Jits.Neptune.Web.Framework.Services.NeptuneServiceManager.ConsumeWorkflow(WorkflowScheme workflow)&quot;,
+            &quot;RemoteStackTraceString&quot;: null,
+            &quot;RemoteStackIndex&quot;: 0,
+            &quot;ExceptionMethod&quot;: null,
+            &quot;HResult&quot;: -2146233088,
+            &quot;Source&quot;: &quot;Jits.Neptune.Web.Deposit&quot;,
+            &quot;WatsonBuckets&quot;: null
+        }
+    },
+    &quot;error_message&quot;: &quot;Invalid deposit status [Dormant]&quot;,
+    &quot;error_code&quot;: &quot;InvalidDepositStatus&quot;
+}
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/edf8c60a28f34a24b1cfb21eb73f19d5 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.198:5001 &quot;GET /api/workflow/get-execution-info/edf8c60a28f34a24b1cfb21eb73f19d5 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody></table></body></html>

@@ -1,0 +1,71 @@
+-- =============== C1: Personal ===============
+DECLARE @CustomerCode117 NVARCHAR(50);
+DECLARE @CustomerCode199 NVARCHAR(50);
+SET @CustomerCode117 = '11056791';
+SET @CustomerCode199 = '11000003';
+
+--SELECT * FROM o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerLinkage WHERE LinkageCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerLinkage WHERE LinkageCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode199;
+
+-- =============== C2: SME ===============
+DECLARE @CustomerCode117 NVARCHAR(50);
+DECLARE @CustomerCode199 NVARCHAR(50);
+SET @CustomerCode117 = '24000001';
+SET @CustomerCode199 = '24000001';
+
+SELECT * FROM o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode117;
+SELECT * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode199;
+
+-- =============== C3: Corporate ===============
+DECLARE @CustomerCode117 NVARCHAR(50);
+DECLARE @CustomerCode199 NVARCHAR(50);
+SET @CustomerCode117 = '37000002';
+SET @CustomerCode199 = '37000001';
+
+--SELECT * FROM o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode199;
+
+SELECT * FROM o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode117;
+SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode199;
+
+-- =============== C4: Institutional ===============
+DECLARE @CustomerCode117 NVARCHAR(50);
+DECLARE @CustomerCode199 NVARCHAR(50);
+SET @CustomerCode117 = '48000001';
+SET @CustomerCode199 = '48000001';
+
+--SELECT * FROM o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.SingleCustomer WHERE CustomerCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerGroup WHERE GroupCode = @CustomerCode199;
+
+--SELECT * FROM o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode117;
+--SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerExtension WHERE CustomerCode = @CustomerCode199;
+
+SELECT * FROM o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode117;
+SELECT * FROM [27.3.1.199].o9customer.dbo.CustomerAlias WHERE CustomerCode = @CustomerCode199;

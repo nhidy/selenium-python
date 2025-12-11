@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.3892511Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"fo_dpt_mwt_mdesc\",\"des\":\"fo_dpt_mwt_mdesc\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"fo_dpt_mwt_mdesc\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"fo_dpt_mwt_mdesc\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"329357cf80543f7a\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"83d3816bde448e45\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"action\":\"\",\"structable\":\"muti.home\",\"structable_read\":\"muti.home\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Home\",\"code\":\"home\",\"codeHidden\":\"6c91645e56161c80\",\"class\":\"        col-12\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.office\",\"structable_read\":\"muti.office\",\"data_default\":\"\",\"isLookup\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Office\",\"code\":\"office\",\"codeHidden\":\"26c7df7c8417a044\",\"class\":\"        col-12\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "fo_dpt_mwt_mdesc",
+        "app": "ncbsCbs",
+        "id": 886
+      }
+    ]
+  }
+]

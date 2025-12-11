@@ -1,0 +1,572 @@
+{{- include "common.sbn" }}
+{{~ form_name = transaction_name | regex.split `\-` ~}}
+{{~ form_name = form_name[1] | string.downcase  | string.replace ` ` "_" | string.replace `-` "_" | string.replace `(` "" | string.replace `)` "" | string.replace `/` "_" ~}}
+
+{{~ list_fields = "" ~}}
+{{~ for field in field_list ~}}
+    {{~ if field.value != "" ~}}
+        {{~ value_param = field.value ~}}
+{{ value_param }}
+    {{~ end ~}}
+{{~ end ~}}
+list_error_message
+
+# {{ form_name }}
+{{~ method_name = choose_name transaction_code form_name ~}}
+# Choose name: {{ method_name }}
+{{~ # ADD ~}}
+{{~ if method_name | string.ends_with "_add" ~}}
+def{{~ " " ~}}{{~ method_name ~}}{{~ "(self" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ ", list_error_message=None):" }}
+    # open form
+    self.close_all_form()
+    {{~ if menu_level_03 == "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}')
+    {{~ end ~}}
+    {{~ if menu_level_03 != "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}', '{{ menu_level_03 }}')
+    {{~ end ~}}
+    self.wait_for_button_available('Add')
+    self.click_button('Add')
+    self.wait_for_button_available('Save')
+    self.assert_form_title('{{ form_title }}')
+    # enter value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_field_method = bo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_field_method ~}}
+        {{~ if field.value != "" && bo_field_method != "" && field.is_enable == 'y' ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is {{ field.value_input }}:
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+                {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+                {{~ end ~}}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    # assert value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_field_method = bo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_field_method ~}}
+        {{~ if field.value != "" && bo_field_method != "" && field.is_enable == 'n' ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is not None:
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+                {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+                {{~ end ~}}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    self.wait_loading()
+    # click 'Save'
+    self.click_button('Save')
+    if list_error_message:
+    # verify error
+        self.assert_error_message()
+        self.assert_list_error_message(list_error_message)
+        print('Action add failed!')
+    else:
+    # verify success
+        self.assert_button_disable('Save')
+        self.assert_notification('Saved successfully!')
+    {{~ list_return = "" ~}}
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_out_method = bo_get_out_method field.field_type field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_out_method ~}}
+        {{~ out_value = "" ~}}
+        {{~ if field.return == "y" ~}}
+            {{~ out_value = field.value | string.append "_out" ~}}
+            {{~ list_return = list_return | string.append out_value ~}}
+            {{~ if tab_name != field.tab_name ~}}
+        self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+        {{ out_value }}=self.{{ method }}{{ "('" }}{{ field.title }}{{ "')" }}
+        print(f'{{ field.title }}{{ ": {" }}{{ out_value }}{{ "}')" }}
+        {{~ end ~}}
+    {{~ end ~}}
+        return {{ list_return }}
+
+
+def{{~ " " ~}}{{~ method_name ~}}{{~ "_verify(self, transaction_number" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ "):" }}
+    # open form
+    self.bo_approval_view(
+        transaction_number=transaction_number,
+        form_title='{{ form_title }}'
+    )
+    # verify value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_view_method = bo_get_view_method field.field_type field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_view_method ~}}
+        {{~ if field.value != "" ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_view_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+
+
+# TEST CASE: ADD SUCCESS
+def test_000_{{ method_name }}_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+
+    {{ method_name }}_result = self.{{ method_name }}(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+    )
+    {{~ list_return = "" ~}}
+    {{~ i = 0 ~}}
+    {{~ for field in field_list ~}}
+        {{~ out_value = "" ~}}
+        {{~ if field.return == "y" ~}}
+            {{~ out_value = field.value | string.append "_out="  | string.append method_name | string.append "_result[" | string.append i | string.append "]\n" ~}}
+            {{~ list_return = list_return | string.append "    " | string.append out_value ~}}
+            {{~ i = i + 1 ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_return ~}}
+
+# TEST CASE: ADD ERROR
+def test_000_{{ method_name }}_error(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+    list_error_message = None
+
+    {{ method_name }}_result = self.{{ method_name }}(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+        list_error_message=list_error_message,
+    )
+{{~ end ~}}
+{{~ # SIMPLE SEARCH ~}}
+{{~ if method_name | string.ends_with "_simple_search" ~}}
+def {{ method_name }}(self, text):
+    self.close_all_form()
+    {{~ if menu_level_03 == "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}')
+    {{~ end ~}}
+    {{~ if menu_level_03 != "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}', '{{ menu_level_03 }}')
+    {{~ end ~}}
+    self.wait_for_button_available('Search')
+    self.assert_form_title('{{ form_title }}')
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+    self.simple_search(text=text, placeholder='{{ field.title }}')
+    self.wait_loading()
+        {{~ end ~}}
+    {{~ end ~}}
+
+# TEST CASE: SIMPLE SEARCH
+def test_000_{{ method_name }}_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+
+    {{ method_name }}_result = self.{{ method_name }}(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+    )
+{{~ end ~}}
+{{~ # ADVANCED SEARCH ~}}
+{{~ if method_name | string.ends_with "_advanced_search" ~}}
+def{{~ " " ~}}{{~ method_name ~}}{{~ "(self" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ "):" }}
+    self.close_all_form()
+    {{~ if menu_level_03 == "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}')
+    {{~ end ~}}
+    {{~ if menu_level_03 != "" ~}}
+    self.click_menu('{{ menu_level_01 }}', '{{ menu_level_02 }}', '{{ menu_level_03 }}')
+    {{~ end ~}}
+    self.wait_for_button_available('Search')
+    self.assert_form_title('{{ form_title }}')
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is {{ field.value_input }}:
+            {{~ end ~}}
+    {{ choose_advanced_search field.title field.value field.field_type field.is_group field.is_replace field.replace_by }}
+        {{~ end ~}}
+    {{~ end ~}}
+    self.click_button_search_advanced()
+    self.wait_loading()
+
+# TEST CASE: ADVANCED SEARCH
+def test_000_{{ method_name }}_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+
+    {{ method_name }}_result = self.{{ method_name }}(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+    )
+{{~ end ~}}
+{{~ # VIEW - UPDATE ~}}
+{{~ if method_name | string.ends_with "_view" ~}}
+def{{~ " " ~}}{{~ method_name ~}}{{~ "(self" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ "):" }}
+    # search
+    self.{{ form_name }}_simple_search(str().replace('-', ''))
+    self.assert_table_data('', 1, )
+    # view
+    self.click_table_menu('View', 1)
+    self.wait_for_button_available('Modify')
+    self.assert_form_title('{{ form_title }}')
+    # verify value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_view_method = bo_get_view_method field.field_type field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_view_method ~}}
+        {{~ if field.value != "" ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_view_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+
+def{{~ " " ~}}{{~ form_name ~}}{{~ "_update(self" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ ", list_error_message=None):" }}
+    # view
+    self.{{ method_name }}(A=A)
+    self.click_button('Modify')
+    self.wait_loading()
+    # update value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_field_method = bo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_field_method ~}}
+        {{~ if field.value != "" && bo_field_method != "" && field.is_enable == 'y' ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is {{ field.value_input }}:
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+                {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+                {{~ end ~}}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    # assert value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_field_method = bo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_field_method ~}}
+        {{~ if field.value != "" && bo_field_method != "" && field.is_enable == 'n' ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is not None:
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+                {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+                {{~ end ~}}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    self.wait_loading()
+    # click 'Save'
+    self.click_button('Save')
+    if list_error_message:
+    # verify error
+        self.assert_error_message()
+        self.assert_list_error_message(list_error_message)
+        print('Action update failed!')
+    else:
+    # verify success
+        self.assert_button_disable('Save')
+        self.assert_notification('Saved successfully!')
+    {{~ list_return = "" ~}}
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_out_method = bo_get_out_method field.field_type field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_out_method ~}}
+        {{~ out_value = "" ~}}
+        {{~ if field.return == "y" ~}}
+            {{~ out_value = field.value | string.append "_out" ~}}
+            {{~ list_return = list_return | string.append out_value ~}}
+            {{~ if tab_name != field.tab_name ~}}
+        self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+        {{ out_value }}=self.{{ method }}{{ "('" }}{{ field.title }}{{ "')" }}
+        print(f'{{ field.title }}{{ ": {" }}{{ out_value }}{{ "}')" }}
+        {{~ end ~}}
+    {{~ end ~}}
+        return {{ list_return }}
+
+def {{ form_name }}_delete(self, param_name, list_error_message=None, expected_message=None):
+    # search
+    self.{{ form_name }}_simple_search(str(param_name).replace('-', ''))
+    self.assert_table_data('', 1, param_name)
+    # delete
+    self.click_table_menu('Delete', 1)
+    self.wait_loading()
+    self.click_button_in_popup('Yes')
+    if list_error_message:
+    # verify error
+        self.assert_error_message()
+        self.assert_list_error_message(list_error_message)
+        print(f"Action delete '{param_name}' failed!")
+    else:
+    # verify success
+        if expected_message:
+            self.assert_notification(expected_message)
+        print(f"Deleted: '{param_name}'")
+        return param_name
+
+
+
+def{{~ " " ~}}{{~ method_name ~}}{{~ "_update_verify(self, transaction_number" ~}}
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=None" ~}}
+            {{~ list_param = list_param | string.append ", " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{ list_param }}{{ "):" }}
+    # open form
+    self.bo_approval_view(
+        transaction_number=transaction_number,
+        form_title='{{ form_title }}'
+    )
+    # verify value
+    {{~ tab_name = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ bo_view_method = bo_get_view_method field.field_type field.is_group field.is_multi field.border_name field.tab_name ~}}
+        {{~ method = choose_method bo_view_method ~}}
+        {{~ if field.value != "" ~}}
+            {{~ if tab_name != field.tab_name ~}}
+    self.bo_click_tab('{{ field.tab_name }}')
+                {{~ tab_name = field.tab_name ~}}
+            {{~ end ~}}
+            {{~ if field.title != "" ~}}
+    {{ choose_param bo_view_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+
+
+
+# TEST CASE: VIEW SUCCESS
+def test_000_{{ method_name }}_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+
+    {{ method_name }}_result = self.{{ method_name }}(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+    )
+
+# TEST CASE: UPDATE SUCCESS
+def test_000_{{ form_name }}_update_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+
+    {{ form_name }}_update_result = self.{{ form_name }}_update(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+    )
+    {{~ list_return = "" ~}}
+    {{~ i = 0 ~}}
+    {{~ for field in field_list ~}}
+        {{~ out_value = "" ~}}
+        {{~ if field.return == "y" ~}}
+            {{~ out_value = field.value | string.append "_out="  | string.append form_name | string.append "_update_result[" | string.append i | string.append "]\n" ~}}
+            {{~ list_return = list_return | string.append "    " | string.append out_value ~}}
+            {{~ i = i + 1 ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_return ~}}
+
+# TEST CASE: UPDATE ERROR
+def test_000_{{ form_name }}_update_error(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "_test = None" ~}}
+            {{~ list_param = list_param | string.append "    " | string.append value_param | string.append "\n" ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+    {{~ list_param ~}}
+    list_error_message = None
+
+    {{ form_name }}_update_result = self.{{ form_name }}_update(
+    {{~ list_param = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ if field.value != "" ~}}
+            {{~ value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n" ~}}
+            {{~ list_param = list_param | string.append "        " | string.append value_param ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+        {{~ list_param ~}}
+        list_error_message=list_error_message,
+    )
+
+# TEST CASE: DELETE SUCCESS
+def test_000_{{ form_name }}_delete_success(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    {{ form_name }}_delete_result = self.{{ form_name }}_delete(
+    
+    )
+
+# TEST CASE: DELETE ERROR
+def test_000_{{ form_name }}_delete_error(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    list_error_message = None
+
+    {{ form_name }}_delete_result = self.{{ form_name }}_delete(
+        
+        list_error_message=list_error_message,
+    )
+{{~ end ~}}

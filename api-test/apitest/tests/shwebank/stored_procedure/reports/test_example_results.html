@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <style>body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.log {
+  background-color: #e6e6e6;
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  height: 230px;
+  overflow-y: scroll;
+  padding: 5px;
+  white-space: pre-wrap;
+}
+.log:only-child {
+  height: inherit;
+}
+
+div.image {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.image img {
+  width: 320px;
+}
+
+div.video {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.video video {
+  overflow: hidden;
+  width: 320px;
+  height: 240px;
+}
+
+.collapsed {
+  display: none;
+}
+
+.expander::after {
+  content: " (show details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.collapser::after {
+  content: " (hide details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+
+.sort-icon {
+  font-size: 0px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 5px;
+  /*triangle*/
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+.inactive .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #E6E6E6;
+}
+.asc.active .sort-icon {
+  /*finish triangle*/
+  border-bottom: 8px solid #999;
+}
+.desc.active .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #999;
+}
+</style></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>test_example_results.html</h1>
+    <p>Report generated on 05-Dec-2024 at 10:48:57 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19041-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"bdd": "4.1.0", "html": "3.1.1", "metadata": "1.11.0", "repeat": "0.9.1"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.1</td></tr></table>
+    <h2>Summary</h2>
+    <p>1 tests ran in 11.54 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">1 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">apitest/tests/shwebank/stored_procedure/test_example.py::TestExample::test_03_sp_dpt_cdp_001_success_current_account_status_new_normal</td>
+          <td class="col-duration">10.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> -------------------------------Captured log setup------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:971 Starting new HTTPS connection (1): 27.3.1.104:5001
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/auth/get-token HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/e9558ad57b5745ff89ad96aa035f1ac2 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/e9558ad57b5745ff89ad96aa035f1ac2 HTTP/1.1&quot; 200 None<br/> ------------------------------Captured stdout call------------------------------ <br/>Data response available for step code &#x27;DPT_OPN&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;id&quot;: 0,
+        &quot;account_number&quot;: &quot;110035954172&quot;,
+        &quot;customer_type&quot;: &quot;C&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;catalog_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;Current&quot;,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;master_f_d_account&quot;: &quot;&quot;,
+        &quot;deposit_purpose&quot;: &quot;P&quot;,
+        &quot;account_type&quot;: &quot;1&quot;,
+        &quot;seq_number&quot;: null,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;business_purpose_code&quot;: &quot;&quot;,
+        &quot;rollover&quot;: &quot;N&quot;,
+        &quot;auto_transfer_option&quot;: &quot;N&quot;,
+        &quot;to_account_number&quot;: null,
+        &quot;user_created&quot;: null,
+        &quot;branch_code&quot;: null,
+        &quot;branch_name&quot;: null,
+        &quot;agent_hub_referral&quot;: &quot;&quot;,
+        &quot;relation_customers&quot;: [],
+        &quot;ifc_balances&quot;: [],
+        &quot;account_chart_number&quot;: [
+            &quot;003202030101010101&quot;
+        ],
+        &quot;employer_organization_name&quot;: &quot;&quot;,
+        &quot;currency_code&quot;: &quot;MMK&quot;,
+        &quot;is_restricted&quot;: &quot;N&quot;,
+        &quot;im_banking&quot;: false,
+        &quot;pc_book&quot;: false,
+        &quot;mpu_card&quot;: false,
+        &quot;wallet&quot;: false,
+        &quot;extension_fields&quot;: {
+            &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+            &quot;relationship_manager&quot;: &quot;&quot;
+        },
+        &quot;transaction_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001081670&quot;,
+        &quot;transaction_type&quot;: &quot;OPN&quot;,
+        &quot;sub_code&quot;: &quot;DPT_OPN&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-05T03:48:49.411Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-05T03:48:49.4599389Z&quot;,
+        &quot;reference_id&quot;: &quot;a740fafd-efb5-4487-a2da-1083a7cdf5f8&quot;,
+        &quot;ref_id&quot;: &quot;d5db74e2a1f34194a2d51c80a1934697&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1100: Open new deposit account&quot;,
+        &quot;token&quot;: &quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzMzMzcwNTI4IiwiZXhwIjoiMTczMzk3NTMyOCIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.KJ4Yy-lmYIF6invUL_UMdj4TQc9EYlqHtXL8yMpx5WXmXm3_F3W_ySMrRH3wSS7BTBi7eRwyLIbgXRynrmL8rFiCXGkxJyc-WDHvXUFsoI9F3RZ89tBb82KB1XNV22DdyknfuxeBJxO4nz4Yd9Ies7xPk77XRqEB4jnzLH5dLf1TBWgre67tLvDlofXhieMi9uyCGpzi4FuMKB2H4Bea2r6gLSls8nkkSRxbaS4-ZlwD2t09oiDXEB5QMVIARbv77rI0olL90b7wxJFd-HP4jzoakEFduv0-IK21LoG8JwjyPzRQLqLZyqBrH9RMWeyyLNO2cnHTDXEime3i2-hSNw&quot;,
+        &quot;language&quot;: &quot;en&quot;,
+        &quot;channel_id&quot;: &quot;C&quot;,
+        &quot;trans_id&quot;: null,
+        &quot;request_body&quot;: &quot;{\&quot;workflow_input\&quot;:{\&quot;workflowid\&quot;:\&quot;DPT_OPN\&quot;,\&quot;lang\&quot;:\&quot;en\&quot;,\&quot;token\&quot;:\&quot;eyJhbGciOiJSUzI1NiIsImtpZCI6IkxTMHRMUzFDUlVkSlRpQlFWVUpNU1VNZ1MwVlpMUzB0TFMwS1RVbEpRa2xVUVU1Q1oydHhhR3RwUnpsM01FSkJVVVZHUVVGUFEwRlJORUZOU1VsQ1ExRkxRMEZSUWxrNFkzbHpjbE5aUkhKd2MydFhaV3BPUldONmRBcE9SbGxFTHpFM2NIVjViSGgzYlRGaFZGTk9ZWEJJYVdZMU5IWXhTWGRGWW14MlREQjFhVmQ0YTBFMmNIaEhURWt2VW5vdksxRkJjR3BrV21rNU5HdHVDbTlpZWsxak5XcE5NelJTUnpWWFpqazBlalJvWTNCSlMzSmlNRk5VT1ZoSmVWZElZbkpZWVU1NllXRTNUbUUyYTNjMGVEbFlSbk01TkZGVE5sRjNNbElLVTAxcloxWnRSVElyUW0wd1p6QkpXWEJxUVRaUUt6UTVRamhOYzFJd1VqSlFUVnBMYW5KbVZHMU1URGhaWW1velIwWjBZMHh5WTJKWmIzTllMMG93YVFwYVUyVjJZV1ZoU1VwVVRURjNkQ3R0V0ZwU09HTXZTRlJHZWpGSFlrMVJjRGR1V0RsWFVISnhZMFpSTDB0amNYTmtla1phYm5SSFMxSXhVRGRaVUVKdkNrOUZNM0ZCVkVoSWIybHJORTEyYkdSb1RHRlNUVmhxV1ZGYU5sSjZOa2RhWVZCUllVUjNjbloxYUdSUGMwdFpaWGRXV1RkSFdsZHFTMnRqYnprMGVuZ0tRV2ROUWtGQlJUMEtMUzB0TFMxRlRrUWdVRlZDVEVsRElFdEZXUzB0TFMwdCIsInR5cCI6IkpXVCJ9.eyJuYmYiOiIxNzMzMzcwNTI4IiwiZXhwIjoiMTczMzk3NTMyOCIsIlVzZXJJZCI6IjMyMyIsIkxvZ2luTmFtZSI6ImNhc2hpZXIwMDMiLCJVc2VyTmFtZSI6IkNhc2hpZXIgMDAzIiwiVXNlckNvZGUiOiJjYXNoaWVyMDAzIiwiQnJhbmNoQ29kZSI6IjAwMyJ9.KJ4Yy-lmYIF6invUL_UMdj4TQc9EYlqHtXL8yMpx5WXmXm3_F3W_ySMrRH3wSS7BTBi7eRwyLIbgXRynrmL8rFiCXGkxJyc-WDHvXUFsoI9F3RZ89tBb82KB1XNV22DdyknfuxeBJxO4nz4Yd9Ies7xPk77XRqEB4jnzLH5dLf1TBWgre67tLvDlofXhieMi9uyCGpzi4FuMKB2H4Bea2r6gLSls8nkkSRxbaS4-ZlwD2t09oiDXEB5QMVIARbv77rI0olL90b7wxJFd-HP4jzoakEFduv0-IK21LoG8JwjyPzRQLqLZyqBrH9RMWeyyLNO2cnHTDXEime3i2-hSNw\&quot;,\&quot;workflow_type\&quot;:\&quot;normal\&quot;,\&quot;reversal_execution_id\&quot;:\&quot;\&quot;,\&quot;approved_execution_id\&quot;:\&quot;\&quot;,\&quot;reference_id\&quot;:\&quot;a740fafd-efb5-4487-a2da-1083a7cdf5f8\&quot;,\&quot;reference_code\&quot;:\&quot;\&quot;,\&quot;description\&quot;:\&quot;\&quot;,\&quot;business_code\&quot;:\&quot;\&quot;,\&quot;tran_id\&quot;:\&quot;\&quot;,\&quot;tx_reason\&quot;:\&quot;\&quot;,\&quot;service_instances\&quot;:[],\&quot;fields\&quot;:{\&quot;amount\&quot;:1,\&quot;account_number\&quot;:\&quot;\&quot;,\&quot;customer_type\&quot;:\&quot;C\&quot;,\&quot;customer_type_caption\&quot;:\&quot;\&quot;,\&quot;customer_code\&quot;:\&quot;11001706\&quot;,\&quot;employer_organization_name\&quot;:\&quot;\&quot;,\&quot;catalog_code\&quot;:\&quot;CAMMK0000\&quot;,\&quot;catalog_name\&quot;:\&quot;Current account in MMK\&quot;,\&quot;deposit_type\&quot;:\&quot;Current\&quot;,\&quot;agent_hub_referral\&quot;:\&quot;\&quot;,\&quot;relation_customers\&quot;:[],\&quot;master_fd_account\&quot;:null,\&quot;deposit_purpose\&quot;:\&quot;P\&quot;,\&quot;account_type\&quot;:\&quot;1\&quot;,\&quot;account_type_caption\&quot;:\&quot;\&quot;,\&quot;seq_number\&quot;:null,\&quot;account_name\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;business_purpose_code\&quot;:\&quot;\&quot;,\&quot;rollover\&quot;:\&quot;N\&quot;,\&quot;auto_transfer_option\&quot;:\&quot;N\&quot;,\&quot;to_account_number\&quot;:null,\&quot;description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;user_approve\&quot;:null,\&quot;deposit_sub_type\&quot;:\&quot;C1\&quot;,\&quot;fee_data\&quot;:[],\&quot;is_restricted\&quot;:\&quot;N\&quot;,\&quot;im_banking\&quot;:false,\&quot;mpu_card\&quot;:false,\&quot;pc_book\&quot;:false,\&quot;wallet\&quot;:false,\&quot;extension_fields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}},\&quot;data\&quot;:{\&quot;CustomerType\&quot;:\&quot;C\&quot;,\&quot;CustomerCode\&quot;:\&quot;11001706\&quot;,\&quot;CatalogCode\&quot;:\&quot;CAMMK0000\&quot;,\&quot;CatalogName\&quot;:\&quot;Current account in MMK\&quot;,\&quot;DepositType\&quot;:\&quot;Current\&quot;,\&quot;MasterFDAccount\&quot;:null,\&quot;DepositPurpose\&quot;:\&quot;P\&quot;,\&quot;AccountType\&quot;:\&quot;1\&quot;,\&quot;SeqNumber\&quot;:null,\&quot;AccountName\&quot;:\&quot;CTM INDIVIDUAL TEST SP 01\&quot;,\&quot;BusinessPurposeCode\&quot;:\&quot;\&quot;,\&quot;Rollover\&quot;:\&quot;N\&quot;,\&quot;AutoTransferOption\&quot;:\&quot;N\&quot;,\&quot;ToAccountNumber\&quot;:null,\&quot;BranchName\&quot;:null,\&quot;DepositSubType\&quot;:\&quot;C1\&quot;,\&quot;AgentHubReferral\&quot;:\&quot;\&quot;,\&quot;RelationCustomers\&quot;:[],\&quot;EmployerOrganizationName\&quot;:\&quot;\&quot;,\&quot;Description\&quot;:\&quot;1100: Open new deposit account\&quot;,\&quot;IsRestricted\&quot;:\&quot;N\&quot;,\&quot;ImBanking\&quot;:false,\&quot;PcBook\&quot;:false,\&quot;MpuCard\&quot;:false,\&quot;Wallet\&quot;:false,\&quot;ExtensionFields\&quot;:{\&quot;reason_of_account_opening\&quot;:\&quot;Reason of Account Opening\&quot;,\&quot;relationship_manager\&quot;:\&quot;\&quot;}}}&quot;,
+        &quot;ignore_session&quot;: false,
+        &quot;is_batch&quot;: false,
+        &quot;is_system&quot;: false,
+        &quot;is_force_reverse&quot;: false,
+        &quot;postings&quot;: [],
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false,
+        &quot;reason_of_account_opening&quot;: &quot;Reason of Account Opening&quot;,
+        &quot;relationship_manager&quot;: &quot;&quot;
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Data response available for step code &#x27;DPT_APR&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110035954172&quot;,
+        &quot;account_holder_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;catalog_code&quot;: &quot;CAMMK0000&quot;,
+        &quot;account_type&quot;: &quot;Individual&quot;,
+        &quot;catalogue_name&quot;: &quot;Current account in MMK&quot;,
+        &quot;deposit_type&quot;: &quot;C&quot;,
+        &quot;deposit_sub_type&quot;: &quot;C1&quot;,
+        &quot;created_by&quot;: &quot;cashier003&quot;,
+        &quot;transaction_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001081671&quot;,
+        &quot;transaction_type&quot;: &quot;APR&quot;,
+        &quot;sub_code&quot;: &quot;DPT_APR&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-05T03:48:50.826Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-05T03:48:50.8589977Z&quot;,
+        &quot;reference_id&quot;: &quot;f22b542e-ea3f-41b3-882e-d0fdcda78ed5&quot;,
+        &quot;ref_id&quot;: &quot;6e48b3b3f92347ee9c8a201b46bd311c&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;Approve deposit account&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Compare results of table:  [o9deposit].[dbo].[DepositAccount]
++---------------------+----------------------------+----------------------------+
+| Column              | Before                     | After                      |
++=====================+============================+============================+
+| LastTransactionDate | 2023-09-12 00:00:00        | 2023-09-13 00:00:00        |
++---------------------+----------------------------+----------------------------+
+| DepositStatus       | P                          | W                          |
++---------------------+----------------------------+----------------------------+
+| Psts                |                            | P                          |
++---------------------+----------------------------+----------------------------+
+| UserApproved        |                            | cashier003                 |
++---------------------+----------------------------+----------------------------+
+| UpdatedOnUtc        | 2024-12-05 03:48:49.560894 | 2024-12-05 03:48:50.953331 |
++---------------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;LastTransactionDate&#x27;, &#x27;DepositStatus&#x27;, &#x27;Psts&#x27;, &#x27;UserApproved&#x27;, &#x27;UpdatedOnUtc&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Data postings available for step code &#x27;DPT_CDP&#x27;
+[
+    {
+        &quot;TransactionNumber&quot;: &quot;20230913000001081672&quot;,
+        &quot;TransTableName&quot;: &quot;DepositAccountTrans&quot;,
+        &quot;TransId&quot;: &quot;710a63941cec4e299ac3e3b415164319&quot;,
+        &quot;SysAccountName&quot;: &quot;DEPOSIT&quot;,
+        &quot;GLAccount&quot;: &quot;003202030101010101&quot;,
+        &quot;DorC&quot;: &quot;C&quot;,
+        &quot;TransactionStatus&quot;: &quot;N&quot;,
+        &quot;Amount&quot;: 10000000.45,
+        &quot;BranchCode&quot;: &quot;003&quot;,
+        &quot;CurrencyCode&quot;: &quot;MMK&quot;,
+        &quot;ValueDate&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;Posted&quot;: true,
+        &quot;AccountingGroup&quot;: 1,
+        &quot;CrossBranchCode&quot;: &quot;&quot;,
+        &quot;CrossCurrencyCode&quot;: &quot;&quot;,
+        &quot;BaseCurrencyAmount&quot;: 0.0,
+        &quot;Id&quot;: 219449
+    }
+]
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110035954172&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001081672&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-05T03:48:52.307Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-05T03:48:52.3471306Z&quot;,
+        &quot;reference_id&quot;: &quot;6b586c73-d48b-4a5b-a6db-b427b2e50370&quot;,
+        &quot;ref_id&quot;: &quot;a9a36c1342f14d6092cc8228fe7a05bd&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Compare results of table:  [o9deposit].[dbo].[DepositAccount]
++---------------------+----------------------------+----------------------------+
+| Column              | Before                     | After                      |
++=====================+============================+============================+
+| DepositAmount       | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| CurrentBalance      | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| LastTransactionDate | 2023-09-12 00:00:00        | 2023-09-13 00:00:00        |
++---------------------+----------------------------+----------------------------+
+| DepositStatus       | W                          | N                          |
++---------------------+----------------------------+----------------------------+
+| Psts                | P                          | P|W                        |
++---------------------+----------------------------+----------------------------+
+| WeekCredit          | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| MonthCredit         | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| QuarterCredit       | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| SemiAnnualCredit    | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| YearCredit          | 0.0                        | 10000000.45                |
++---------------------+----------------------------+----------------------------+
+| UpdatedOnUtc        | 2024-12-05 03:48:50.953331 | 2024-12-05 03:48:52.477953 |
++---------------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;YearCredit&#x27;, &#x27;MonthCredit&#x27;, &#x27;LastTransactionDate&#x27;, &#x27;DepositStatus&#x27;, &#x27;Psts&#x27;, &#x27;SemiAnnualCredit&#x27;, &#x27;UpdatedOnUtc&#x27;, &#x27;CurrentBalance&#x27;, &#x27;WeekCredit&#x27;, &#x27;QuarterCredit&#x27;, &#x27;DepositAmount&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Compare results of table:  [o9cash].[dbo].[CashList]
++----------------+----------------------------+----------------------------+
+| Column         | Before                     | After                      |
++================+============================+============================+
+| CurrentBalance | 1682808123.2               | 1692808123.65              |
++----------------+----------------------------+----------------------------+
+| UpdatedOnUtc   | 2024-12-05 03:26:10.169977 | 2024-12-05 03:48:52.729520 |
++----------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;UpdatedOnUtc&#x27;, &#x27;CurrentBalance&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Compare results of table:  [o9cash].[dbo].[CashStatement]
++--------------+----------------------------+----------------------------+
+| Column       | Before                     | After                      |
++==============+============================+============================+
+| CashAmount   | 480060024.3                | 490060024.75               |
++--------------+----------------------------+----------------------------+
+| UpdatedOnUtc | 2024-12-05 03:26:10.179048 | 2024-12-05 03:48:52.739626 |
++--------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;UpdatedOnUtc&#x27;, &#x27;CashAmount&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Compare results of table:  [o9accounting].[dbo].[AccountBalance]: DEPOSIT
++------------------+-------------+-------------+
+| Column           |      Before |       After |
++==================+=============+=============+
+| Balance          | 1.38538e+13 | 1.38538e+13 |
++------------------+-------------+-------------+
+| DailyCredit      | 1.2346e+13  | 1.23461e+13 |
++------------------+-------------+-------------+
+| WeeklyCredit     | 1.23551e+13 | 1.23551e+13 |
++------------------+-------------+-------------+
+| MonthlyCredit    | 1.45333e+13 | 1.45333e+13 |
++------------------+-------------+-------------+
+| QuarterlyCredit  | 1.45333e+13 | 1.45333e+13 |
++------------------+-------------+-------------+
+| HalfYearlyCredit | 1.45333e+13 | 1.45333e+13 |
++------------------+-------------+-------------+
+| YearlyCredit     | 1.45333e+13 | 1.45333e+13 |
++------------------+-------------+-------------+
+Compare results of table:  [o9accounting].[dbo].[AccountBalance]: CASH
++-----------------+--------------+--------------+
+| Column          |       Before |        After |
++=================+==============+==============+
+| Balance         | -2.55394e+13 | -2.55394e+13 |
++-----------------+--------------+--------------+
+| DailyDebit      |  2.3346e+13  |  2.33461e+13 |
++-----------------+--------------+--------------+
+| WeeklyDebit     |  2.33567e+13 |  2.33567e+13 |
++-----------------+--------------+--------------+
+| MonthlyDebit    |  2.56314e+13 |  2.56315e+13 |
++-----------------+--------------+--------------+
+| QuarterlyDebit  |  2.55473e+13 |  2.55473e+13 |
++-----------------+--------------+--------------+
+| HalfYearlyDebit |  2.55473e+13 |  2.55473e+13 |
++-----------------+--------------+--------------+
+| YearlyDebit     |  2.55473e+13 |  2.55473e+13 |
++-----------------+--------------+--------------+
+Matched Columns: [&#x27;WeeklyCredit&#x27;, &#x27;QuarterlyCredit&#x27;, &#x27;MonthlyCredit&#x27;, &#x27;Balance&#x27;, &#x27;DailyCredit&#x27;, &#x27;HalfYearlyCredit&#x27;, &#x27;YearlyCredit&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Matched Columns: [&#x27;HalfYearlyDebit&#x27;, &#x27;YearlyDebit&#x27;, &#x27;MonthlyDebit&#x27;, &#x27;Balance&#x27;, &#x27;DailyDebit&#x27;, &#x27;WeeklyDebit&#x27;, &#x27;QuarterlyDebit&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+Data response available for step code &#x27;DPT_CDP&#x27;
+{
+    &quot;status&quot;: 0,
+    &quot;data&quot;: {
+        &quot;account_number&quot;: &quot;110035954172&quot;,
+        &quot;amount_deposit&quot;: 10000000.45,
+        &quot;amount&quot;: 0.0,
+        &quot;depositor_description&quot;: {
+            &quot;home&quot;: &quot;&quot;,
+            &quot;office&quot;: &quot;&quot;
+        },
+        &quot;inclusive&quot;: &quot;&quot;,
+        &quot;depositor_address&quot;: &quot;Home, Street, Ward, Township&quot;,
+        &quot;identification_number&quot;: &quot;&quot;,
+        &quot;currency_deposit&quot;: &quot;MMK&quot;,
+        &quot;values_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;customer_code&quot;: &quot;11001706&quot;,
+        &quot;cash_amount_bcy&quot;: 0.0,
+        &quot;id_place&quot;: &quot;&quot;,
+        &quot;cash_exchange_rate&quot;: 1.0,
+        &quot;cash_amount&quot;: 0.0,
+        &quot;cash_currency&quot;: &quot;MMK&quot;,
+        &quot;prepaid_interest&quot;: 0.0,
+        &quot;account_name&quot;: &quot;CTM INDIVIDUAL TEST SP 01&quot;,
+        &quot;exchange_rate&quot;: 1.0,
+        &quot;cross_rate&quot;: 1.0,
+        &quot;deposit_type&quot;: &quot;&quot;,
+        &quot;interest_tenor_unit&quot;: &quot;&quot;,
+        &quot;commission&quot;: 0.0,
+        &quot;id_issue_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;base_amount&quot;: 0.0,
+        &quot;total_ifc_fee&quot;: 0.0,
+        &quot;fee_currency_code&quot;: null,
+        &quot;round_total_ifc_fee&quot;: 0.0,
+        &quot;branch_name&quot;: &quot;003 - Bayint Naung Branch&quot;,
+        &quot;fee_data&quot;: [],
+        &quot;account_balances&quot;: [],
+        &quot;transaction_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_number&quot;: &quot;20230913000001081674&quot;,
+        &quot;transaction_type&quot;: &quot;CDP&quot;,
+        &quot;sub_code&quot;: &quot;DPT_CDP&quot;,
+        &quot;transaction_date&quot;: &quot;2024-12-05T03:48:57.498Z&quot;,
+        &quot;service_sys_date&quot;: &quot;2024-12-05T03:48:57.5340273Z&quot;,
+        &quot;reference_id&quot;: &quot;d6bbe5e0-b07e-4b8c-bcd6-2e0e4de8b145&quot;,
+        &quot;ref_id&quot;: &quot;6d449b7b630e4d7e9a2d8346550f6617&quot;,
+        &quot;reference_code&quot;: &quot;&quot;,
+        &quot;business_code&quot;: &quot;&quot;,
+        &quot;value_date&quot;: &quot;2023-09-13T00:00:00&quot;,
+        &quot;current_user_code&quot;: &quot;cashier003&quot;,
+        &quot;current_branch_code&quot;: &quot;003&quot;,
+        &quot;current_username&quot;: &quot;Cashier 003&quot;,
+        &quot;current_loginname&quot;: &quot;cashier003&quot;,
+        &quot;user_approve&quot;: &quot;&quot;,
+        &quot;status&quot;: &quot;N&quot;,
+        &quot;is_reverse&quot;: false,
+        &quot;amount1&quot;: 0.0,
+        &quot;description&quot;: &quot;1110: Cash deposit&quot;,
+        &quot;token&quot;: &quot;*&quot;,
+        &quot;is_transaction_reverse&quot;: false,
+        &quot;is_transaction_compensated&quot;: false
+    },
+    &quot;error_message&quot;: &quot;&quot;,
+    &quot;error_code&quot;: &quot;&quot;
+}
+Compare results of table:  [o9deposit].[dbo].[DepositAccount]
++---------------------+----------------------------+----------------------------+
+| Column              | Before                     | After                      |
++=====================+============================+============================+
+| DepositAmount       | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| CurrentBalance      | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| LastTransactionDate | 2023-09-12 00:00:00        | 2023-09-13 00:00:00        |
++---------------------+----------------------------+----------------------------+
+| Psts                | P|W                        | P|W|N                      |
++---------------------+----------------------------+----------------------------+
+| WeekCredit          | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| MonthCredit         | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| QuarterCredit       | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| SemiAnnualCredit    | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| YearCredit          | 10000000.45                | 20000000.9                 |
++---------------------+----------------------------+----------------------------+
+| UpdatedOnUtc        | 2024-12-05 03:48:52.477953 | 2024-12-05 03:48:57.658480 |
++---------------------+----------------------------+----------------------------+
+Matched Columns: [&#x27;YearCredit&#x27;, &#x27;MonthCredit&#x27;, &#x27;LastTransactionDate&#x27;, &#x27;Psts&#x27;, &#x27;SemiAnnualCredit&#x27;, &#x27;UpdatedOnUtc&#x27;, &#x27;CurrentBalance&#x27;, &#x27;WeekCredit&#x27;, &#x27;QuarterCredit&#x27;, &#x27;DepositAmount&#x27;]
+Unexpected Columns: []
+Missing Expected Columns: []
+<br/> -------------------------------Captured log call-------------------------------- <br/>DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/d5db74e2a1f34194a2d51c80a1934697 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/d5db74e2a1f34194a2d51c80a1934697 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6e48b3b3f92347ee9c8a201b46bd311c HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6e48b3b3f92347ee9c8a201b46bd311c HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a9a36c1342f14d6092cc8228fe7a05bd HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/a9a36c1342f14d6092cc8228fe7a05bd HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;POST /api/workflow/execute HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6d449b7b630e4d7e9a2d8346550f6617 HTTP/1.1&quot; 200 None
+DEBUG    urllib3.connectionpool:connectionpool.py:452 https://27.3.1.104:5001 &quot;GET /api/workflow/get-execution-info/6d449b7b630e4d7e9a2d8346550f6617 HTTP/1.1&quot; 200 None<br/></div></td></tr></tbody></table></body></html>

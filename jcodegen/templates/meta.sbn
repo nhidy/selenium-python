@@ -1,0 +1,6 @@
+// Generated at: {{ now }}
+// Today: {{ today }}
+// Guid: {{ guid }}
+// User name: {{ user }}
+// Server: {{ machine }}
+// Template: {{ template }}

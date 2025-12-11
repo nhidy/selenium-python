@@ -1,0 +1,144 @@
+{{- include "common.sbn" }}
+def{{~ " " ~}}{{~ form_code | string.downcase ~}}{{~ "(self" ~}}
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    value_param = field.value | string.append "=None"
+    list_param = list_param | string.append ", " | string.append value_param
+    ~}}
+{{~ end ~}}
+{{ list_param }}{{ ", approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):" }}
+    # open form
+    self.close_all_form()
+    self.click_menu('{{ menu_01 }}', '{{ menu_02 }}')
+    self.wait_for_button_available('Accept')
+    self.assert_form_title('{{ form_title }}')
+    # enter value
+{{~ for field in field_list ~}}
+    {{~ method = choose_method field.field_method ~}}
+    {{~ if field.value_input | string.size != 0 ~}}
+    if {{ field.value }} is None or {{ field.value }} == '':
+        {{ field.value }} = {{ field.value_input }}
+    {{~ end ~}}
+    {{~
+    value = ""
+    if field.title != ""
+        value = field.value
+    ~}}
+    if {{ field.value }}:
+        {{~
+        if field.is_replace == "y"
+        value = field.value | string.append "_value"
+        ~}}
+        {{ value }} = str({{ field.value }}).replace('{{ field.replace_by }}', '')
+        {{~ end ~}}
+        self.{{ method }}('{{ field.border_name }}', '{{ field.title }}', {{ value }})
+    {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+    {{~ end ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    if enter_side=='D':
+        {{~ for field in enter_list_debit ~}}
+        {{~ method = choose_method field.field_method ~}}
+        {{~ 
+        value = ""
+        if field.title != ""
+            value = field.value
+        ~}}
+        if {{ field.value }}:
+            {{~ 
+            if field.is_replace == "y"
+            value = field.value | string.append "_value"
+            ~}}
+            {{ value }} = str({{ field.value }}).replace('{{ field.replace_by }}', '')
+            {{~ end ~}}
+            self.{{ method }}('{{ field.border_name }}', '{{ field.title }}', {{ value }})
+        {{~ end ~}}
+    {{~ end ~}}
+    if enter_side=='C':
+        {{~ for field in enter_list_credit ~}}
+        {{~ method = choose_method field.field_method ~}}
+        {{~ 
+        value = ""
+        if field.title != ""
+            value = field.value
+        ~}}
+        if {{ field.value }}:
+            {{~ 
+            if field.is_replace == "y"
+            value = field.value | string.append "_value"
+            ~}}
+            {{ value }} = str({{ field.value }}).replace('{{ field.replace_by }}', '')
+            {{~ end ~}}
+            self.{{ method }}('{{ field.border_name }}', '{{ field.title }}', {{ value }})
+        {{~ end ~}}
+    {{~ end ~}}
+    if credit_amount:
+        self.fo_assert_value_border('Rate', 'Receive Amount', credit_amount)
+    self.fo_assert_value_border('Rate', 'Fee Amount', '0.00')
+{{~ if add_fee == "y" ~}}
+    if ifc_codes:
+        self.add_fees(ifc_codes, values, total_fee)
+        self.wait_loading()
+    {{~ for field in field_fee ~}}
+        {{~ method = choose_method field.field_method ~}}
+        {{~ 
+        value = ""
+        if field.title != ""
+            value = field.value
+        ~}}
+        if {{ field.value }}:
+            {{~ 
+            if field.is_replace == "y"
+            value = field.value | string.append "_value"
+            ~}}
+            {{ value }} = str({{ field.value }}).replace('{{ field.replace_by }}', '')
+            {{~ end ~}}
+            self.{{ method }}('{{ field.border_name }}', '{{ field.title }}', {{ value }})
+        {{~ end ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    self.wait_loading()
+    self.fo_click_checkbox('Caution!  There is no doubt that banks may be used as a means of Money Laundering/ Terrorist Financing/ Proliferation of Weapons of Mass Destruction.')
+    self.wait_loading()
+    # click 'Accept'
+    self.click_button('Accept')
+    # approve
+    if approve_later=='Y':
+        self.click_button('Later')
+    if approve_on_form=='Y':
+        self.fo_approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+    if list_error_message:
+    # verify error
+        self.assert_error_message()
+        self.assert_list_error_message(list_error_message)
+        print('Transaction failed!')
+    else:
+    # verify success
+        self.assert_button_disable('Accept')
+        self.switch_to_core_banking()
+        self.assert_notification('Saved successfully!')
+        self.close_voucher()
+        if expected_posting:
+            self.assert_posting_data(**expected_posting)
+        transaction_references=self.fo_get_text('Transaction references')
+        {{ "print(f'Transaction references " }} {{~ form_code ~}} {{ ": {transaction_references}')" }}
+    {{~ list_return = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ method = choose_method field.out_method ~}}
+        {{~ 
+        out_value = ""
+        if field.return == "y"
+            out_value = field.value | string.append "_out"
+            list_return = list_return | string.append ", "  | string.append out_value
+        ~}}
+        {{ out_value }}=self.{{ method }}('{{ field.border_name }}', '{{ field.title }}')
+        print(f'{{ field.border_name }} {{ field.title | string.downcase }}{{ ": {" }}{{ out_value }}}')
+        {{~ end ~}}
+    {{~ end ~}}
+        return transaction_references{{ list_return }}

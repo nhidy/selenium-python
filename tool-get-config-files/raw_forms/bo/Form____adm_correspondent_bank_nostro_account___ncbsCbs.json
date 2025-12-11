@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.9773309Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"Adm_correspondent_bank_nostro_account\",\"des\":\"Adm_correspondent_bank_nostro_account\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"Adm_correspondent_bank_nostro_account\"},\"mode_form\":{\"mode\":\"1\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"adm_correspondent_bank_nostro_account\",\"ruleStrong\":[],\"app\":\"ncbsCbs\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"abb9d4658387ee16\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"bec4ce16a309ede8\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Nostro Account 1\",\"code\":\"nostro_account_1\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"c5d4373b1010dc1d\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.nostro_account_1\",\"structable_read\":\"muti.nostro_account_1\",\"data_default\":\"\",\"isLookup\":\"true\",\"is_upperCase\":\"false\",\"callform\":\"adm_correspondent_bank_vostro_accountvostro_account_1\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"ACT_ACCHRT_LOOKUP.account_name\",\"data_value\":\"ACT_ACCHRT_LOOKUP.account_number\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Nostro Account 2\",\"code\":\"nostro_account_2\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1 offset-lg-1\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"6acbe5703334a2a7\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.nostro_account_2\",\"structable_read\":\"muti.nostro_account_2\",\"data_default\":\"\",\"isLookup\":\"true\",\"is_upperCase\":\"false\",\"callform\":\"adm_correspondent_bank_vostro_accountvostro_account_1\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"ACT_ACCHRT_LOOKUP.account_name\",\"data_value\":\"ACT_ACCHRT_LOOKUP.account_number\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Nostro Account 3\",\"code\":\"nostro_account_3\",\"class\":\"                              col-xl-5 col-lg-5 col-md-6 col-sm-6 offset-xl-1-right offset-lg-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"8345148caedd78b7\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"muti.nostro_account_3\",\"structable_read\":\"muti.nostro_account_3\",\"data_default\":\"\",\"isLookup\":\"true\",\"is_upperCase\":\"false\",\"callform\":\"adm_correspondent_bank_vostro_accountvostro_account_1\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"ACT_ACCHRT_LOOKUP.account_name\",\"data_value\":\"ACT_ACCHRT_LOOKUP.account_number\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"true\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"}]}]}]",
+        "react_txt": "",
+        "form_id": "adm_correspondent_bank_nostro_account",
+        "app": "ncbsCbs",
+        "id": 549
+      }
+    ]
+  }
+]

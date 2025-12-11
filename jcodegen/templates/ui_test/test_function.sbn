@@ -1,0 +1,38 @@
+{{- include "common.sbn" }}
+{{~ func generate_call(call) ~}}
+        {{ call.name }}({{ call.parameters | array.join ", " }});
+{{~ end ~}}
+{{~ func generate_properties(prop) ~}}
+    private {{ prop.type }} {{ prop.name }} { get; set; }
+{{~ end ~}}
+public class {{ class_name }}: IStepProcess
+{
+    //BEGIN of private properties
+    {{~ for prop in private_properties ~}}
+        {{~ generate_properties prop ~}}
+    {{~ end ~}}
+    //END of private properties
+
+    public void Run()
+    {
+        {{~ for call in function_calls ~}}
+		    {{~ generate_call call ~}}
+        {{~ end ~}}
+    }
+}
+
+{{~ for field in field_list ~}}
+    {{~ method = "" ~}}
+    Loại trường: {{ field.field_type }}
+    {{~ method = choose_method field.field_type ~}}
+
+        self.{{ method }}('{{ field.border_name }}', '{{ field.title }}', {{ value }})
+
+{{~ end ~}}
+
+
+Test choose_method: {{ choose_method "fs" }}
+Test choose_param: {{ choose_param "fs" "fo_select" "title" "value" "collap_name" "field.border_name" }}
+
+{{ [" hello", " world", "20"] | array.any @string.contains "20"}}
+{{ [" hello", " world", "20"] | array.any @string.contains "30"}}

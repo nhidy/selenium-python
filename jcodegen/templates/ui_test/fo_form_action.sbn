@@ -1,0 +1,521 @@
+{{- include "common.sbn" }}
+field_names_enabled = [
+{{~ for field in field_list ~}}
+    {{~ if field.is_enable == 'y' ~}}
+    '{{ field.title }}',
+    {{~ end ~}}
+{{~ end ~}}
+]
+
+field_names_disabled = [
+{{~ for field in field_list ~}}
+    {{~ if field.is_enable == 'n' ~}}
+    '{{ field.title }}',
+    {{~ end ~}}
+{{~ end ~}}
+]
+
+# {{ transaction_code }}: {{ form_title }}
+def{{~ " " ~}}{{~ transaction_code | string.downcase ~}}{{~ "(self" ~}}
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=None"
+        list_param = list_param | string.append ", " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+{{ list_param }}{{ ", ifc_codes=None, values=None, total_fee=None, approve_later=None, approve_on_form=None, username=None, password=None, reason=None, list_error_message=None, expected_posting=None):" }}
+    # open form
+    self.close_all_form()
+    self.open_fo('{{ transaction_code }}', '{{ transaction_name }}')
+    self.wait_for_button_available('Accept')
+    self.assert_form_title('{{ form_title }}')
+    # enter value
+{{~ for field in field_list ~}}
+        {{~ fo_field_method = fo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_field_method ~}}
+    {{~ if field.value != "" && fo_field_method != "" && field.is_enable == 'y' ~}}
+        {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is None or {{ field.value }} == '':
+        {{ field.value }} = {{ field.value_input }}
+        {{~ end ~}}
+        {{~ if field.title != "" ~}}
+    {{ choose_param fo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+            {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{~ end ~}}
+{{~ if add_fee == "y" ~}}
+    if ifc_codes:
+        self.add_fees(ifc_codes, values, total_fee)
+{{~ end ~}}
+{{~ for field in field_list ~}}
+    {{~ fo_field_method = fo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_field_method ~}}
+    {{~ if field.value != "" && fo_field_method != "" && field.is_enable == 'n' ~}}
+        {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is None or {{ field.value }} == '':
+        {{ field.value }} = {{ field.value_input }}
+        {{~ end ~}}
+        {{~ if field.title != "" ~}}
+    {{ choose_param fo_field_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+            {{~ if field.is_wait == "y" ~}}
+        self.wait_loading()
+            {{~ end ~}}
+        {{~ end ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    self.wait_loading()
+{{~ for field in field_list ~}}
+    {{~ fo_field_method = fo_get_field_method field.field_type field.is_enable field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_field_method ~}}
+    {{~ if field.value == "" && field.title != "" && field.collap_name == "" ~}}
+    self.{{ method }}('{{ field.title }}')
+    self.wait_loading()
+    {{~ end ~}}
+{{~ end ~}}
+    # click 'Accept'
+    self.click_button('Accept')
+    # approve
+    if approve_later=='Y':
+        self.click_button('Later')
+    if approve_on_form=='Y':
+        self.fo_approve_in_popup(
+            username=username,
+            password=password,
+            reason=reason
+        )
+    if list_error_message:
+    # verify error
+        self.assert_error_message()
+        self.assert_list_error_message(list_error_message)
+        print('Transaction failed!')
+    else:
+    # verify success
+        self.assert_button_disable('Accept')
+        self.switch_to_core_banking()
+        self.assert_notification('Saved successfully!')
+        self.close_voucher()
+        if expected_posting:
+            self.assert_posting_data(**expected_posting)
+        transaction_references=self.fo_get_text('Transaction references')
+        {{ "print(f'Transaction references " }} {{~ transaction_code ~}} {{ ": {transaction_references}')" }}
+    {{~ list_return = "" ~}}
+    {{~ for field in field_list ~}}
+        {{~ fo_out_method = fo_get_out_method field.field_type field.is_group field.is_multi field.border_name ~}}
+        {{~ method = choose_method fo_out_method ~}}
+        {{~
+        out_value = ""
+        if field.return == "y"
+            out_value = field.value | string.append "_out"
+            list_return = list_return | string.append ", "  | string.append out_value
+        ~}}
+        {{ out_value }}=self.{{ method }}{{ "('" }}{{ field.title }}{{ "')" }}
+        print(f'{{ field.title }}{{ ": {" }}{{ out_value }}{{ "}')" }}
+        {{~ end ~}}
+    {{~ end ~}}
+        return transaction_references{{ list_return }}
+
+{{~ # TRANSACTION VIEW  ~}}
+def{{~ " " ~}}{{~ transaction_code | string.downcase ~}}{{~ "_view(self, transaction_references" ~}}
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=None"
+        list_param = list_param | string.append ", " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+{{ list_param }}{{ ", expected_posting=None):" }}
+    self.transaction_view(transaction_references, '{{ form_title }}')
+    # compare value
+{{~ for field in field_list ~}}
+    {{~ fo_view_method = fo_get_view_method field.field_type field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_view_method ~}}
+    {{~ if field.value != "" ~}}
+        {{~ if field.value_input != "" ~}}
+    if {{ field.value }} is None or {{ field.value }} == '':
+        {{ field.value }} = {{ field.value_input }}
+        {{~ end ~}}
+        {{~ if field.title != "" ~}}
+    {{ choose_param fo_view_method method field.title field.value field.collap_name field.border_name field.is_replace field.replace_by field.mask_method }}
+        {{~ end ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    if expected_posting:
+        self.assert_posting_data(**expected_posting)
+{{~ for field in field_list ~}}
+    {{~ fo_view_method = fo_get_view_method field.field_type field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_view_method ~}}
+    {{~ if field.value == "" && field.title != "" && field.collap_name =="" ~}}
+    self.{{ method }}('{{ field.title }}', True)
+    {{~ end ~}}
+{{~ end ~}}
+    transaction_references=self.fo_get_text('Transaction references')
+    {{ "print(f'F8: Transaction references " }} {{~ transaction_code ~}} {{ ": {transaction_references}')" }}
+{{~ list_return = "" ~}}
+{{~ for field in field_list ~}}
+    {{~ fo_out_method = fo_get_out_method field.field_type field.is_group field.is_multi field.border_name ~}}
+    {{~ method = choose_method fo_out_method ~}}
+    {{~
+    out_value = ""
+    if field.return == "y"
+        out_value = field.value | string.append "_out"
+        list_return = list_return | string.append ", "  | string.append out_value
+    ~}}
+    {{ out_value }}=self.{{ method }}{{ "('" }}{{ field.title }}{{ "')" }}
+    print(f'F8: {{ field.title }}{{ ": {" }}{{ out_value }}{{ "}')" }}
+    {{~ end ~}}
+{{~ end ~}}
+    return transaction_references{{ list_return }}
+
+{{~ test_case_name = form_title | regex.split `\d+:\s*` | array.last | string.downcase  | string.replace ` ` "_" | string.replace `-` "_" | string.replace `(` "" | string.replace `)` "" | string.replace `/` "_" ~}}
+# TEST CASE: SUCCESS AND NO NEED APPROVE
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_success_no_need_approve(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    expected_posting = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        expected_posting=expected_posting,
+    )
+    transaction_references={{ transaction_code | string.downcase }}_result[0]
+{{~ list_return = "" ~}}
+{{~ i = 1 ~}}
+{{~ for field in field_list ~}}
+    {{~
+    out_value = ""
+    if field.return == "y"
+        out_value = field.value | string.append "_out="  | string.append transaction_code | string.downcase  | string.append "_result[" | string.append i | string.append "]\n"
+        list_return = list_return | string.append "    " | string.append out_value
+        i = i + 1
+    end
+    ~}}
+{{~ end ~}}
+    {{~ list_return ~}}
+    self.{{ transaction_code | string.downcase }}_view(
+        transaction_references=transaction_references,
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        expected_posting=expected_posting,
+    )
+
+# TEST CASE: SUCCESS AND APPROVE LATER
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_success_approve_later(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    expected_posting = None
+    approve_later = 'Y'
+    username = username_approve
+    password = password_approve
+    reason = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        approve_later=approve_later,
+    )
+    transaction_references={{ transaction_code | string.downcase }}_result[0]
+{{~ list_return = "" ~}}
+{{~ i = 1 ~}}
+{{~ for field in field_list ~}}
+    {{~
+    out_value = ""
+    if field.return == "y"
+        out_value = field.value | string.append "_out="  | string.append transaction_code | string.downcase  | string.append "_result[" | string.append i | string.append "]\n"
+        list_return = list_return | string.append "    " | string.append out_value
+        i = i + 1
+    end
+    ~}}
+{{~ end ~}}
+    {{~ list_return ~}}
+    self.transaction_approve(
+        transaction_references=transaction_references,
+        username=username,
+        password=password,
+        reason=reason,
+    )
+    self.{{ transaction_code | string.downcase }}_view(
+        transaction_references=transaction_references,
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        expected_posting=expected_posting,
+    )
+
+# TEST CASE: SUCCESS AND APPROVE ON FORM
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_success_approve_on_form(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    expected_posting = None
+    approve_on_form = 'Y'
+    username = username_approve
+    password = password_approve
+    reason = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        expected_posting=expected_posting,
+        approve_on_form=approve_on_form,
+        username=username,
+        password=password,
+        reason=reason
+    )
+    transaction_references={{ transaction_code | string.downcase }}_result[0]
+{{~ list_return = "" ~}}
+{{~ i = 1 ~}}
+{{~ for field in field_list ~}}
+    {{~
+    out_value = ""
+    if field.return == "y"
+        out_value = field.value | string.append "_out="  | string.append transaction_code | string.downcase  | string.append "_result[" | string.append i | string.append "]\n"
+        list_return = list_return | string.append "    " | string.append out_value
+        i = i + 1
+    end
+    ~}}
+{{~ end ~}}
+    {{~ list_return ~}}
+    self.{{ transaction_code | string.downcase }}_view(
+        transaction_references=transaction_references,
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        expected_posting=expected_posting,
+    )
+
+# TEST CASE: ERROR AND NO NEED APPROVE
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_error_no_need_approve(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    list_error_message = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        list_error_message=list_error_message,
+    )
+
+# TEST CASE: ERROR AND APPROVE LATER
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_error_approve_later(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    list_error_message = None
+    approve_later = 'Y'
+    username = username_approve
+    password = password_approve
+    reason = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        approve_later=approve_later,
+    )
+    transaction_references={{ transaction_code | string.downcase }}_result[0]
+{{~ list_return = "" ~}}
+{{~ i = 1 ~}}
+{{~ for field in field_list ~}}
+    {{~
+    out_value = ""
+    if field.return == "y"
+        out_value = field.value | string.append "_out="  | string.append transaction_code | string.downcase  | string.append "_result[" | string.append i | string.append "]\n"
+        list_return = list_return | string.append "    " | string.append out_value
+        i = i + 1
+    end
+    ~}}
+{{~ end ~}}
+    {{~ list_return ~}}
+    self.transaction_approve(
+        transaction_references=transaction_references,
+        username=username,
+        password=password,
+        reason=reason,
+        list_error_message=list_error_message,
+    )
+
+# TEST CASE: ERROR AND APPROVE ON FORM
+def test_000_{{ transaction_code | string.downcase }}_{{ test_case_name }}_error_approve_on_form(self):
+    print('Start: ' + datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "_test = None"
+        list_param = list_param | string.append "    " | string.append value_param | string.append "\n"
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+    {{~ list_param ~}}
+    ifc_codes = None
+    values = None
+    total_fee = None
+    list_error_message = None
+    approve_on_form = 'Y'
+    username = username_approve
+    password = password_approve
+    reason = None
+
+    {{ transaction_code | string.downcase }}_result = self.{{ transaction_code | string.downcase }}(
+{{~ list_param = "" ~}}
+{{~ for field in field_list ~}}
+    {{~
+    if field.value != ""
+        value_param = field.value | string.append "=" | string.append field.value | string.append "_test,\n"
+        list_param = list_param | string.append "        " | string.append value_param
+    ~}}
+    {{~ end ~}}
+{{~ end ~}}
+        {{~ list_param ~}}
+        ifc_codes=ifc_codes,
+        values=values,
+        total_fee=total_fee,
+        list_error_message=list_error_message,
+        approve_on_form=approve_on_form,
+        username=username,
+        password=password,
+        reason=reason
+    )

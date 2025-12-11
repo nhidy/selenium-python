@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:43.8281409Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"title\":\"BO_015003013_Search_advanced_search\",\"des\":\"BO_015003013_Search_advanced_search\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"false\",\"url_input\":\"\",\"lang_form\":{\"en\":\"BO_015003013_Search_advanced_search\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_015003013_Search_advanced_search\",\"ruleStrong\":[],\"app\":\"\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"ce315492fd1f6b20\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"f074184a221b1463\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"action\":\"\",\"structable\":\"muti.lgname\",\"structable_read\":\"muti.lgname\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0,\"max\":50},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Login name\",\"code\":\"lgname\",\"codeHidden\":\"41922973dc04c0c2\",\"class\":\"                                                col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}},{\"config\":{\"action\":\"\",\"structable\":\"muti.email\",\"structable_read\":\"muti.email\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"autoWrap\":true,\"isSearch\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":0,\"max\":250},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cTextInput\",\"default\":{\"name\":\"Email\",\"code\":\"email\",\"codeHidden\":\"b61b180862b3240c\",\"class\":\"                                                col-xl-4 col-lg-4 col-md-5 col-sm-6 offset-xl-2-right offset-lg-2-right offset-md-1-right\",\"condition\":\"\",\"role\":\"\",\"ofgroup\":\"\"}}]},{\"name\":\"button search\",\"code\":\"code\",\"codeHidden\":\"b9c21f349dcbe412\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"useAction\":\"false\",\"action\":\"\",\"structable\":\"muti.advanced_search_buttonSearch\",\"structable_read\":\"muti.advanced_search_buttonSearch\",\"data_default\":\"\",\"color\":\"primary\",\"icon\":\"fa-search\",\"txFo\":\"[{\\\"txcode\\\":\\\"fo-search-advancedAPI\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"\\\",\\\"table_code\\\":\\\"muti\\\",\\\"learn_api\\\":\\\"BO_015003013_Search_BO_015003013_Search_advanced_search_button_POST_api_UserEmail_search_page_0\\\"}}]\",\"onTable\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"advanced_search_button\",\"codeHidden\":\"7cae0451738215db\",\"class\":\"\",\"condition\":\"\",\"role\":\"\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_015003013_Search_advanced_search",
+        "app": "ncbsCbs",
+        "id": 396
+      }
+    ]
+  }
+]

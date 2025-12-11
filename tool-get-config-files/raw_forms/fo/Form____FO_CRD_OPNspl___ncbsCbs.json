@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.2957249Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\"form_code_alias\":\"\",\"last_update\":\"09/11/2022 10:25:06 AM\",\"list_show_error\":\"false\",\"app\":\"ncbsCbs\",\"title\":\"FO_CRD_OPNspl_lookup\",\"bodata\":\"\",\"data\":\"\",\"des\":\"FO_CRD_OPNspl_lookup\",\"flow_layout\":[],\"form_code\":\"FO_CRD_OPNspl\",\"key_form\":\"\",\"lang_form\":{\"en\":\"FO_CRD_OPNspl_lookup\"},\"learnapi\":\"\",\"learnsql\":\"\",\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"node_position\":[],\"ofModal\":false,\"openOne\":\"false\",\"ruleStrong\":[{\"code\":\"visibility\",\"inUse\":true,\"isStart\":true,\"isStatus\":-1,\"order\":1,\"config\":{\"component_action\":\"\",\"component_result\":\"search_input;search_button\",\"view_result\":\"\",\"condition\":\"\",\"visible\":\"false\",\"ena_dis\":\"false\",\"component_event\":\"all\",\"list_config\":[]},\"isDidStart\":false,\"isOpenFromOther\":false},{\"code\":\"runFo\",\"config\":{\"component_action\":\"search_input\",\"component_result\":\"\",\"component_event\":\"enter\",\"txFoActions\":\"\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"FO_CRD_OPNspl\\\",\\\"learn_api\\\":\\\"FO_CRD_OPN_api_rulefunc_crd_opn_lkp_data_splcd\\\"}}]\",\"useAction\":\"false\",\"condition\":\"\"},\"inUse\":true,\"order\":1,\"isStart\":true}],\"responseType\":\"1\"}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"1cca5b416cd80ea1\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"2d7f395915d3464d\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Search\",\"code\":\"search_input\",\"class\":\"    col-xl-4 col-lg-4 col-md-5 col-sm-6\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"01df544303b8bc4a\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"lookup.search_input\",\"structable_read\":\"lookup.search_input\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":false,\"isSearch\":true,\"readOnly\":false},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-search-API\\\",\\\"input\\\":{\\\"list_component\\\":\\\"*\\\",\\\"list_view\\\":\\\"code\\\",\\\"table_code\\\":\\\"FO_CRD_OPNspl\\\",\\\"learn_api\\\":\\\"FO_CRD_OPN_api_rulefunc_crd_opn_lkp_data_splcd\\\"}}]\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ed4481f418acd092\"}},{\"default\":{\"name\":\"\",\"code\":\"view\",\"codeHidden\":\"4c5d95e2bafb3a11\",\"class\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12col-md-12\",\"role\":\"\"},\"config\":{\"action\":\"\",\"txFoActions\":\"[{\\\"function\\\":\\\"\\\",\\\"status\\\":\\\"A\\\",\\\"para\\\":[]}]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-lookup-selectData\\\",\\\"input\\\":{}}]\",\"useAction\":\"false\",\"icon\":\"fa-hand-o-right\",\"color\":\"info\",\"onTable\":\"table_name\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"\"},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cButton\"}]},{\"name\":\"Search\",\"code\":\"code\",\"codeHidden\":\"e63ed8f415065121\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"config\":{\"structable\":\"\",\"query_data\":\"select * from FO_CRD_OPN_api_rulefunc_crd_opn_lkp_data_splcd\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"FO_CRD_OPN_api_rulefunc_crd_opn_lkp_data_splcd.sub_product_limit_code\\\",\\n        \\\"title\\\": \\\"Code\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"FO_CRD_OPN_api_rulefunc_crd_opn_lkp_data_splcd.sub_product_limit_name\\\",\\n        \\\"title\\\": \\\"Name\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    }\\n]\",\"onTable\":\"\",\"isLoadDataStart\":\"true\",\"hasSystemColumnCheck\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":\"checked\"},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"vi\":\"\",\"en\":\"\"},\"configAVD\":{},\"inputtype\":\"cTableDefault\",\"default\":{\"name\":\"\",\"code\":\"table_name\",\"class\":\"col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"f20a91fcdfb4f723\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "FO_CRD_OPNspl",
+        "app": "ncbsCbs",
+        "id": 810
+      }
+    ]
+  }
+]

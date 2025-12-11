@@ -1,0 +1,10 @@
+[
+    {
+        "info": "{\"title\":\"ADM-Roles Profile\",\"des\":\"Roles Profile\",\"data\":\"\",\"learnapi\":\"\",\"learnsql\":\"\",\"bodata\":\"\",\"openOne\":\"\",\"url_input\":\"\",\"lang_form\":{\"en\":\"ADM-Roles Profile\"},\"mode_form\":{\"mode\":\"\",\"col_text\":\"\",\"col_input\":\"\"},\"form_code\":\"BO_015003003\",\"ruleStrong\":[],\"app\":\"ncbsCbs\"}",
+        "list_layout": "[{\"name\":\"Program Layout\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"program_layout\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"Program View\",\"code\":\"code\",\"codeHidden\":\"program_view\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"lang\":{},\"default\":{\"name\":\"Add\",\"code\":\"Add\",\"codeHidden\":\"0150030030001\"}},{\"lang\":{},\"default\":{\"name\":\"Delete\",\"code\":\"Delete\",\"codeHidden\":\"0150030030004\"}},{\"lang\":{},\"default\":{\"name\":\"Save\",\"code\":\"Save\",\"codeHidden\":\"0150030030005\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_015003003",
+        "app": "ncbsCbs",
+        "id": 643
+    }
+]

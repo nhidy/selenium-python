@@ -1,0 +1,47 @@
+[
+  {
+    "type": "header",
+    "command": "Export data to Json"
+  },
+  {
+    "exported_time": "2025-05-19T09:06:44.803719Z",
+    "host": "test-cbs.shwesit.jits.digital",
+    "db_properties": [
+      {
+        "name": "server",
+        "value": "server=27.3.1.104"
+      },
+      {
+        "name": "port",
+        "value": "1433"
+      },
+      {
+        "name": "database",
+        "value": "cms"
+      },
+      {
+        "name": "entity",
+        "value": "Form"
+      }
+    ],
+    "exported_by_fields": [
+      {
+        "form_id": null,
+        "app": "ncbsCbs"
+      }
+    ]
+  },
+  {
+    "type": "data",
+    "data": [
+      {
+        "info": "{\r\n  \"form_code_alias\": \"\",\r\n  \"last_update\": \"03/11/2022 11:23:14 AM\",\r\n  \"list_show_error\": \"false\",\r\n  \"app\": \"ncbsCbs\",\r\n  \"title\": \"BO_006009_Addtxcode_lookup\",\r\n  \"bodata\": \"\",\r\n  \"data\": \"\",\r\n  \"des\": \"BO_006009_Addtxcode_lookup\",\r\n  \"flow_layout\": [],\r\n  \"form_code\": \"BO_006009_Addtxcode\",\r\n  \"key_form\": \"\",\r\n  \"lang_form\": {\r\n    \"en\": \"BO_006009_Addtxcode_lookup\"\r\n  },\r\n  \"learnapi\": \"\",\r\n  \"learnsql\": \"\",\r\n  \"mode_form\": {\r\n    \"mode\": \"\",\r\n    \"col_text\": \"\",\r\n    \"col_input\": \"\"\r\n  },\r\n  \"node_position\": [],\r\n  \"ofModal\": false,\r\n  \"openOne\": \"false\",\r\n  \"ruleStrong\": [\r\n    {\r\n      \"code\": \"visibility\",\r\n      \"inUse\": true,\r\n      \"isStart\": true,\r\n      \"isStatus\": -1,\r\n      \"order\": 1,\r\n      \"config\": {\r\n        \"component_action\": \"\",\r\n        \"component_result\": \"search_code;search_name\",\r\n        \"view_result\": \"\",\r\n        \"condition\": \"\",\r\n        \"visible\": \"false\",\r\n        \"ena_dis\": \"false\",\r\n        \"component_event\": \"enter_tab\",\r\n        \"list_config\": []\r\n      },\r\n      \"isDidStart\": false,\r\n      \"isOpenFromOther\": false\r\n    },\r\n    {\r\n      \"code\": \"runFo\",\r\n      \"config\": {\r\n        \"component_action\": \"search_name\",\r\n        \"component_event\": \"enter\",\r\n        \"txFo\": \"[\\n  {\\n    \\\"txcode\\\": \\\"fo-search-advanced-lookup\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"*\\\",\\n      \\\"table_code\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION\\\",\\n      \\\"learn_api\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION\\\"\\n    }\\n  }\\n]\",\r\n        \"txFoActions\": \"\",\r\n        \"useAction\": \"false\",\r\n        \"condition\": \"JSON.parse('@{table_name}').total_paging===0\",\r\n        \"component_result\": \"\"\r\n      },\r\n      \"inUse\": true,\r\n      \"order\": 1,\r\n      \"isStart\": true,\r\n      \"isStatus\": -1,\r\n      \"isDidStart\": false,\r\n      \"isOpenFromOther\": false\r\n    }\r\n  ],\r\n  \"responseType\": \"1\"\r\n}",
+        "list_layout": "[{\"name\":\"\",\"des\":\"\",\"class\":\"\",\"codeHidden\":\"bd844bad5f401828\",\"inputtype\":\"cLayout\",\"list_view\":[{\"name\":\"\",\"code\":\"code\",\"codeHidden\":\"d44bae848965d546\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"Code\",\"code\":\"search_code\",\"class\":\"col-xl-5 col-lg-5 col-md-5 col-sm-5 offset-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"12a2d7e248f12b22\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"lookup.search_code\",\"structable_read\":\"lookup.search_code\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"default\":{\"name\":\"Name\",\"code\":\"search_name\",\"class\":\"col-xl-5 col-lg-5 col-md-5 col-sm-5 offset-1-right\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"85a43b30a0701f77\"},\"config\":{\"useAction\":\"true\",\"txFoActions\":\"[\\n    {\\n        \\\"function\\\": \\\"\\\",\\n        \\\"status\\\": \\\"A\\\",\\n        \\\"para\\\": []\\n    }\\n]\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\",\"structable\":\"lookup.search_name\",\"structable_read\":\"lookup.search_name\",\"data_default\":\"\",\"isLookup\":\"false\",\"is_upperCase\":\"false\",\"callform\":\"\",\"callform_detail\":\"\",\"callform_detail_mode\":\"modal\",\"data_view\":\"\",\"data_value\":\"\",\"is_password\":\"false\",\"is_upper\":\"false\",\"action\":\"\",\"autoWrap\":\"false\",\"isSearch\":\"false\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"is_compare\":false,\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"title\":{\"vi\":\"\",\"en\":\"\"},\"lang_compare\":{}},\"configAVD\":{},\"inputtype\":\"cTextInput\"},{\"config\":{\"onTable\":\"\",\"icon\":\"fa-search\",\"color\":\"primary\",\"action\":\"\",\"useAction\":\"false\",\"txFoActions\":\"[]\",\"txFo\":\"[\\n  {\\n    \\\"txcode\\\": \\\"fo-search-advanced-lookup\\\",\\n    \\\"input\\\": {\\n      \\\"list_component\\\": \\\"*\\\",\\n      \\\"list_view\\\": \\\"*\\\",\\n      \\\"table_code\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION\\\",\\n      \\\"learn_api\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION\\\"\\n    }\\n  }\\n]\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\",\"isLookup\":\"\",\"cmd\":\"\",\"callform\":\"\",\"uploadfile\":{\"active\":\"false\",\"filetype\":\"\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false},\"lang\":{\"en\":\"\",\"vi\":\"\"},\"configAVD\":{},\"inputtype\":\"cButton\",\"default\":{\"name\":\"Search\",\"code\":\"search_button\",\"class\":\"\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"ed4481f418acd092\"}}]},{\"name\":\"Search\",\"code\":\"code\",\"codeHidden\":\"bfbfb4db4ec5dd74\",\"inputtype\":\"cView\",\"isTab\":\"false\",\"list_input\":[{\"default\":{\"name\":\"\",\"code\":\"view\",\"codeHidden\":\"c1d797a3a2ea68e9\",\"class\":\"\",\"condition\":\"\",\"ofgroup\":\"false\",\"class_ofgroup\":\"col-sm-12col-md-12\",\"role\":\"\"},\"config\":{\"action\":\"\",\"txFoActions\":\"[{\\\"function\\\":\\\"\\\",\\\"status\\\":\\\"A\\\",\\\"para\\\":[]}]\",\"txFo\":\"[{\\\"txcode\\\":\\\"#sys:fo-lookup-selectData\\\",\\\"input\\\":{}}]\",\"useAction\":\"false\",\"icon\":\"fa-hand-o-right\",\"color\":\"info\",\"onTable\":\"table_name\",\"isMasterData\":\"false\",\"tableMasterData\":\"\",\"privateKeyTableMasterData\":\"\"},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{\"danger\":\"\",\"warning\":\"\"},\"validate\":{},\"lang\":{},\"configAVD\":{},\"inputtype\":\"cButton\"},{\"config\":{\"structable\":\"\",\"query_data\":\"select * from CRD_IFC_GETALLACTIVETRANSACTION\",\"paging_record\":\"5\",\"columns\":\"[\\n    {\\n        \\\"code\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION.id\\\",\\n        \\\"title\\\": \\\"Code\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    },\\n    {\\n        \\\"code\\\": \\\"CRD_IFC_GETALLACTIVETRANSACTION.name\\\",\\n        \\\"title\\\": \\\"Name\\\",\\n        \\\"inputtype\\\": \\\"ColumnString\\\",\\n        \\\"config\\\": {}\\n    }\\n]\",\"onTable\":\"\",\"isLoadDataStart\":\"true\",\"hasSystemColumnCheck\":\"false\",\"isMoveColumn\":\"false\",\"isResize\":\"false\",\"columnSystemCheckBox\":{\"methodGet\":\"checked\",\"hasSystemColumnCheckTotal\":\"false\",\"check_type\":\"DEFAULT\",\"headerCheckTitle\":\"\",\"actionFo_SystemCheck\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"},\"checked_to_selected\":\"checked\"},\"actionFo_RowSelect\":{\"useAction\":\"txFo\",\"txFo\":\"[\\n    {\\n        \\\"txcode\\\": \\\"\\\",\\n        \\\"input\\\": {}\\n    }\\n]\"}},\"role\":{\"visible\":\"\",\"disabled\":\"\"},\"property\":{},\"validate\":{\"request\":false,\"min\":\"\",\"max\":\"\",\"regex_format\":\"\",\"validate_html\":\"true\"},\"lang\":{\"en\":{},\"vi\":{}},\"configAVD\":{},\"inputtype\":\"cTableDefault\",\"default\":{\"name\":\"\",\"code\":\"table_name\",\"class\":\"col-12\",\"role\":\"\",\"condition\":\"\",\"ofgroup\":\"\",\"class_ofgroup\":\"col-sm-12 col-md-12\",\"codeHidden\":\"1c49dab62f489233\"}}]}]}]",
+        "react_txt": "",
+        "form_id": "BO_006009_Addtxcode",
+        "app": "ncbsCbs",
+        "id": 1473
+      }
+    ]
+  }
+]
